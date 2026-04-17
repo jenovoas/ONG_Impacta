@@ -49,14 +49,31 @@ services:
         condition: service_healthy
     networks:
       - default
+    restart: unless-stopped
+
+  landing:
+    image: localhost/ong_impacta_landing:latest
+    build:
+      context: ./landing
+      dockerfile: Dockerfile
+    container_name: impacta-landing
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    networks:
+      - default
       - proxy
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.impacta.rule=Host(`impacta.pinguinoseguro.cl`)"
-      - "traefik.http.routers.impacta.entrypoints=websecure"
-      - "traefik.http.routers.impacta.tls.certresolver=powerdns"
-      - "traefik.http.services.impacta.loadbalancer.server.port=3001"
+      - "traefik.http.routers.impacta-landing-http.rule=Host(`impacta.pinguinoseguro.cl`)"
+      - "traefik.http.routers.impacta-landing-http.entrypoints=web"
+      - "traefik.http.routers.impacta-landing-http.middlewares=https-redirect@file"
+      - "traefik.http.routers.impacta-landing.rule=Host(`impacta.pinguinoseguro.cl`)"
+      - "traefik.http.routers.impacta-landing.entrypoints=websecure"
+      - "traefik.http.routers.impacta-landing.tls.certresolver=powerdns"
+      - "traefik.http.services.impacta-landing.loadbalancer.server.port=3000"
     restart: unless-stopped
 
 networks:
