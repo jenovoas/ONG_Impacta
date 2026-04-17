@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -11,7 +9,13 @@ services:
       - POSTGRES_USER=impacta
       - POSTGRES_PASSWORD=impacta_pass
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data:z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U impacta -d impacta"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -19,7 +23,46 @@ services:
     ports:
       - "6381:6379"
     volumes:
-      - redis_data:/data
+      - redis_data:/data:z
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: impacta-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://impacta:impacta_pass@postgres:5432/impacta?schema=public
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - default
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.impacta.rule=Host(`impacta.pinguinoseguro.cl`)"
+      - "traefik.http.routers.impacta.entrypoints=websecure"
+      - "traefik.http.routers.impacta.tls.certresolver=powerdns"
+      - "traefik.http.services.impacta.loadbalancer.server.port=3001"
+    restart: unless-stopped
+
+networks:
+  default:
+  proxy:
+    external: true
 
 volumes:
   postgres_data:
