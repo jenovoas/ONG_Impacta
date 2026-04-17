@@ -1,0 +1,68 @@
+:root {
+  /* Colores Base */
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+  --color-primary: #00A8FF;
+  --color-primary-dark: #0077B6;
+  --color-accent: #00D4AA;
+  --color-accent-dark: #00A896;
+  
+  /* Grises */
+  --color-gray-900: #1A1A1A;
+  --color-gray-700: #4A4A4A;
+  --color-gray-300: #E0E0E0;
+  
+  /* Tipografía */
+  --font-primary: 'Inter', sans-serif;
+  --font-display: 'Montserrat', sans-serif;
+
+  /* Fondos Dashboard */
+  --bg-primary: #000000;
+  --bg-secondary: #1A1A1A;
+  --bg-tertiary: #2A2A2A;
+
+  /* Texto */
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  
+  /* Bordes */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+.glass {
+  background: rgba(26, 26, 26, 0.6);
+  backdrop-filter: blur(12px);
+  border: var(--border-subtle);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-700);
+}
