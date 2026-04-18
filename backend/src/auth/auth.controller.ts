@@ -1,19 +1,7 @@
 import { Controller, Post, Body, UnauthorizedException, Get, Request } from '@nestjs/common';
-import { IsEmail, IsString, MinLength } from 'class-validator';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
-
-export class LoginDto {
-  @IsEmail()
-  email: string;
-
-  @IsString()
-  @MinLength(6)
-  password: string;
-
-  @IsString()
-  orgSlug: string;
-}
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
