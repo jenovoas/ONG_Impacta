@@ -4,7 +4,7 @@ import { CreateMissionDto } from './dto/create-mission.dto';
 
 @Injectable()
 export class MissionsService {
-  constructor(private readonly prisma: DatabaseService) {}
+  constructor(private readonly prisma: DatabaseService) { }
 
   async create(orgId: string, dto: CreateMissionDto) {
     const { tasks, ...missionData } = dto;
@@ -45,7 +45,7 @@ export class MissionsService {
   async updateTaskStatus(orgId: string, missionId: string, taskId: string, isCompleted: boolean) {
     // Verificar que la misión pertenece a la organización
     const mission = await this.findOne(orgId, missionId);
-    
+
     return this.prisma.missionTask.update({
       where: { id: taskId, missionId },
       data: { isCompleted },

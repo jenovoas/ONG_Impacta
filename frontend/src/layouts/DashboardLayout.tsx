@@ -6,7 +6,7 @@ import { EarthBackground } from '../components/Background/EarthBackground';
 
 export const DashboardLayout: React.FC = () => {
   return (
-    <div className="flex min-h-screen relative overflow-hidden bg-black">
+    <div className="flex min-h-screen relative overflow-hidden bg-transparent">
       <EarthBackground />
       <Sidebar />
       

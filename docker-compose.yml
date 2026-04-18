@@ -60,6 +60,8 @@ services:
       - "traefik.http.routers.impacta-api.rule=Host(`api-impacta.pinguinoseguro.cl`)"
       - "traefik.http.routers.impacta-api.entrypoints=websecure"
       - "traefik.http.routers.impacta-api.tls.certresolver=powerdns"
+      - "traefik.http.routers.impacta-api.tls.domains[0].main=pinguinoseguro.cl"
+      - "traefik.http.routers.impacta-api.tls.domains[0].sans=*.pinguinoseguro.cl"
       - "traefik.http.services.impacta-api.loadbalancer.server.port=3001"
     restart: unless-stopped
 
@@ -82,6 +84,8 @@ services:
       - "traefik.http.routers.impacta-app.rule=Host(`app-impacta.pinguinoseguro.cl`)"
       - "traefik.http.routers.impacta-app.entrypoints=websecure"
       - "traefik.http.routers.impacta-app.tls.certresolver=powerdns"
+      - "traefik.http.routers.impacta-app.tls.domains[0].main=pinguinoseguro.cl"
+      - "traefik.http.routers.impacta-app.tls.domains[0].sans=*.pinguinoseguro.cl"
       - "traefik.http.services.impacta-app.loadbalancer.server.port=80"
     restart: unless-stopped
 
@@ -107,6 +111,8 @@ services:
       - "traefik.http.routers.impacta-landing.rule=Host(`impacta.pinguinoseguro.cl`)"
       - "traefik.http.routers.impacta-landing.entrypoints=websecure"
       - "traefik.http.routers.impacta-landing.tls.certresolver=powerdns"
+      - "traefik.http.routers.impacta-landing.tls.domains[0].main=pinguinoseguro.cl"
+      - "traefik.http.routers.impacta-landing.tls.domains[0].sans=*.pinguinoseguro.cl"
       - "traefik.http.services.impacta-landing.loadbalancer.server.port=3000"
     restart: unless-stopped
 
