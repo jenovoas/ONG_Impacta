@@ -6,13 +6,12 @@ import { CreateMissionDto } from './dto/create-mission.dto';
 export class MissionsService {
   constructor(private readonly prisma: DatabaseService) { }
 
-  async create(orgId: string, dto: CreateMissionDto) {
+  async create(dto: CreateMissionDto) {
     const { tasks, ...missionData } = dto;
 
-    return this.prisma.mission.create({
+    return this.prisma.tenant.mission.create({
       data: {
         ...missionData,
-        organizationId: orgId,
         tasks: tasks ? {
           create: tasks,
         } : undefined,
@@ -21,17 +20,16 @@ export class MissionsService {
     });
   }
 
-  async findAll(orgId: string) {
-    return this.prisma.mission.findMany({
-      where: { organizationId: orgId },
+  async findAll() {
+    return this.prisma.tenant.mission.findMany({
       include: { tasks: true },
       orderBy: { startDate: 'desc' },
     });
   }
 
-  async findOne(orgId: string, id: string) {
-    const mission = await this.prisma.mission.findFirst({
-      where: { id, organizationId: orgId },
+  async findOne(id: string) {
+    const mission = await this.prisma.tenant.mission.findFirst({
+      where: { id },
       include: { tasks: true },
     });
 
@@ -42,11 +40,12 @@ export class MissionsService {
     return mission;
   }
 
-  async updateTaskStatus(orgId: string, missionId: string, taskId: string, isCompleted: boolean) {
-    // Verificar que la misión pertenece a la organización
-    const mission = await this.findOne(orgId, missionId);
+  async updateTaskStatus(missionId: string, taskId: string, isCompleted: boolean) {
+    // Verificar que la misión pertenece a la organización (esto es automático via findOne)
+    await this.findOne(missionId);
 
-    return this.prisma.missionTask.update({
+    // MissionTask no tiene organizationId, pero filtramos por missionId
+    return this.prisma.tenant.missionTask.update({
       where: { id: taskId, missionId },
       data: { isCompleted },
     });

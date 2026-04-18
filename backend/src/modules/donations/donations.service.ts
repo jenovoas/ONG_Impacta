@@ -10,30 +10,29 @@ export class DonationsService {
     private readonly campaignsService: CampaignsService,
   ) {}
 
-  async create(orgId: string, dto: CreateDonationDto) {
-    // Si se provee memberId, verificar que exista y pertenezca a la organización
+  async create(dto: CreateDonationDto) {
+    // Si se provee memberId, verificar que exista (la filtración por organización es automática)
     if (dto.memberId) {
-      const member = await this.prisma.member.findUnique({
+      const member = await this.prisma.tenant.member.findUnique({
         where: { id: dto.memberId },
       });
-      if (!member || member.organizationId !== orgId) {
+      if (!member) {
         throw new NotFoundException('Member not found in this organization');
       }
     }
 
     // Si se provee campaignId, verificar que exista
     if (dto.campaignId) {
-      const campaign = await this.prisma.campaign.findUnique({
+      const campaign = await this.prisma.tenant.campaign.findUnique({
         where: { id: dto.campaignId },
       });
-      if (!campaign || campaign.organizationId !== orgId) {
+      if (!campaign) {
         throw new NotFoundException('Campaign not found in this organization');
       }
     }
 
-    const donation = await this.prisma.donation.create({
+    const donation = await this.prisma.tenant.donation.create({
       data: {
-        organizationId: orgId,
         memberId: dto.memberId,
         campaignId: dto.campaignId,
         amount: dto.amount,
@@ -45,7 +44,7 @@ export class DonationsService {
     // Aquí se llamaría a la pasarela de pago para obtener un link/token
     const gatewayRef = `mock_ref_${Math.random().toString(36).substring(7)}`;
 
-    const updatedDonation = await this.prisma.donation.update({
+    const updatedDonation = await this.prisma.tenant.donation.update({
       where: { id: donation.id },
       data: { gatewayRef },
     });
@@ -56,9 +55,8 @@ export class DonationsService {
     };
   }
 
-  async findAll(orgId: string) {
-    return this.prisma.donation.findMany({
-      where: { organizationId: orgId },
+  async findAll() {
+    return this.prisma.tenant.donation.findMany({
       include: {
         member: {
           select: {
@@ -72,9 +70,9 @@ export class DonationsService {
     });
   }
 
-  async findOne(orgId: string, id: string) {
-    const donation = await this.prisma.donation.findFirst({
-      where: { id, organizationId: orgId },
+  async findOne(id: string) {
+    const donation = await this.prisma.tenant.donation.findFirst({
+      where: { id },
       include: { member: true },
     });
 
@@ -86,7 +84,7 @@ export class DonationsService {
   }
 
   async handleCallback(gatewayRef: string, status: 'SUCCEEDED' | 'FAILED') {
-    const donation = await this.prisma.donation.findFirst({
+    const donation = await this.prisma.tenant.donation.findFirst({
       where: { gatewayRef },
     });
 
@@ -94,7 +92,7 @@ export class DonationsService {
       throw new NotFoundException('Donation not found for this reference');
     }
 
-    const updatedDonation = await this.prisma.donation.update({
+    const updatedDonation = await this.prisma.tenant.donation.update({
       where: { id: donation.id },
       data: { status },
     });

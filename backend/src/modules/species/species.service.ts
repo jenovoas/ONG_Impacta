@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { StorageService } from '../storage/storage.service';
 import { CreateSpeciesDto } from './dto/create-species.dto';
+import { tenantContextStorage } from '../../common/utils/tenant-context';
 
 @Injectable()
 export class SpeciesService {
@@ -10,31 +11,38 @@ export class SpeciesService {
     private readonly storage: StorageService,
   ) {}
 
-  async create(orgId: string, dto: CreateSpeciesDto, file?: Express.Multer.File) {
+  private getOrgId(): string {
+    const context = tenantContextStorage.getStore();
+    if (!context?.orgId) {
+      throw new Error('Organization ID not found in context');
+    }
+    return context.orgId;
+  }
+
+  async create(dto: CreateSpeciesDto, file?: Express.Multer.File) {
+    const orgId = this.getOrgId();
     let imageUrl: string | null = null;
     if (file) {
       imageUrl = await this.storage.uploadFile(file, `organizations/${orgId}/species`);
     }
 
-    return this.prisma.species.create({
+    return this.prisma.tenant.species.create({
       data: {
         ...dto,
-        organizationId: orgId,
         imageUrl,
       },
     });
   }
 
-  async findAll(orgId: string) {
-    return this.prisma.species.findMany({
-      where: { organizationId: orgId },
+  async findAll() {
+    return this.prisma.tenant.species.findMany({
       orderBy: { commonName: 'asc' },
     });
   }
 
-  async findOne(orgId: string, id: string) {
-    const species = await this.prisma.species.findFirst({
-      where: { id, organizationId: orgId },
+  async findOne(id: string) {
+    const species = await this.prisma.tenant.species.findFirst({
+      where: { id },
     });
 
     if (!species) {
@@ -44,15 +52,16 @@ export class SpeciesService {
     return species;
   }
 
-  async update(orgId: string, id: string, dto: any, file?: Express.Multer.File) {
-    const species = await this.findOne(orgId, id);
+  async update(id: string, dto: any, file?: Express.Multer.File) {
+    const orgId = this.getOrgId();
+    const species = await this.findOne(id);
     
     let imageUrl = species.imageUrl;
     if (file) {
       imageUrl = await this.storage.uploadFile(file, `organizations/${orgId}/species`);
     }
 
-    return this.prisma.species.update({
+    return this.prisma.tenant.species.update({
       where: { id },
       data: {
         ...dto,

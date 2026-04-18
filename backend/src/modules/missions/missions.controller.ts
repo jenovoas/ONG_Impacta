@@ -1,39 +1,39 @@
-import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, UseGuards } from '@nestjs/common';
 import { MissionsService } from './missions.service';
 import { CreateMissionDto } from './dto/create-mission.dto';
-import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 
 @Controller('missions')
+@UseGuards(RolesGuard)
 export class MissionsController {
   constructor(private readonly missionsService: MissionsService) {}
 
   @Post()
-  @Roles('ADMIN')
-  create(
-    @CurrentTenant() orgId: string,
-    @Body() createMissionDto: CreateMissionDto,
-  ) {
-    return this.missionsService.create(orgId, createMissionDto);
+  @Roles('SUPERADMIN', 'ADMIN', 'OPERATOR')
+  create(@Body() createMissionDto: CreateMissionDto) {
+    return this.missionsService.create(createMissionDto);
   }
 
   @Get()
-  findAll(@CurrentTenant() orgId: string) {
-    return this.missionsService.findAll(orgId);
+  @Roles('SUPERADMIN', 'ADMIN', 'OPERATOR', 'VIEWER')
+  findAll() {
+    return this.missionsService.findAll();
   }
 
   @Get(':id')
-  findOne(@CurrentTenant() orgId: string, @Param('id') id: string) {
-    return this.missionsService.findOne(orgId, id);
+  @Roles('SUPERADMIN', 'ADMIN', 'OPERATOR', 'VIEWER')
+  findOne(@Param('id') id: string) {
+    return this.missionsService.findOne(id);
   }
 
   @Patch(':id/tasks/:taskId')
-  updateTask(
-    @CurrentTenant() orgId: string,
-    @Param('id') id: string,
+  @Roles('SUPERADMIN', 'ADMIN', 'OPERATOR')
+  updateTaskStatus(
+    @Param('id') missionId: string,
     @Param('taskId') taskId: string,
     @Body('isCompleted') isCompleted: boolean,
   ) {
-    return this.missionsService.updateTaskStatus(orgId, id, taskId, isCompleted);
+    return this.missionsService.updateTaskStatus(missionId, taskId, isCompleted);
   }
 }

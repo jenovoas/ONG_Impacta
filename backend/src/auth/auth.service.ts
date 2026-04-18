@@ -11,7 +11,7 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, pass: string, orgSlug: string): Promise<any> {
-    const user = await this.database.user.findFirst({
+    const user = await this.database.base.user.findFirst({
       where: {
         email,
         organization: {
@@ -40,6 +40,20 @@ export class AuthService {
     };
     return {
       access_token: this.jwtService.sign(payload),
+      refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
     };
+  }
+
+  async refresh(token: string) {
+    try {
+      const payload = this.jwtService.verify(token);
+      const user = await this.database.base.user.findUnique({
+        where: { id: payload.sub },
+      });
+      if (!user) throw new UnauthorizedException();
+      return this.login(user);
+    } catch (e) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 }

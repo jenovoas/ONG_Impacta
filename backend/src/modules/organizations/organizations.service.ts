@@ -8,7 +8,7 @@ export class OrganizationsService {
   constructor(private prisma: DatabaseService) {}
 
   async create(data: CreateOrganizationDto) {
-    return this.prisma.organization.create({
+    return this.prisma.base.organization.create({
       data: {
         name: data.name,
         slug: data.slug,
@@ -20,30 +20,30 @@ export class OrganizationsService {
   }
 
   async findAll() {
-    return this.prisma.organization.findMany();
+    return this.prisma.base.organization.findMany();
   }
 
   async findOne(id: string) {
-    return this.prisma.organization.findUnique({
+    return this.prisma.base.organization.findUnique({
       where: { id },
     });
   }
 
   async findBySlug(slug: string) {
-    return this.prisma.organization.findUnique({
+    return this.prisma.base.organization.findUnique({
       where: { slug },
     });
   }
 
-  async getSummary(orgId: string) {
+  async getSummary() {
     const [donationsCount, totalDonations, membersCount, campaignsCount] = await Promise.all([
-      this.prisma.donation.count({ where: { organizationId: orgId, status: 'SUCCEEDED' } }),
-      this.prisma.donation.aggregate({
-        where: { organizationId: orgId, status: 'SUCCEEDED' },
+      this.prisma.tenant.donation.count({ where: { status: 'SUCCEEDED' } }),
+      this.prisma.tenant.donation.aggregate({
+        where: { status: 'SUCCEEDED' },
         _sum: { amount: true },
       }),
-      this.prisma.member.count({ where: { organizationId: orgId, status: 'ACTIVE' } }),
-      this.prisma.campaign.count({ where: { organizationId: orgId, status: 'ACTIVE' } }),
+      this.prisma.tenant.member.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.tenant.campaign.count({ where: { status: 'ACTIVE' } }),
     ]);
 
     return {

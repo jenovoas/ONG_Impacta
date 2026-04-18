@@ -5,7 +5,6 @@ import * as THREE from 'three';
 
 const Earth = () => {
   const earthRef = useRef<THREE.Mesh>(null);
-  const atmosphereRef = useRef<THREE.Mesh>(null);
 
   // Carga de texturas locales
   const [colorMap, normalMap, specularMap, cloudsMap, lightsMap] = useLoader(THREE.TextureLoader, [
@@ -22,14 +21,15 @@ const Earth = () => {
       earthRef.current.rotation.y = elapsedTime * 0.05;
       earthRef.current.rotation.x = 0.2; // Inclinación natural
     }
-    if (atmosphereRef.current) {
-      atmosphereRef.current.rotation.y = elapsedTime * 0.06;
-      atmosphereRef.current.rotation.x = 0.2;
-    }
   });
 
   return (
     <group scale={1.4}>
+      {/* Núcleo Opaco para evitar que se vea el fondo a través del planeta */}
+      <Sphere args={[0.99, 32, 32]}>
+        <meshBasicMaterial color="#000000" />
+      </Sphere>
+
       {/* Superficie de la Tierra con relieve, reflejos y luces de ciudad */}
       <Sphere ref={earthRef} args={[1, 64, 64]}>
         <meshPhongMaterial
@@ -41,6 +41,8 @@ const Earth = () => {
           emissiveMap={lightsMap}
           emissive={new THREE.Color(0xffffea)}
           emissiveIntensity={1.2}
+          transparent={false}
+          depthWrite={true}
         />
       </Sphere>
 
@@ -50,30 +52,6 @@ const Earth = () => {
           map={cloudsMap}
           transparent
           opacity={0.8}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </Sphere>
-
-      {/* Halo Atmosférico (Fresnel) */}
-      <Sphere ref={atmosphereRef} args={[1.05, 64, 64]}>
-        <meshStandardMaterial
-          color="#0066ff"
-          transparent
-          opacity={0.2}
-          side={THREE.BackSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </Sphere>
-
-      {/* Resplandor exterior suave */}
-      <Sphere args={[1.15, 64, 64]}>
-        <meshBasicMaterial
-          color="#0088ff"
-          transparent
-          opacity={0.06}
-          side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />

@@ -5,9 +5,8 @@ import { DatabaseService } from '../../database/database.service';
 export class UsersService {
   constructor(private prisma: DatabaseService) {}
 
-  async findAll(orgId: string) {
-    return this.prisma.user.findMany({
-      where: { organizationId: orgId },
+  async findAll() {
+    return this.prisma.tenant.user.findMany({
       select: {
         id: true,
         email: true,
@@ -18,9 +17,9 @@ export class UsersService {
     });
   }
 
-  async findOne(orgId: string, id: string) {
-    return this.prisma.user.findFirst({
-      where: { id, organizationId: orgId },
+  async findOne(id: string) {
+    return this.prisma.tenant.user.findFirst({
+      where: { id },
       select: {
         id: true,
         email: true,
@@ -31,12 +30,9 @@ export class UsersService {
     });
   }
 
-  async create(orgId: string, data: any) {
-    return this.prisma.user.create({
-      data: {
-        ...data,
-        organizationId: orgId,
-      },
+  async create(data: any) {
+    return this.prisma.tenant.user.create({
+      data,
       select: {
         id: true,
         email: true,

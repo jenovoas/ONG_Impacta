@@ -6,19 +6,19 @@ import { validateRut } from '../../common/utils/rut.validator';
 export class MembersService {
   constructor(private prisma: DatabaseService) {}
 
-  async findAll(orgId: string, filters: { status?: string; page?: number; pageSize?: number }) {
+  async findAll(filters: { status?: string; page?: number; pageSize?: number }) {
     const { status, page = 1, pageSize = 20 } = filters;
     const skip = (page - 1) * pageSize;
 
     const [items, total] = await Promise.all([
-      this.prisma.member.findMany({
-        where: { organizationId: orgId, status },
+      this.prisma.tenant.member.findMany({
+        where: { status },
         skip,
         take: pageSize,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.member.count({
-        where: { organizationId: orgId, status },
+      this.prisma.tenant.member.count({
+        where: { status },
       }),
     ]);
 
@@ -33,32 +33,30 @@ export class MembersService {
     };
   }
 
-  async findOne(orgId: string, id: string) {
-    return this.prisma.member.findFirst({
-      where: { id, organizationId: orgId },
+  async findOne(id: string) {
+    return this.prisma.tenant.member.findFirst({
+      where: { id },
     });
   }
 
-  async create(orgId: string, data: any) {
+  async create(data: any) {
     if (data.rut && !validateRut(data.rut)) {
       throw new BadRequestException('Invalid RUT');
     }
 
-    return this.prisma.member.create({
-      data: {
-        ...data,
-        organizationId: orgId,
-      },
+    return this.prisma.tenant.member.create({
+      data,
     });
   }
 
-  async update(orgId: string, id: string, data: any) {
+  async update(id: string, data: any) {
     if (data.rut && !validateRut(data.rut)) {
       throw new BadRequestException('Invalid RUT');
     }
 
-    return this.prisma.member.updateMany({
-      where: { id, organizationId: orgId },
+    // Using updateMany to filter by ID and automatically by tenant via extension
+    return this.prisma.tenant.member.updateMany({
+      where: { id },
       data,
     });
   }
