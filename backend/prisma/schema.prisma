@@ -22,6 +22,10 @@ model Organization {
   
   users       User[]
   members     Member[]
+  donations   Donation[]
+  campaigns   Campaign[]
+  species     Species[]
+  missions    Mission[]
 }
 
 model User {
@@ -50,6 +54,84 @@ model Member {
   createdAt      DateTime @default(now())
   
   organization   Organization @relation(fields: [organizationId], references: [id])
+  donations      Donation[]
 
   @@unique([organizationId, rut])
+}
+
+model Donation {
+  id              String   @id @default(uuid())
+  organizationId  String
+  memberId        String?
+  campaignId      String?
+  amount          Decimal  @db.Decimal(15, 2)
+  currency        String   @default("CLP")
+  status          String   @default("PENDING") // PENDING, SUCCEEDED, FAILED
+  gatewayRef      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  member          Member?      @relation(fields: [memberId], references: [id])
+  campaign        Campaign?    @relation(fields: [campaignId], references: [id])
+}
+
+model Campaign {
+  id              String   @id @default(uuid())
+  organizationId  String
+  name            String
+  description     String?
+  goalAmount      Decimal  @db.Decimal(15, 2)
+  currentAmount   Decimal  @default(0) @db.Decimal(15, 2)
+  startDate       DateTime @default(now())
+  endDate         DateTime?
+  status          String   @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  donations       Donation[]
+}
+
+model Species {
+  id              String   @id @default(uuid())
+  organizationId  String
+  commonName      String
+  scientificName  String?
+  description     String?
+  imageUrl        String?
+  status          String   @default("ACTIVE") // ACTIVE, THREATENED, etc.
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id])
+}
+
+model Mission {
+  id              String   @id @default(uuid())
+  organizationId  String
+  title           String
+  description     String?
+  location        String?
+  status          String   @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED, CANCELLED
+  startDate       DateTime @default(now())
+  endDate         DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  tasks           MissionTask[]
+}
+
+model MissionTask {
+  id              String   @id @default(uuid())
+  missionId       String
+  title           String
+  description     String?
+  isCompleted     Boolean  @default(false)
+  assignedTo      String?  // Puede ser un Member ID o nombre
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  mission         Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
 }

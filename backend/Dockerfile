@@ -19,4 +19,4 @@ RUN npm ci --omit=dev && npx prisma generate && npm cache clean --force
 COPY --from=builder /app/dist ./dist
 EXPOSE 3001
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]

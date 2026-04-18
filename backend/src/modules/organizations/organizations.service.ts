@@ -34,4 +34,23 @@ export class OrganizationsService {
       where: { slug },
     });
   }
+
+  async getSummary(orgId: string) {
+    const [donationsCount, totalDonations, membersCount, campaignsCount] = await Promise.all([
+      this.prisma.donation.count({ where: { organizationId: orgId, status: 'SUCCEEDED' } }),
+      this.prisma.donation.aggregate({
+        where: { organizationId: orgId, status: 'SUCCEEDED' },
+        _sum: { amount: true },
+      }),
+      this.prisma.member.count({ where: { organizationId: orgId, status: 'ACTIVE' } }),
+      this.prisma.campaign.count({ where: { organizationId: orgId, status: 'ACTIVE' } }),
+    ]);
+
+    return {
+      donationsCount,
+      totalAmount: totalDonations._sum.amount || 0,
+      membersCount,
+      campaignsCount,
+    };
+  }
 }

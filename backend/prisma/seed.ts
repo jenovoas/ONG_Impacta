@@ -1,25 +1,29 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const impacta = await prisma.organization.upsert({
-    where: { slug: 'impacta' },
+  const passwordHash = await bcrypt.hash('admin123', 10);
+
+  const organization = await prisma.organization.upsert({
+    where: { slug: 'demo' },
     update: {},
     create: {
-      name: 'ONG Impacta',
-      slug: 'impacta',
-      logo: 'https://impacta.pinguinoseguro.cl/logo.svg',
-      config: {
-        primary: '#00A8FF',
-        accent: '#00D4AA',
-        background: '#000000',
-      },
+      name: 'ONG Demo Impacta',
+      slug: 'demo',
       plan: 'PRO',
+      users: {
+        create: {
+          email: 'admin@demo.impacta.cl',
+          passwordHash: passwordHash,
+          role: 'SUPERADMIN',
+        },
+      },
     },
   });
 
-  console.log({ impacta });
+  console.log({ organization });
 }
 
 main()

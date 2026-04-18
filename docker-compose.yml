@@ -42,6 +42,7 @@ services:
       PORT: 3001
       DATABASE_URL: postgresql://impacta:impacta_pass@postgres:5432/impacta?schema=public
       REDIS_URL: redis://redis:6379/0
+      # CORS configuration might be needed here
     depends_on:
       postgres:
         condition: service_healthy
@@ -49,6 +50,39 @@ services:
         condition: service_healthy
     networks:
       - default
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.impacta-api-http.rule=Host(`api-impacta.pinguinoseguro.cl`)"
+      - "traefik.http.routers.impacta-api-http.entrypoints=web"
+      - "traefik.http.routers.impacta-api-http.middlewares=https-redirect@file"
+      - "traefik.http.routers.impacta-api.rule=Host(`api-impacta.pinguinoseguro.cl`)"
+      - "traefik.http.routers.impacta-api.entrypoints=websecure"
+      - "traefik.http.routers.impacta-api.tls.certresolver=powerdns"
+      - "traefik.http.services.impacta-api.loadbalancer.server.port=3001"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: https://api-impacta.pinguinoseguro.cl
+    container_name: impacta-frontend
+    networks:
+      - default
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.impacta-app-http.rule=Host(`app-impacta.pinguinoseguro.cl`)"
+      - "traefik.http.routers.impacta-app-http.entrypoints=web"
+      - "traefik.http.routers.impacta-app-http.middlewares=https-redirect@file"
+      - "traefik.http.routers.impacta-app.rule=Host(`app-impacta.pinguinoseguro.cl`)"
+      - "traefik.http.routers.impacta-app.entrypoints=websecure"
+      - "traefik.http.routers.impacta-app.tls.certresolver=powerdns"
+      - "traefik.http.services.impacta-app.loadbalancer.server.port=80"
     restart: unless-stopped
 
   landing:
