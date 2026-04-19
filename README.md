@@ -1,11 +1,9 @@
-# Impacta+ — The Digital Steward 🌿
+# Impacta+ — Multi-tenant SaaS for NGOs 🌿
 
 [![Tech Stack](https://img.shields.io/badge/Stack-NestJS%20|%20Next.js%20|%20Prisma-000?style=for-the-badge&logo=nestjs&logoColor=white)](https://impacta.pinguinoseguro.cl)
 [![Status](https://img.shields.io/badge/Status-Beta%20V1.0-green?style=for-the-badge)](https://api-impacta.pinguinoseguro.cl/health)
 
-![Hero Banner](https://api-impacta.pinguinoseguro.cl/assets/organizations/demo/species/puma.png)
-
-> **Impacta+** es una plataforma SaaS multi-tenant diseñada para escalar el impacto de las ONGs. Centraliza la gestión de socios, donaciones, misiones de conservación y campañas de recaudación bajo una identidad visual premium y una infraestructura robusta.
+> **Impacta+** es una solución empresarial diseñada para digitalizar y escalar el impacto de organizaciones sin fines de lucro. Un ecosistema robusto que integra gestión de socios, recaudación de fondos y monitoreo de proyectos de conservación bajo una arquitectura multi-tenant de alto rendimiento.
 
 ---
 
