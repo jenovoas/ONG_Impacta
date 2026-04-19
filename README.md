@@ -18,16 +18,6 @@
 
 ---
 
-## 💎 Identidad Visual & Assets de Alta Fidelidad
-
-En Impacta+, la estética no es un accesorio, es una herramienta de confianza. Utilizamos un sistema de **Asset Proxy** que sirve imágenes generadas por IA de alta resolución para representar la biodiversidad que protegemos.
-
-| Puma Chileno | Zorro Chilla | Monito del Monte | Cóndor Andino |
-| :---: | :---: | :---: | :---: |
-| ![Puma](https://api-impacta.pinguinoseguro.cl/assets/organizations/demo/species/puma.png) | ![Zorro](https://api-impacta.pinguinoseguro.cl/assets/organizations/demo/species/zorro.png) | ![Monito](https://api-impacta.pinguinoseguro.cl/assets/organizations/demo/species/monito.png) | ![Condor](https://api-impacta.pinguinoseguro.cl/assets/organizations/demo/species/condor.png) |
-
----
-
 ## 🛠️ Stack Tecnológico
 
 ### Core
