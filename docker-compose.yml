@@ -42,7 +42,12 @@ services:
       PORT: 3001
       DATABASE_URL: postgresql://impacta:impacta_pass@postgres:5432/impacta?schema=public
       REDIS_URL: redis://redis:6379/0
-      # CORS configuration might be needed here
+      MINIO_ENDPOINT: 10.89.5.19
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: 'false'
+      MINIO_ACCESS_KEY: minio_admin
+      MINIO_SECRET_KEY: minio_password_2026
+      MINIO_BUCKET: impacta
     depends_on:
       postgres:
         condition: service_healthy
@@ -51,6 +56,7 @@ services:
     networks:
       - default
       - proxy
+      - infra_default
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -119,6 +125,8 @@ services:
 networks:
   default:
   proxy:
+    external: true
+  infra_default:
     external: true
 
 volumes:

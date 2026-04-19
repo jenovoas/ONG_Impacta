@@ -11,13 +11,14 @@ import { DonationsModule } from './modules/donations/donations.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { SpeciesModule } from './modules/species/species.module';
 import { MissionsModule } from './modules/missions/missions.module';
+import { StorageModule } from './modules/storage/storage.module';
 import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
     DatabaseModule, 
     AuthModule, 
-    OrganizationsModule, UsersModule, MembersModule, DonationsModule, CampaignsModule, SpeciesModule, MissionsModule,
+    OrganizationsModule, UsersModule, MembersModule, DonationsModule, CampaignsModule, SpeciesModule, MissionsModule, StorageModule,
     LoggerModule.forRoot({
       pinoHttp: {
         transport: process.env.NODE_ENV !== 'production'
@@ -42,6 +43,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(TenantMiddleware)
+      .exclude('assets/(.*)')
       .forRoutes('*');
   }
 }
