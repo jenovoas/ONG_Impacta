@@ -84,14 +84,21 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.impacta-app-http.rule=Host(`app-impacta.pinguinoseguro.cl`)"
+      - "traefik.http.routers.impacta-app-http.rule=Host(`app-impacta.pinguinoseguro.cl`) || Host(`impacta.pinguinoseguro.cl`) || (Host(`pinguinoseguro.cl`) && PathPrefix(`/impacta`))"
       - "traefik.http.routers.impacta-app-http.entrypoints=web"
       - "traefik.http.routers.impacta-app-http.middlewares=https-redirect@file"
-      - "traefik.http.routers.impacta-app.rule=Host(`app-impacta.pinguinoseguro.cl`)"
+      - "traefik.http.routers.impacta-app.rule=Host(`app-impacta.pinguinoseguro.cl`) || Host(`impacta.pinguinoseguro.cl`)"
       - "traefik.http.routers.impacta-app.entrypoints=websecure"
       - "traefik.http.routers.impacta-app.tls.certresolver=powerdns"
       - "traefik.http.routers.impacta-app.tls.domains[0].main=pinguinoseguro.cl"
       - "traefik.http.routers.impacta-app.tls.domains[0].sans=*.pinguinoseguro.cl"
+      - "traefik.http.middlewares.impacta-stripprefix.stripprefix.prefixes=/impacta"
+      - "traefik.http.routers.impacta-app-path.rule=Host(`pinguinoseguro.cl`) && PathPrefix(`/impacta`)"
+      - "traefik.http.routers.impacta-app-path.entrypoints=websecure"
+      - "traefik.http.routers.impacta-app-path.middlewares=impacta-stripprefix"
+      - "traefik.http.routers.impacta-app-path.tls.certresolver=powerdns"
+      - "traefik.http.routers.impacta-app-path.tls.domains[0].main=pinguinoseguro.cl"
+      - "traefik.http.routers.impacta-app-path.tls.domains[0].sans=*.pinguinoseguro.cl"
       - "traefik.http.services.impacta-app.loadbalancer.server.port=80"
     restart: unless-stopped
 
@@ -111,7 +118,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.impacta-landing-http.rule=Host(`impacta.pinguinoseguro.cl`)"
+      - "traefik.http.routers.impacta-landing-http.rule=Host(`impacta.pinguinoseguro.cl`) || (Host(`pinguinoseguro.cl`) && PathPrefix(`/impacta`))"
       - "traefik.http.routers.impacta-landing-http.entrypoints=web"
       - "traefik.http.routers.impacta-landing-http.middlewares=https-redirect@file"
       - "traefik.http.routers.impacta-landing.rule=Host(`impacta.pinguinoseguro.cl`)"
@@ -119,6 +126,13 @@ services:
       - "traefik.http.routers.impacta-landing.tls.certresolver=powerdns"
       - "traefik.http.routers.impacta-landing.tls.domains[0].main=pinguinoseguro.cl"
       - "traefik.http.routers.impacta-landing.tls.domains[0].sans=*.pinguinoseguro.cl"
+      - "traefik.http.middlewares.impacta-stripprefix.stripprefix.prefixes=/impacta"
+      - "traefik.http.routers.impacta-landing-path.rule=Host(`pinguinoseguro.cl`) && PathPrefix(`/impacta`)"
+      - "traefik.http.routers.impacta-landing-path.entrypoints=websecure"
+      - "traefik.http.routers.impacta-landing-path.middlewares=impacta-stripprefix"
+      - "traefik.http.routers.impacta-landing-path.tls.certresolver=powerdns"
+      - "traefik.http.routers.impacta-landing-path.tls.domains[0].main=pinguinoseguro.cl"
+      - "traefik.http.routers.impacta-landing-path.tls.domains[0].sans=*.pinguinoseguro.cl"
       - "traefik.http.services.impacta-landing.loadbalancer.server.port=3000"
     restart: unless-stopped
 

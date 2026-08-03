@@ -1,11 +1,11 @@
 # PRD del Proyecto Impacta+
 
-Source: https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBKNARIhYXBwX2NvbXBhbmlvbl91c2VyX3VwbG9hZGVkX2ZpbGVzGmgKM3VzZXJfdXBsb2FkZWRfaHRtbF8wMDA2NGU5ZTNiYTdlZTE4MDVjMmZmNDUyNDExZWJiNhILEgcQgsC-rfEJGAGSASMKCnByb2plY3RfaWQSFUITNDc0MTA0NDcxNTQ2MTIwNjkwOA&filename=&opi=89354086
+Source: <https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBKNARIhYXBwX2NvbXBhbmlvbl91c2VyX3VwbG9hZGVkX2ZpbGVzGmgKM3VzZXJfdXBsb2FkZWRfaHRtbF8wMDA2NGU5ZTNiYTdlZTE4MDVjMmZmNDUyNDExZWJiNhILEgcQgsC-rfEJGAGSASMKCnByb2plY3RfaWQSFUITNDc0MTA0NDcxNTQ2MTIwNjkwOA&filename=&opi=89354086>
 
 ---
 
 | **Versión** | 1.0 |
-|-------------|-----|
+| ------------- | ----- |
 | **Estado** | En revisión |
 | **Fecha** | 4 de abril de 2026 |
 | **Responsable** | Equipo de Desarrollo |
@@ -13,9 +13,11 @@ Source: https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVme
 ---
 
 ### 1.1 Propósito
+
 Desarrollar una plataforma SaaS multi-tenant para la gestión integral de Organizaciones No Gubernamentales (ONGs), permitiendo administrar eventos, donaciones, ayuda social, rescate ecológico, rifas digitales, recaudación de fondos, y administración de socios, clientes y proveedores.
 
 ### 1.2 Problema a Resolver
+
 Las ONGs carecen de sistemas internos de administración que les permitan gestionar de manera eficiente sus operaciones diarias, incluyendo:
 
 - Gestión de socios, voluntarios y beneficiarios
@@ -27,9 +29,11 @@ Las ONGs carecen de sistemas internos de administración que les permitan gestio
 - **Seguimiento de poblaciones y evaluación de impacto ambiental**
 
 ### 1.3 Visión del Producto
+
 Convertirse en la plataforma líder para la gestión de ONGs en la región, ofreciendo una solución todo-en-uno que permita a las organizaciones enfocarse en su misión social en lugar de en tareas administrativas.
 
 ### 1.4 Modelo de Negocio
+
 - **SaaS Multi-tenant**: Múltiples ONGs comparten la misma infraestructura
 - **Plan Freemium**: Funcionalidades básicas gratuitas
 - **Planes Premium**: Funcionalidades avanzadas por suscripción mensual/anual
@@ -38,11 +42,13 @@ Convertirse en la plataforma líder para la gestión de ONGs en la región, ofre
 ---
 
 ### 2.1 Objetivo Principal
+
 Crear una plataforma SaaS que centralice y automatice la gestión operativa de ONGs, mejorando su eficiencia y transparencia.
 
 ### 2.2 Objetivos Específicos
+
 | ID | Objetivo | Prioridad |
-|----|----------|-----------|
+| ---- | ---------- | ----------- |
 | OE1 | Proveer administración completa de socios y voluntarios | Alta (MVP) |
 | OE2 | Facilitar la gestión de eventos y recaudación de fondos | Alta |
 | OE3 | Habilitar sistema de donaciones con transparencia | Alta |
@@ -71,8 +77,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 ---
 
 ### 3.1 Módulo de Administración de Socios y Voluntarios (MVP)
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Registro de Socios** | Alta de nuevos socios con datos completos | Alta |
 | **Gestión de Membresías** | Control de cuotas, vencimientos y estados | Alta |
 | **Perfil de Voluntarios** | Registro con habilidades, disponibilidad y áreas de interés | Alta |
@@ -85,8 +92,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Organigrama de la ONG** | Visualización de estructura organizacional con cargos | Media |
 
 ### 3.2 Módulo de Eventos y Recaudación de Fondos
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Creación de Eventos** | Configuración de eventos (nombre, fecha, lugar, capacidad) | Alta |
 | **Calendario Público** | Visualización de eventos próximos | Alta |
 | **Inscripciones en Línea** | Registro de participantes con pago integrado | Alta |
@@ -97,8 +105,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Recordatorios Automáticos** | Notificaciones previas al evento | Media |
 
 ### 3.3 Módulo de Calendario y Coordinador de Tareas
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Calendario General** | Vista mensual, semanal y diaria de todas las actividades | Alta |
 | **Asignación de Tareas** | Crear y asignar tareas a socios/voluntarios específicos | Alta |
 | **Tareas Recurrentes** | Configuración de tareas periódicas (ej: reunión mensual) | Alta |
@@ -110,8 +119,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Dependencias entre Tareas** | Configuración de tareas bloqueantes/dependientes | Baja |
 
 ### 3.4 Módulo de Donaciones y Pagos Unificados
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Donaciones en Línea (Web)** | Integración con pasarelas de pago (MercadoPago, PayPal, Stripe) desde la landing page | Alta |
 | **Donaciones en Línea (Sistema Interno)** | Registro de donaciones web desde el panel de administración | Alta |
 | **Pagos de Cuotas de Socios (Web)** | Portal de autoservicio para pago de membresías | Alta |
@@ -128,8 +138,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Reportes de Recaudación** | Informes diarios, semanales, mensuales de ingresos | Alta |
 
 ### 3.5 Módulo de Rifas Digitales
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Creación de Rifas** | Configuración de premios, cantidad de boletos, precio | Alta |
 | **Venta de Boletos en Línea** | Selección de números y pago integrado | Alta |
 | **Boleto Digital** | Envío de boleto por email/WhatsApp | Alta |
@@ -139,8 +150,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Límite por Persona** | Configuración de máximo de boletos por persona | Media |
 
 ### 3.6 Módulo de Ayuda Social
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Registro de Beneficiarios** | Base de datos de personas/familias beneficiadas | Alta |
 | **Seguimiento de Casos** | Historial de ayuda proporcionada | Alta |
 | **Tipos de Ayuda** | Clasificación (alimentos, salud, educación, vivienda, etc.) | Alta |
@@ -149,8 +161,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Geolocalización** | Mapa de zonas beneficiadas | Media |
 
 ### 3.7 Módulo de Rescate Ecológico
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Registro de Proyectos** | Proyectos de reforestación, limpieza, conservación | Alta |
 | **Seguimiento de Actividades** | Tracking de jornadas y voluntarios participantes | Alta |
 | **Métricas de Impacto** | Árboles plantados, residuos recolectados, etc. | Alta |
@@ -158,8 +171,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Certificados de Participación** | Para voluntarios en actividades ecológicas | Baja |
 
 ### 3.8 Módulo de Biblioteca Técnica de Especies Nativas e Impacto Ambiental
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Catálogo de Flora Nativa** | Base de datos de árboles, plantas y vegetación autóctona con fichas técnicas | Alta |
 | **Catálogo de Fauna Nativa** | Registro de especies animales, hábitat y estado de conservación | Alta |
 | **Fichas Técnicas de Especies** | Información científica: nombre científico, familia, características, distribución | Alta |
@@ -175,8 +189,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Exportación de Datos Científicos** | Formatos compatibles con sistemas de investigación (CSV, Darwin Core) | Media |
 
 ### 3.9 Módulo de Administración (CRM)
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Gestión de Socios/Clientes** | CRM completo con historial de interacciones | Alta |
 | **Gestión de Proveedores** | Base de datos de proveedores y contratos | Alta |
 | **Órdenes de Compra** | Generación y seguimiento de compras | Media |
@@ -184,8 +199,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Contactos** | Agenda centralizada de contactos | Media |
 
 ### 3.10 Módulo de Administración Contable (Normativa Chilena)
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Plan de Cuentas** | Plan de cuentas personalizable según normativa chilena | Alta |
 | **Libro Diario** | Registro cronológico de todas las transacciones contables | Alta |
 | **Libro Mayor** | Mayor general y analítico por cuentas | Alta |
@@ -206,8 +222,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Cierre Contable** | Proceso de cierre mensual/anual con asientos de ajuste | Alta |
 
 ### 3.11 Módulo de Reportes y Analytics
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Dashboard General** | Vista general de métricas clave | Alta |
 | **Reportes Financieros** | Ingresos, egresos, balance por proyecto | Alta |
 | **Reportes de Impacto** | Beneficiarios, voluntarios, actividades | Alta |
@@ -215,8 +232,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Reportes Personalizados** | Configuración de reportes a medida | Media |
 
 ### 3.12 Módulo de Landing Page
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Landing Page Personalizada** | Página web automática para cada ONG | Media |
 | **Personalización de Marca** | Logo, colores, dominio personalizado | Media |
 | **Formularios Públicos** | Contacto, voluntariado, donaciones | Alta |
@@ -227,8 +245,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Multi-idioma** | Español e Inglés con selector de idioma | Alta |
 
 ### 3.13 Módulo de Aplicación Móvil
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **App Multi-plataforma** | iOS y Android con código base único (React Native) | Alta |
 | **Autenticación Biométrica** | Login con huella digital o reconocimiento facial | Alta |
 | **Dashboard Personalizado** | Vista de tareas, eventos y métricas personales | Alta |
@@ -248,8 +267,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 ---
 
 ## 3.14 Módulo de Transparencia y Rendición de Cuentas
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Dashboard Público** | Página web pública con métricas de transparencia | Alta |
 | **Uso de Fondos** | Visualización gráfica de cómo se usan las donaciones | Alta |
 | **Proyectos Activos** | Estado y avance de cada proyecto con fotos | Alta |
@@ -258,8 +278,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Certificaciones** | Sellos de transparencia y certificaciones | Media |
 
 ## 3.15 Módulo de Email Marketing y Comunicación
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Newsletter** | Envío de boletines periódicos | Alta |
 | **Segmentación** | Envíos por tipo de usuario (socio, donante, voluntario) | Alta |
 | **Plantillas** | Templates pre-diseñados para campañas | Alta |
@@ -268,8 +289,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Integración Redes Sociales** | Auto-posting en Facebook, Twitter, Instagram | Media |
 
 ## 3.16 Módulo de Logística e Inventarios
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Control de Inventario** | Stock de alimentos, ropa, insumos | Alta |
 | **Bodegas Múltiples** | Múltiples ubicaciones de almacenamiento | Alta |
 | **Entradas/Salidas** | Registro de movimientos de inventario | Alta |
@@ -280,8 +302,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Control de Entrega** | Registro con firma/foto del receptor | Alta |
 
 ## 3.17 Módulo de E-Learning y Capacitación
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Cursos Online** | Plataforma LMS para capacitar voluntarios | Alta |
 | **Certificaciones** | Certificados automáticos al completar cursos | Alta |
 | **Biblioteca de Recursos** | Manuales, guías, videos tutoriales | Alta |
@@ -291,8 +314,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Gamificación** | Insignias, puntos, niveles | Media |
 
 ## 3.18 Módulo de Crowdfunding y Campañas Virales
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Campañas Crowdfunding** | Creación de campañas con meta y plazo | Alta |
 | **Recompensas** | Sistema de recompensas por niveles de donación | Media |
 | **Ambassador Program** | Embajadores que comparten y ganan insignias | Alta |
@@ -301,8 +325,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Matching Gifts** | Empresas igualan donaciones de empleados | Media |
 
 ## 3.19 Módulo de Voluntariado Corporativo
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Portal Empresas** | Dashboard específico para empresas voluntarias | Alta |
 | **Días de Voluntariado** | Agenda de jornadas corporativas | Alta |
 | **Skills-based Volunteering** | Voluntariado basado en habilidades profesionales | Alta |
@@ -310,8 +335,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Reconocimientos** | Certificados para empresas participantes | Media |
 
 ## 3.20 Módulo de Análisis Predictivo e IA
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Predictive Analytics** | Predicción de donaciones futuras | Media |
 | **Churn Prediction** | Identificar donantes en riesgo de abandono | Alta |
 | **Donor Scoring** | Score de probabilidad de donación mayor | Media |
@@ -319,8 +345,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Análisis de Sentimiento** | Monitoreo de percepción en redes | Baja |
 
 ## 3.21 Módulo de Emergencias y Respuesta Rápida
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **Alertas de Emergencia** | Notificaciones masivas SMS/push | Alta |
 | **Protocolos de Actuación** | Checklists por tipo de emergencia | Alta |
 | **Movilización de Voluntarios** | Convocatoria rápida para emergencias | Alta |
@@ -328,8 +355,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Daño Assessment** | Evaluación rápida de daños post-desastre | Alta |
 
 ## 3.22 Módulo de API Pública
+
 | Funcionalidad | Descripción | Prioridad |
-|---------------|-------------|-----------|
+| --------------- | ------------- | ----------- |
 | **API REST Pública** | Documentación abierta para developers | Media |
 | **Webhooks** | Notificaciones a sistemas externos | Alta |
 | **Developer Portal** | Documentación, keys, analytics de uso | Media |
@@ -338,6 +366,7 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 ---
 
 ### 4.1 Arquitectura Multi-tenant
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    LOAD BALANCER                        │
@@ -365,8 +394,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 ```
 
 ### 4.2 Stack Tecnológico Propuesto
+
 | Capa | Tecnología | Justificación |
-|------|------------|---------------|
+| ------ | ------------ | --------------- |
 | **Frontend Web** | React + TypeScript + TailwindCSS | Moderno, escalable, buena UX |
 | **Landing Page** | Next.js 14 | SSR, SEO optimizado |
 | **App Móvil** | React Native + Expo | Multi-plataforma (iOS/Android), código compartido |
@@ -382,8 +412,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Push Notifications** | Firebase Cloud Messaging / OneSignal | Notificaciones en app móvil |
 
 ### 4.3 Infraestructura y Despliegue
+
 | Componente | Configuración | Ubicación |
-|------------|---------------|-----------|
+| ------------ | --------------- | ----------- |
 | **Servidor** | Servidor Fenix | On-premise / Data Center |
 | **Dominio** | impacta.pinguinoseguro.cl | DNS configurado |
 | **SSL/TLS** | Certificado Let's Encrypt o comercial | Renovación automática |
@@ -394,8 +425,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Backups** | Automáticos diarios + off-site | Recuperación ante desastres |
 
 ### 4.4 Seguridad
+
 | Requisito | Implementación |
-|-----------|----------------|
+| ----------- | ---------------- |
 | Autenticación | JWT con refresh tokens |
 | Autorización | RBAC (Roles y Permisos) |
 | Multi-tenancy | Row-level security en BD |
@@ -405,8 +437,9 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 ---
 
 ### 5.1 Roles del Sistema
+
 | Rol | Descripción | Permisos |
-|-----|-------------|----------|
+| ----- | ------------- | ---------- |
 | **Super Admin** | Administrador de la plataforma SaaS | Acceso total a todas las ONGs |
 | **Admin ONG** | Administrador de una ONG específica | Acceso completo a su ONG |
 | **Coordinador** | Coordinador de área/voluntarios | Gestión de voluntarios y eventos |
@@ -415,10 +448,11 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Donante** | Donante registrado | Ver historial de donaciones |
 
 ### 5.2 Cargos Directivos de la ONG
+
 El sistema permite asignar cargos organizacionales a los socios:
 
 | Cargo | Descripción | Permisos Especiales |
-|-------|-------------|---------------------|
+| ------- | ------------- | --------------------- |
 | **Presidente/a** | Máxima autoridad de la ONG | Acceso total a reportes y configuración |
 | **Vicepresidente/a** | Segundo al mando | Reemplaza al presidente, acceso amplio |
 | **Secretario/a** | Gestión documental | Actas, documentos oficiales |
@@ -431,7 +465,7 @@ El sistema permite asignar cargos organizacionales a los socios:
 ---
 
 | ID | Requisito | Descripción |
-|----|-----------|-------------|
+| ---- | ----------- | ------------- |
 | RNF1 | **Disponibilidad** | 99.9% uptime garantizado |
 | RNF2 | **Performance** | < 2 segundos de respuesta en 95% de requests |
 | RNF3 | **Escalabilidad** | Soportar 100+ ONGs, 10,000+ usuarios concurrentes |
@@ -446,6 +480,7 @@ El sistema permite asignar cargos organizacionales a los socios:
 ---
 
 ### 7.1 MVP (Módulo Socios y Voluntarios)
+
 - [ ] Registro y alta de nuevos socios con validación de datos
 - [ ] Gestión de membresías (alta, baja, renovación)
 - [ ] Perfil completo de voluntarios con habilidades y disponibilidad
@@ -455,6 +490,7 @@ El sistema permite asignar cargos organizacionales a los socios:
 - [ ] Dashboard con métricas de socios y voluntarios
 
 ### 7.2 Criterios Generales
+
 - [ ] La plataforma soporta al menos 10 ONGs simultáneas en testing
 - [ ] Los datos de cada ONG están aislados y no son accesibles por otras ONGs
 - [ ] El tiempo de carga inicial es menor a 3 segundos
@@ -463,7 +499,7 @@ El sistema permite asignar cargos organizacionales a los socios:
 ---
 
 | Métrica | Objetivo | Período |
-|---------|----------|---------|
+| --------- | ---------- | --------- |
 | ONGs registradas | 50+ | Primeros 6 meses |
 | Usuarios activos | 1,000+ | Primeros 6 meses |
 | Tasa de retención | > 80% | Mensual |
@@ -474,10 +510,11 @@ El sistema permite asignar cargos organizacionales a los socios:
 ---
 
 ### Desarrollo Ágil - Entregas Iterativas
+
 #### Fase 1: Core MVP (5-7 semanas)
 
 | Fase | Duración | Entregables |
-|------|----------|-------------|
+| ------ | ---------- | ------------- |
 | **Fase 0: Setup** | 1-2 días | Infraestructura, CI/CD, base del proyecto |
 | **Fase 1: MVP Core** | 3-5 días | Socios, Voluntarios, Roles, Calendario, Tareas |
 | **Fase 2: Pagos** | 2-3 días | Sistema unificado web/interno, conciliación |
@@ -495,7 +532,7 @@ El sistema permite asignar cargos organizacionales a los socios:
 #### Fase 2: Crecimiento y Transparencia (4-6 semanas)
 
 | Fase | Duración | Entregables |
-|------|----------|-------------|
+| ------ | ---------- | ------------- |
 | **Fase 11: Transparencia** | 2-3 días | Dashboard público, uso de fondos, informes |
 | **Fase 12: Email Marketing** | 2-3 días | Newsletter, automatización, plantillas |
 | **Fase 13: Inventarios** | 3-4 días | Control de stock, bodegas, distribución |
@@ -508,7 +545,7 @@ El sistema permite asignar cargos organizacionales a los socios:
 #### Fase 3: Madurez e Innovación (4-5 semanas)
 
 | Fase | Duración | Entregables |
-|------|----------|-------------|
+| ------ | ---------- | ------------- |
 | **Fase 17: E-Learning** | 3-4 días | LMS, cursos, certificaciones |
 | **Fase 18: IA y Analytics** | 4-5 días | Churn prediction, donor scoring, chatbot |
 | **Fase 19: Emergencias** | 2-3 días | Alertas, protocolos, movilización |
@@ -521,6 +558,7 @@ El sistema permite asignar cargos organizacionales a los socios:
 **Total general:** 55-80 días (12-18 semanas / 3-4 meses)
 
 ### Notas de Desarrollo
+
 - Desarrollo iterativo con entregas continuas
 - Priorización dinámica según necesidades
 - Deploy continuo a producción (impacta.pinguinoseguro.cl)
@@ -531,8 +569,9 @@ El sistema permite asignar cargos organizacionales a los socios:
 ---
 
 ## 10. Riesgos y Dependencias
+
 | Riesgo | Probabilidad | Impacto | Mitigación |
-|--------|--------------|---------|------------|
+| -------- | -------------- | --------- | ------------ |
 | Complejidad de desarrollo | Alta | Alto | Priorizar MVP, iteraciones cortas |
 | Adopción lenta del mercado | Media | Alto | Plan de marketing, beta testers |
 | Problemas con pasarelas de pago | Media | Alto | Múltiples proveedores, fallback |
@@ -543,8 +582,9 @@ El sistema permite asignar cargos organizacionales a los socios:
 ---
 
 ## 11. Plan de Monetización
+
 | Plan | Precio | Funcionalidades |
-|------|--------|-----------------|
+| ------ | -------- | ----------------- |
 | **Free** | $0/mes | Hasta 50 socios, 1 evento/mes, donaciones básicas |
 | **Básico** | $29/mes | Hasta 200 socios, eventos ilimitados, rifas digitales |
 | **Pro** | $79/mes | Socios ilimitados, todos los módulos, landing page |
@@ -558,8 +598,9 @@ El sistema permite asignar cargos organizacionales a los socios:
 ---
 
 ## 12. Glosario
+
 | Término | Definición |
-|---------|------------|
+| --------- | ------------ |
 | **Multi-tenant** | Arquitectura donde una instancia sirve a múltiples clientes |
 | **SaaS** | Software as a Service, software por suscripción en la nube |
 | **RBAC** | Role-Based Access Control, control de acceso por roles |
@@ -592,8 +633,9 @@ El sistema permite asignar cargos organizacionales a los socios:
 ---
 
 ## 13. Aprobaciones
+
 | Rol | Nombre | Fecha | Firma |
-|-----|--------|-------|-------|
+| ----- | -------- | ------- | ------- |
 | Product Owner | | | |
 | Stakeholder | | | |
 | Tech Lead | | | |
