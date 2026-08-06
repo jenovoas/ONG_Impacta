@@ -24,3 +24,5 @@ Thumbs.db
 # Build artifacts
 dist
 build
+# Added by code-review-graph
+.code-review-graph/
