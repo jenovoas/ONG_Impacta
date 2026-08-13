@@ -121,10 +121,20 @@ export const LoginPage: React.FC = () => {
             </button>
           </form>
 
-          <div className="mt-8 text-center">
-            <a href="#" className="text-sm text-gray-500 hover:text-white transition-colors">
-              ¿Olvidaste tu contraseña?
-            </a>
+          <div className="mt-8 pt-6 border-t border-white/5 space-y-3">
+            <p className="text-xs text-gray-500 text-center font-bold uppercase tracking-wider">Credenciales de Prueba</p>
+            <button
+              type="button"
+              onClick={() => {
+                setOrgSlug('demo');
+                setEmail('admin@demo.impacta.cl');
+                setPassword('admin123');
+              }}
+              className="w-full bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-bold py-3 px-4 rounded-xl transition-colors flex items-center justify-between"
+            >
+              <span>Fundación Conservación Atacama</span>
+              <span className="text-secondary">Usar datos Demo ➔</span>
+            </button>
           </div>
         </div>
 

@@ -96,30 +96,30 @@ export const Campaigns: React.FC = () => {
                     e.preventDefault();
                     const formData = new FormData(e.target);
                     createMutation.mutate({
-                      title: formData.get('title'),
+                      name: formData.get('name'),
                       description: formData.get('description'),
-                      targetAmount: Number(formData.get('targetAmount')),
+                      goalAmount: Number(formData.get('goalAmount')),
                       endDate: formData.get('endDate') ? new Date(formData.get('endDate') as string).toISOString() : undefined,
                     });
                   }} 
                   className="space-y-6"
                 >
                   <div>
-                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Título de la Campaña</label>
-                    <input name="title" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" placeholder="Ej: Reforestación Parque Central" />
+                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest font-sans">Nombre de la Campaña</label>
+                    <input name="name" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" placeholder="Ej: Reforestación Parque Central" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Meta ($ CLP)</label>
-                      <input name="targetAmount" type="number" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" placeholder="1.000.000" />
+                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest font-sans">Meta ($ CLP)</label>
+                      <input name="goalAmount" type="number" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" placeholder="1.000.000" />
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Fecha Límite</label>
+                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest font-sans">Fecha Límite</label>
                       <input name="endDate" type="date" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Descripción</label>
+                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest font-sans">Descripción</label>
                     <textarea name="description" rows={3} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" />
                   </div>
 
@@ -145,7 +145,9 @@ export const Campaigns: React.FC = () => {
 };
 
 const CampaignCard = ({ campaign }: { campaign: any }) => {
-  const progress = Math.min((campaign.currentAmount / campaign.targetAmount) * 100, 100);
+  const goal = Number(campaign.goalAmount || 0);
+  const current = Number(campaign.currentAmount || 0);
+  const progress = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
   
   return (
     <motion.div 
@@ -159,7 +161,7 @@ const CampaignCard = ({ campaign }: { campaign: any }) => {
 
       <div className="relative z-10">
         <div className="flex justify-between items-start mb-6">
-          <h3 className="text-2xl font-black text-white uppercase italic tracking-tight">{campaign.title}</h3>
+          <h3 className="text-2xl font-black text-white uppercase italic tracking-tight">{campaign.name}</h3>
           <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
             campaign.status === 'ACTIVE' ? 'bg-secondary/10 text-secondary' : 'bg-gray-500/10 text-gray-500'
           }`}>
@@ -175,10 +177,10 @@ const CampaignCard = ({ campaign }: { campaign: any }) => {
           <div className="flex justify-between items-end">
             <div>
               <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Recaudado</p>
-              <p className="text-3xl font-black text-white">${campaign.currentAmount?.toLocaleString()}</p>
+              <p className="text-3xl font-black text-white">${current.toLocaleString()}</p>
             </div>
             <div className="text-right">
-              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Meta: ${campaign.targetAmount?.toLocaleString()}</p>
+              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Meta: ${goal.toLocaleString()}</p>
               <p className="text-tertiary font-black text-lg">{progress.toFixed(1)}%</p>
             </div>
           </div>

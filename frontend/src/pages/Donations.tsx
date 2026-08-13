@@ -44,9 +44,12 @@ export const Donations: React.FC = () => {
   });
 
   const filteredDonations = donations.filter((d: any) => {
+    const donorName = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Donante Anónimo';
+    const donorEmail = d.member?.email || '';
+
     const matchesSearch = 
-      d.donorName?.toLowerCase().includes(search.toLowerCase()) ||
-      d.donorEmail?.toLowerCase().includes(search.toLowerCase()) ||
+      donorName.toLowerCase().includes(search.toLowerCase()) ||
+      donorEmail.toLowerCase().includes(search.toLowerCase()) ||
       d.id.includes(search);
     
     const matchesFilter = filter === 'ALL' || d.status === filter;
@@ -124,49 +127,53 @@ export const Donations: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredDonations.map((d: any) => (
-                  <motion.tr 
-                    key={d.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="hover:bg-white/[0.02] transition-colors group"
-                  >
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20">
-                          {d.donorName?.[0] || 'A'}
+                filteredDonations.map((d: any) => {
+                  const name = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Donante Anónimo';
+                  const email = d.member?.email || 'N/A';
+                  return (
+                    <motion.tr 
+                      key={d.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="hover:bg-white/[0.02] transition-colors group"
+                    >
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20">
+                            {name[0]}
+                          </div>
+                          <div>
+                            <p className="text-white font-bold text-sm">{name}</p>
+                            <p className="text-gray-500 text-xs">{email}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-white font-bold text-sm">{d.donorName || 'Anónimo'}</p>
-                          <p className="text-gray-500 text-xs">{d.donorEmail || 'Sin email'}</p>
+                      </td>
+                      <td className="px-8 py-6">
+                        <p className="text-white font-black text-lg">${Number(d.amount).toLocaleString()}</p>
+                        <p className="text-gray-600 text-[10px] font-bold uppercase tracking-tighter">Pesos Chilenos</p>
+                      </td>
+                      <td className="px-8 py-6">
+                        <StatusBadge status={d.status} />
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-2 text-gray-400">
+                          <Calendar className="w-4 h-4" />
+                          <span className="text-xs font-medium">{new Date(d.createdAt).toLocaleDateString()}</span>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <p className="text-white font-black text-lg">${d.amount?.toLocaleString()}</p>
-                      <p className="text-gray-600 text-[10px] font-bold uppercase tracking-tighter">Pesos Chilenos</p>
-                    </td>
-                    <td className="px-8 py-6">
-                      <StatusBadge status={d.status} />
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <Calendar className="w-4 h-4" />
-                        <span className="text-xs font-medium">{new Date(d.createdAt).toLocaleDateString()}</span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">
-                        {d.campaign?.title || 'General'}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6 text-right">
-                      <button className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-500 hover:text-white">
-                        <ExternalLink className="w-5 h-5" />
-                      </button>
-                    </td>
-                  </motion.tr>
-                ))
+                      </td>
+                      <td className="px-8 py-6">
+                        <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">
+                          {d.campaign?.name || 'Aporte General'}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6 text-right">
+                        <button className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-500 hover:text-white">
+                          <ExternalLink className="w-5 h-5" />
+                        </button>
+                      </td>
+                    </motion.tr>
+                  );
+                })
               )}
             </tbody>
           </table>
