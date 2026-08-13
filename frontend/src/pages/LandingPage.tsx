@@ -44,7 +44,6 @@ export const LandingPage: React.FC = () => {
               <a href="#hero" className="hover:text-[#00a8ff] transition-colors">Inicio</a>
               <a href="#modules" className="hover:text-[#00a8ff] transition-colors">Módulos</a>
               <a href="#impact" className="hover:text-[#00a8ff] transition-colors">Impacto Vivo</a>
-              <a href="#pricing" className="hover:text-[#00a8ff] transition-colors">Planes</a>
             </nav>
 
             {/* Actions */}
@@ -279,83 +278,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Pricing Section */}
-        <section id="pricing" className="py-24 bg-[#131313]/60 backdrop-blur-md border-b border-[#2a2a2a]/40">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <h2 className="text-xs uppercase font-bold tracking-widest text-[#00a8ff] mb-3">Planes & Suscripciones</h2>
-              <h3 className="text-3xl md:text-4xl font-bold text-white font-headline">
-                Precios transparentes adaptados al tamaño de tu ONG
-              </h3>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {/* Plan 1 */}
-              <div className="p-8 rounded-3xl bg-[#1c1b1b]/80 border border-[#2a2a2a] flex flex-col justify-between">
-                <div>
-                  <h4 className="text-xl font-bold text-white mb-2">Comunitario</h4>
-                  <p className="text-xs text-[#bec7d3] mb-6">Para organizaciones pequeñas en etapa inicial.</p>
-                  <div className="text-4xl font-extrabold text-white font-headline mb-6">Gratis</div>
-                  <ul className="space-y-3 text-xs text-[#bec7d3] mb-8">
-                    <li className="flex items-center gap-2"><span className="text-[#00d4aa]">✓</span> Hasta 100 socios</li>
-                    <li className="flex items-center gap-2"><span className="text-[#00d4aa]">✓</span> 1 campaña activa</li>
-                    <li className="flex items-center gap-2"><span className="text-[#00d4aa]">✓</span> Biblioteca de 50 especies</li>
-                  </ul>
-                </div>
-                <button
-                  onClick={() => setShowDemoModal(true)}
-                  className="w-full py-3 rounded-xl bg-[#2a2a2a] text-white font-bold text-xs hover:bg-[#333] transition-colors"
-                >
-                  Comenzar Gratis
-                </button>
-              </div>
-
-              {/* Plan 2 */}
-              <div className="p-8 rounded-3xl bg-[#1c1b1b] border-2 border-[#00a8ff] relative flex flex-col justify-between shadow-2xl shadow-[#00a8ff]/10">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#00a8ff] text-[#003352] font-black text-[10px] uppercase tracking-wider">
-                  Más Popular
-                </div>
-                <div>
-                  <h4 className="text-xl font-bold text-white mb-2">Pro Conservación</h4>
-                  <p className="text-xs text-[#bec7d3] mb-6">Para ONGs consolidadas con campañas activas.</p>
-                  <div className="text-4xl font-extrabold text-[#00a8ff] font-headline mb-6">$49<span className="text-sm font-normal text-[#bec7d3]">/mes</span></div>
-                  <ul className="space-y-3 text-xs text-[#bec7d3] mb-8">
-                    <li className="flex items-center gap-2"><span className="text-[#00d4aa]">✓</span> Socios ilimitados</li>
-                    <li className="flex items-center gap-2"><span className="text-[#00d4aa]">✓</span> Campañas ilimitadas</li>
-                    <li className="flex items-center gap-2"><span className="text-[#00d4aa]">✓</span> Misiones geoespaciales</li>
-                    <li className="flex items-center gap-2"><span className="text-[#00d4aa]">✓</span> Soporte prioritario</li>
-                  </ul>
-                </div>
-                <button
-                  onClick={() => setShowDemoModal(true)}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] font-bold text-xs hover:opacity-90 transition-opacity"
-                >
-                  Solicitar Prueba Pro
-                </button>
-              </div>
-
-              {/* Plan 3 */}
-              <div className="p-8 rounded-3xl bg-[#1c1b1b]/80 border border-[#2a2a2a] flex flex-col justify-between">
-                <div>
-                  <h4 className="text-xl font-bold text-white mb-2">Institucional</h4>
-                  <p className="text-xs text-[#bec7d3] mb-6">Para redes globales y santuarios ecológicos.</p>
-                  <div className="text-4xl font-extrabold text-white font-headline mb-6">A Medida</div>
-                  <ul className="space-y-3 text-xs text-[#bec7d3] mb-8">
-                    <li className="flex items-center gap-2"><span className="text-[#00d4aa]">✓</span> API dedicada</li>
-                    <li className="flex items-center gap-2"><span className="text-[#00d4aa]">✓</span> Multi-organización matriz</li>
-                    <li className="flex items-center gap-2"><span className="text-[#00d4aa]">✓</span> Integraciones custom ERP</li>
-                  </ul>
-                </div>
-                <button
-                  onClick={() => setShowDemoModal(true)}
-                  className="w-full py-3 rounded-xl bg-[#2a2a2a] text-white font-bold text-xs hover:bg-[#333] transition-colors"
-                >
-                  Contactar Ventas
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* CTA Bottom Banner */}
         <section className="py-20 bg-transparent relative overflow-hidden">
