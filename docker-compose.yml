@@ -37,6 +37,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: impacta-backend
+    ports:
+      - "8085:3001"
     environment:
       NODE_ENV: production
       PORT: 3001
@@ -78,6 +80,8 @@ services:
       args:
         VITE_API_URL: https://api-impacta.pinguinoseguro.cl
     container_name: impacta-frontend
+    ports:
+      - "8086:80"
     networks:
       - default
       - proxy
@@ -101,6 +105,8 @@ services:
       context: ./landing
       dockerfile: Dockerfile
     container_name: impacta-landing
+    ports:
+      - "3002:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
