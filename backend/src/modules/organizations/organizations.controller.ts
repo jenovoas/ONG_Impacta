@@ -2,10 +2,17 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
+import { Public } from '../../auth/decorators/public.decorator';
 
 @Controller('organizations')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
+
+  @Public()
+  @Get('public-stats')
+  getPublicStats() {
+    return this.organizationsService.getPublicStats();
+  }
 
   @Get('me/summary')
   getSummary(@CurrentTenant() orgId: string) {

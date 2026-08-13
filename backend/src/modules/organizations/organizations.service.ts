@@ -53,4 +53,25 @@ export class OrganizationsService {
       campaignsCount,
     };
   }
+
+  async getPublicStats() {
+    const [speciesCount, donationsAgg, missionsCount, orgsCount] = await Promise.all([
+      this.prisma.species.count(),
+      this.prisma.donation.aggregate({
+        where: { status: 'SUCCEEDED' },
+        _sum: { amount: true },
+        _count: true,
+      }),
+      this.prisma.mission.count(),
+      this.prisma.organization.count(),
+    ]);
+
+    return {
+      speciesCount,
+      totalDonated: donationsAgg._sum.amount || 0,
+      donationsCount: donationsAgg._count || 0,
+      missionsCount,
+      orgsCount,
+    };
+  }
 }

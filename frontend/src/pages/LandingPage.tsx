@@ -1,11 +1,33 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { EarthBackground } from '../components/Background/EarthBackground';
+import { 
+  ArrowRight, 
+  Rocket, 
+  ChevronDown, 
+  DollarSign, 
+  Users, 
+  PawPrint, 
+  Compass, 
+  ShieldCheck, 
+  CheckCircle2
+} from 'lucide-react';
+import client from '../api/client';
 
 export const LandingPage: React.FC = () => {
   const [showDemoModal, setShowDemoModal] = React.useState(false);
   const [demoSubmitted, setDemoSubmitted] = React.useState(false);
   const [demoForm, setDemoForm] = React.useState({ name: '', email: '', org: '', phone: '' });
+
+  // Fetch real public stats from backend
+  const { data: stats } = useQuery({
+    queryKey: ['public-stats'],
+    queryFn: async () => {
+      const { data } = await client.get('/organizations/public-stats');
+      return data;
+    },
+  });
 
   const handleDemoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +81,7 @@ export const LandingPage: React.FC = () => {
                 className="text-sm font-semibold px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] hover:opacity-90 transition-opacity shadow-md shadow-[#00a8ff]/20 flex items-center gap-2"
               >
                 <span>Acceso ONG</span>
-                <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -91,34 +113,42 @@ export const LandingPage: React.FC = () => {
                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] font-bold text-base hover:opacity-95 transition-all shadow-xl shadow-[#00a8ff]/25 flex items-center justify-center gap-3"
               >
                 <span>Solicitar Demostración</span>
-                <span className="material-symbols-outlined text-xl">rocket_launch</span>
+                <Rocket className="w-5 h-5" />
               </button>
               <a
                 href="#modules"
                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#1c1b1b]/80 border border-[#2a2a2a] text-[#e5e2e1] font-semibold text-base hover:bg-[#20201f] transition-all flex items-center justify-center gap-2"
               >
                 <span>Explorar Módulos</span>
-                <span className="material-symbols-outlined text-xl">expand_more</span>
+                <ChevronDown className="w-5 h-5" />
               </a>
             </div>
 
             {/* Stats Bar */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto p-6 rounded-2xl glass-card border border-[#2a2a2a]">
               <div className="p-4 text-center">
-                <div className="text-3xl font-extrabold text-white font-headline">+120,000</div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">Especies Monitoreadas</div>
+                <div className="text-3xl font-extrabold text-white font-headline">
+                  {stats ? `${stats.speciesCount}` : '3'}
+                </div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">Especies Registradas</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
-                <div className="text-3xl font-extrabold text-[#00a8ff] font-headline">99.8%</div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">Transparencia en Aportes</div>
+                <div className="text-3xl font-extrabold text-[#00a8ff] font-headline">
+                  {stats ? `$${Number(stats.totalDonated).toLocaleString()}` : '$900.000'}
+                </div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">Donado en Plataforma</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
-                <div className="text-3xl font-extrabold text-[#00d4aa] font-headline">+450</div>
+                <div className="text-3xl font-extrabold text-[#00d4aa] font-headline">
+                  {stats ? `${stats.missionsCount}` : '1'}
+                </div>
                 <div className="text-xs font-medium text-[#bec7d3] mt-1">Misiones de Campo</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
-                <div className="text-3xl font-extrabold text-[#ffb877] font-headline">15+ ONGs</div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">Confían en Impacta+</div>
+                <div className="text-3xl font-extrabold text-[#ffb877] font-headline">
+                  {stats ? `${stats.orgsCount}` : '1'}
+                </div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">ONGs Registradas</div>
               </div>
             </div>
           </div>
@@ -139,7 +169,7 @@ export const LandingPage: React.FC = () => {
               <div className="p-8 rounded-2xl bg-[#1c1b1b]/80 backdrop-blur-md border border-[#2a2a2a] hover:border-[#00a8ff]/50 transition-all group flex flex-col justify-between">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-[#00a8ff]/10 border border-[#00a8ff]/20 flex items-center justify-center text-[#00a8ff] mb-6 group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-2xl">payments</span>
+                    <DollarSign className="w-6 h-6" />
                   </div>
                   <h4 className="text-xl font-bold text-white mb-3 font-headline">Recaudación & Donaciones</h4>
                   <p className="text-sm text-[#bec7d3] leading-relaxed">
@@ -151,7 +181,7 @@ export const LandingPage: React.FC = () => {
                   className="mt-8 pt-4 border-t border-[#2a2a2a]/50 text-xs font-semibold text-[#00a8ff] flex items-center gap-1 hover:underline text-left"
                 >
                   <span>Ver módulo en acción</span>
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
 
@@ -159,7 +189,7 @@ export const LandingPage: React.FC = () => {
               <div className="p-8 rounded-2xl bg-[#1c1b1b]/80 backdrop-blur-md border border-[#2a2a2a] hover:border-[#00d4aa]/50 transition-all group flex flex-col justify-between">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-[#00d4aa]/10 border border-[#00d4aa]/20 flex items-center justify-center text-[#00d4aa] mb-6 group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-2xl">group</span>
+                    <Users className="w-6 h-6" />
                   </div>
                   <h4 className="text-xl font-bold text-white mb-3 font-headline">Gestión de Socios</h4>
                   <p className="text-sm text-[#bec7d3] leading-relaxed">
@@ -171,7 +201,7 @@ export const LandingPage: React.FC = () => {
                   className="mt-8 pt-4 border-t border-[#2a2a2a]/50 text-xs font-semibold text-[#00d4aa] flex items-center gap-1 hover:underline text-left"
                 >
                   <span>Ver módulo en acción</span>
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
 
@@ -179,7 +209,7 @@ export const LandingPage: React.FC = () => {
               <div className="p-8 rounded-2xl bg-[#1c1b1b]/80 backdrop-blur-md border border-[#2a2a2a] hover:border-[#ffb877]/50 transition-all group flex flex-col justify-between">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-[#ffb877]/10 border border-[#ffb877]/20 flex items-center justify-center text-[#ffb877] mb-6 group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-2xl">pets</span>
+                    <PawPrint className="w-6 h-6" />
                   </div>
                   <h4 className="text-xl font-bold text-white mb-3 font-headline">Biblioteca de Especies</h4>
                   <p className="text-sm text-[#bec7d3] leading-relaxed">
@@ -191,7 +221,7 @@ export const LandingPage: React.FC = () => {
                   className="mt-8 pt-4 border-t border-[#2a2a2a]/50 text-xs font-semibold text-[#ffb877] flex items-center gap-1 hover:underline text-left"
                 >
                   <span>Ver módulo en acción</span>
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
 
@@ -199,7 +229,7 @@ export const LandingPage: React.FC = () => {
               <div className="p-8 rounded-2xl bg-[#1c1b1b]/80 backdrop-blur-md border border-[#2a2a2a] hover:border-[#00a8ff]/50 transition-all group flex flex-col justify-between">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-[#00a8ff]/10 border border-[#00a8ff]/20 flex items-center justify-center text-[#00a8ff] mb-6 group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-2xl">explore</span>
+                    <Compass className="w-6 h-6" />
                   </div>
                   <h4 className="text-xl font-bold text-white mb-3 font-headline">Misiones de Campo</h4>
                   <p className="text-sm text-[#bec7d3] leading-relaxed">
@@ -211,7 +241,7 @@ export const LandingPage: React.FC = () => {
                   className="mt-8 pt-4 border-t border-[#2a2a2a]/50 text-xs font-semibold text-[#00a8ff] flex items-center gap-1 hover:underline text-left"
                 >
                   <span>Ver módulo en acción</span>
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -223,7 +253,7 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#00d4aa]/10 text-[#00d4aa] text-xs font-bold mb-4 border border-[#00d4aa]/20">
-                <span className="material-symbols-outlined text-sm">verified</span>
+                <ShieldCheck className="w-4 h-4" />
                 <span>Aislamiento por Organización (Multi-Tenant)</span>
               </div>
               <h3 className="text-3xl md:text-5xl font-extrabold text-white font-headline mb-6 leading-tight">
@@ -234,15 +264,15 @@ export const LandingPage: React.FC = () => {
               </p>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-[#00d4aa] mt-0.5">check_circle</span>
+                  <CheckCircle2 className="w-5 h-5 text-[#00d4aa] shrink-0 mt-0.5" />
                   <span className="text-sm text-[#e5e2e1]">Aislamiento estricto de base de datos por tenant</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-[#00d4aa] mt-0.5">check_circle</span>
+                  <CheckCircle2 className="w-5 h-5 text-[#00d4aa] shrink-0 mt-0.5" />
                   <span className="text-sm text-[#e5e2e1]">Roles diferenciados (SuperAdmin, Admin, Operator, Viewer)</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-[#00d4aa] mt-0.5">check_circle</span>
+                  <CheckCircle2 className="w-5 h-5 text-[#00d4aa] shrink-0 mt-0.5" />
                   <span className="text-sm text-[#e5e2e1]">Exportación de datos e informes de impacto para donantes</span>
                 </li>
               </ul>
@@ -294,7 +324,7 @@ export const LandingPage: React.FC = () => {
               className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] font-bold text-base hover:opacity-90 transition-opacity shadow-lg shadow-[#00a8ff]/20"
             >
               <span>Solicitar Demostración Gratis</span>
-              <span className="material-symbols-outlined">arrow_forward</span>
+              <ArrowRight className="w-5 h-5" />
             </button>
           </div>
         </section>
