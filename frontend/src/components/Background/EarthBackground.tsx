@@ -89,7 +89,7 @@ const Earth = () => {
 
 export const EarthBackground: React.FC = () => {
   return (
-    <div className="fixed inset-0 z-0 bg-transparent overflow-hidden pointer-events-none">
+    <div className="fixed inset-0 z-0 bg-[#050505] overflow-hidden pointer-events-none">
       <Canvas camera={{ position: [0, 0, 3.5], fov: 45 }}>
         <color attach="background" args={['#050505']} />
         

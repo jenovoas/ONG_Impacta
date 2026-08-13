@@ -114,7 +114,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Product Modules Section */}
-      <section id="modules" className="py-24 bg-[#131313] border-b border-[#2a2a2a]/40">
+      <section id="modules" className="py-24 bg-[#131313]/60 backdrop-blur-md border-b border-[#2a2a2a]/40">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-xs uppercase font-bold tracking-widest text-[#00d4aa] mb-3">Módulos Integrados</h2>
@@ -125,7 +125,7 @@ export const LandingPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Card 1: Donaciones & Recaudación */}
-            <div className="p-8 rounded-2xl bg-[#1c1b1b] border border-[#2a2a2a] hover:border-[#00a8ff]/50 transition-all group flex flex-col justify-between">
+            <div className="p-8 rounded-2xl bg-[#1c1b1b]/80 backdrop-blur-md border border-[#2a2a2a] hover:border-[#00a8ff]/50 transition-all group flex flex-col justify-between">
               <div>
                 <div className="w-12 h-12 rounded-xl bg-[#00a8ff]/10 border border-[#00a8ff]/20 flex items-center justify-center text-[#00a8ff] mb-6 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-2xl">payments</span>
@@ -142,7 +142,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Card 2: Voluntariado & Socios */}
-            <div className="p-8 rounded-2xl bg-[#1c1b1b] border border-[#2a2a2a] hover:border-[#00d4aa]/50 transition-all group flex flex-col justify-between">
+            <div className="p-8 rounded-2xl bg-[#1c1b1b]/80 backdrop-blur-md border border-[#2a2a2a] hover:border-[#00d4aa]/50 transition-all group flex flex-col justify-between">
               <div>
                 <div className="w-12 h-12 rounded-xl bg-[#00d4aa]/10 border border-[#00d4aa]/20 flex items-center justify-center text-[#00d4aa] mb-6 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-2xl">group</span>
@@ -159,7 +159,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Card 3: Catálogo de Especies */}
-            <div className="p-8 rounded-2xl bg-[#1c1b1b] border border-[#2a2a2a] hover:border-[#ffb877]/50 transition-all group flex flex-col justify-between">
+            <div className="p-8 rounded-2xl bg-[#1c1b1b]/80 backdrop-blur-md border border-[#2a2a2a] hover:border-[#ffb877]/50 transition-all group flex flex-col justify-between">
               <div>
                 <div className="w-12 h-12 rounded-xl bg-[#ffb877]/10 border border-[#ffb877]/20 flex items-center justify-center text-[#ffb877] mb-6 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-2xl">pets</span>
@@ -176,7 +176,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Card 4: Misiones de Campo */}
-            <div className="p-8 rounded-2xl bg-[#1c1b1b] border border-[#2a2a2a] hover:border-[#00a8ff]/50 transition-all group flex flex-col justify-between">
+            <div className="p-8 rounded-2xl bg-[#1c1b1b]/80 backdrop-blur-md border border-[#2a2a2a] hover:border-[#00a8ff]/50 transition-all group flex flex-col justify-between">
               <div>
                 <div className="w-12 h-12 rounded-xl bg-[#00a8ff]/10 border border-[#00a8ff]/20 flex items-center justify-center text-[#00a8ff] mb-6 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-2xl">explore</span>
@@ -196,7 +196,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Live Impact Feature Highlight */}
-      <section id="impact" className="py-24 bg-[#0e0e0e] border-b border-[#2a2a2a]/40">
+      <section id="impact" className="py-24 bg-transparent border-b border-[#2a2a2a]/40">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#00d4aa]/10 text-[#00d4aa] text-xs font-bold mb-4 border border-[#00d4aa]/20">
@@ -236,14 +236,14 @@ export const LandingPage: React.FC = () => {
               <span className="text-xs font-mono text-[#bec7d3]">demo.impacta.cl/dashboard</span>
             </div>
             <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-[#1c1b1b] border border-[#2a2a2a] flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-[#1c1b1b]/80 border border-[#2a2a2a] flex items-center justify-between">
                 <div>
                   <div className="text-xs text-[#bec7d3]">Campaña Activa</div>
                   <div className="text-sm font-bold text-white font-headline">Reforestación Bosque Nactivo 2026</div>
                 </div>
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#00d4aa]/15 text-[#00d4aa]">78% Completado</span>
               </div>
-              <div className="p-4 rounded-xl bg-[#1c1b1b] border border-[#2a2a2a] flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-[#1c1b1b]/80 border border-[#2a2a2a] flex items-center justify-between">
                 <div>
                   <div className="text-xs text-[#bec7d3]">Última Donación Integrada</div>
                   <div className="text-sm font-bold text-white font-headline">$150,000 CLP via ImpactaPay</div>
@@ -256,7 +256,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* CTA Bottom Banner */}
-      <section className="py-20 bg-gradient-to-b from-[#0e0e0e] to-[#131313] relative overflow-hidden">
+      <section className="py-20 bg-transparent relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <h2 className="text-3xl md:text-5xl font-extrabold text-white font-headline mb-6">
             ¿Listo para llevar el impacto de tu ONG al siguiente nivel?
