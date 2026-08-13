@@ -10,41 +10,42 @@ export class DonationsService {
     private readonly campaignsService: CampaignsService,
   ) {}
 
-  async create(dto: CreateDonationDto) {
-    // Si se provee memberId, verificar que exista (la filtración por organización es automática)
+  async create(orgId: string, dto: CreateDonationDto) {
+    // Si se provee memberId, verificar que exista y pertenezca a la organización
     if (dto.memberId) {
-      const member = await this.prisma.tenant.member.findUnique({
+      const member = await this.prisma.member.findUnique({
         where: { id: dto.memberId },
       });
-      if (!member) {
+      if (!member || member.organizationId !== orgId) {
         throw new NotFoundException('Member not found in this organization');
       }
     }
 
     // Si se provee campaignId, verificar que exista
     if (dto.campaignId) {
-      const campaign = await this.prisma.tenant.campaign.findUnique({
+      const campaign = await this.prisma.campaign.findUnique({
         where: { id: dto.campaignId },
       });
-      if (!campaign) {
+      if (!campaign || campaign.organizationId !== orgId) {
         throw new NotFoundException('Campaign not found in this organization');
       }
     }
 
-    const donation = await this.prisma.tenant.donation.create({
+    const donation = await this.prisma.donation.create({
       data: {
+        organizationId: orgId,
         memberId: dto.memberId,
         campaignId: dto.campaignId,
         amount: dto.amount,
         currency: dto.currency || 'CLP',
         status: 'PENDING',
-      } as any, // Prisma extension inyecta organizationId en runtime (ver prisma-multi-tenant.extension.ts)
+      },
     });
 
     // Aquí se llamaría a la pasarela de pago para obtener un link/token
     const gatewayRef = `mock_ref_${Math.random().toString(36).substring(7)}`;
 
-    const updatedDonation = await this.prisma.tenant.donation.update({
+    const updatedDonation = await this.prisma.donation.update({
       where: { id: donation.id },
       data: { gatewayRef },
     });
@@ -55,8 +56,9 @@ export class DonationsService {
     };
   }
 
-  async findAll() {
-    return this.prisma.tenant.donation.findMany({
+  async findAll(orgId: string) {
+    return this.prisma.donation.findMany({
+      where: { organizationId: orgId },
       include: {
         member: {
           select: {
@@ -65,20 +67,14 @@ export class DonationsService {
             email: true,
           },
         },
-        campaign: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
       },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findOne(id: string) {
-    const donation = await this.prisma.tenant.donation.findFirst({
-      where: { id },
+  async findOne(orgId: string, id: string) {
+    const donation = await this.prisma.donation.findFirst({
+      where: { id, organizationId: orgId },
       include: { member: true },
     });
 
@@ -90,7 +86,7 @@ export class DonationsService {
   }
 
   async handleCallback(gatewayRef: string, status: 'SUCCEEDED' | 'FAILED') {
-    const donation = await this.prisma.tenant.donation.findFirst({
+    const donation = await this.prisma.donation.findFirst({
       where: { gatewayRef },
     });
 
@@ -98,7 +94,7 @@ export class DonationsService {
       throw new NotFoundException('Donation not found for this reference');
     }
 
-    const updatedDonation = await this.prisma.tenant.donation.update({
+    const updatedDonation = await this.prisma.donation.update({
       where: { id: donation.id },
       data: { status },
     });

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UnauthorizedException, Get, Request, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException, Get, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { LoginDto } from './dto/login.dto';
@@ -9,7 +9,6 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  @HttpCode(200)
   async login(@Body() loginDto: LoginDto) {
     const user = await this.authService.validateUser(
       loginDto.email,
@@ -20,15 +19,6 @@ export class AuthController {
       throw new UnauthorizedException('Invalid credentials');
     }
     return this.authService.login(user);
-  }
-
-  @Public()
-  @Post('refresh')
-  async refresh(@Body('refresh_token') refreshToken: string) {
-    if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token is required');
-    }
-    return this.authService.refresh(refreshToken);
   }
 
   @Get('me')

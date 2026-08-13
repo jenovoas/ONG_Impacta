@@ -1,7 +1,6 @@
 export function validateRut(rut: string): boolean {
-  const cleanRut = rut.replace(/\./g, '').replace(/,/g, '');
-  if (!/^[0-9]+-[0-9kK]{1}$/.test(cleanRut)) return false;
-  const [num, dv] = cleanRut.split('-');
+  if (!/^[0-9]+-[0-9kK]{1}$/.test(rut)) return false;
+  const [num, dv] = rut.split('-');
   let total = 0;
   let multiplier = 2;
   for (let i = num.length - 1; i >= 0; i--) {

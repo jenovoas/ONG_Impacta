@@ -6,22 +6,28 @@ import { CreateCampaignDto } from './dto/create-campaign.dto';
 export class CampaignsService {
   constructor(private readonly prisma: DatabaseService) {}
 
-  async create(dto: CreateCampaignDto) {
-    return this.prisma.tenant.campaign.create({
-      data: dto as any, // Prisma extension inyecta organizationId en runtime (ver prisma-multi-tenant.extension.ts)
+  async create(orgId: string, dto: CreateCampaignDto) {
+    return this.prisma.campaign.create({
+      data: {
+        ...dto,
+        organizationId: orgId,
+      },
     });
   }
 
-  async findAll(status?: string) {
-    return this.prisma.tenant.campaign.findMany({
-      where: status ? { status } : {},
+  async findAll(orgId: string, status?: string) {
+    return this.prisma.campaign.findMany({
+      where: { 
+        organizationId: orgId,
+        ...(status ? { status } : {}),
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findOne(id: string) {
-    const campaign = await this.prisma.tenant.campaign.findFirst({
-      where: { id },
+  async findOne(orgId: string, id: string) {
+    const campaign = await this.prisma.campaign.findFirst({
+      where: { id, organizationId: orgId },
       include: {
         _count: {
           select: { donations: { where: { status: 'SUCCEEDED' } } },
@@ -37,14 +43,14 @@ export class CampaignsService {
   }
 
   async updateBalance(campaignId: string) {
-    const successfulDonations = await this.prisma.tenant.donation.aggregate({
+    const successfulDonations = await this.prisma.donation.aggregate({
       where: { campaignId, status: 'SUCCEEDED' },
       _sum: { amount: true },
     });
 
     const total = successfulDonations._sum.amount || 0;
 
-    return this.prisma.tenant.campaign.update({
+    return this.prisma.campaign.update({
       where: { id: campaignId },
       data: { currentAmount: total },
     });

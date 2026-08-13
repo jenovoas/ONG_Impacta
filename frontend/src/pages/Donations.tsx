@@ -44,17 +44,13 @@ export const Donations: React.FC = () => {
   });
 
   const filteredDonations = donations.filter((d: any) => {
-    const donorName = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Anónimo';
-    const donorEmail = d.member?.email ?? '';
-    const s = search.toLowerCase();
-    const matchesSearch =
-      !s ||
-      donorName.toLowerCase().includes(s) ||
-      donorEmail.toLowerCase().includes(s) ||
+    const matchesSearch = 
+      d.donorName?.toLowerCase().includes(search.toLowerCase()) ||
+      d.donorEmail?.toLowerCase().includes(search.toLowerCase()) ||
       d.id.includes(search);
-
+    
     const matchesFilter = filter === 'ALL' || d.status === filter;
-
+    
     return matchesSearch && matchesFilter;
   });
 
@@ -128,12 +124,8 @@ export const Donations: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredDonations.map((d: any) => {
-                  const donorName = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Anónimo';
-                  const donorEmail = d.member?.email ?? 'Sin email';
-                  const amount = Number(d.amount ?? 0);
-                  return (
-                  <motion.tr
+                filteredDonations.map((d: any) => (
+                  <motion.tr 
                     key={d.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -142,17 +134,17 @@ export const Donations: React.FC = () => {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20">
-                          {donorName[0]}
+                          {d.donorName?.[0] || 'A'}
                         </div>
                         <div>
-                          <p className="text-white font-bold text-sm">{donorName}</p>
-                          <p className="text-gray-500 text-xs">{donorEmail}</p>
+                          <p className="text-white font-bold text-sm">{d.donorName || 'Anónimo'}</p>
+                          <p className="text-gray-500 text-xs">{d.donorEmail || 'Sin email'}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <p className="text-white font-black text-lg">${amount.toLocaleString('es-CL')}</p>
-                      <p className="text-gray-600 text-[10px] font-bold uppercase tracking-tighter">{d.currency || 'CLP'}</p>
+                      <p className="text-white font-black text-lg">${d.amount?.toLocaleString()}</p>
+                      <p className="text-gray-600 text-[10px] font-bold uppercase tracking-tighter">Pesos Chilenos</p>
                     </td>
                     <td className="px-8 py-6">
                       <StatusBadge status={d.status} />
@@ -160,12 +152,12 @@ export const Donations: React.FC = () => {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-2 text-gray-400">
                         <Calendar className="w-4 h-4" />
-                        <span className="text-xs font-medium">{new Date(d.createdAt).toLocaleDateString('es-CL')}</span>
+                        <span className="text-xs font-medium">{new Date(d.createdAt).toLocaleDateString()}</span>
                       </div>
                     </td>
                     <td className="px-8 py-6">
                       <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">
-                        {d.campaign?.name || 'General'}
+                        {d.campaign?.title || 'General'}
                       </span>
                     </td>
                     <td className="px-8 py-6 text-right">
@@ -174,8 +166,7 @@ export const Donations: React.FC = () => {
                       </button>
                     </td>
                   </motion.tr>
-                  );
-                })
+                ))
               )}
             </tbody>
           </table>

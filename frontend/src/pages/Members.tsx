@@ -16,18 +16,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const Members: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [formError, setFormError] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState('ALL');
   const queryClient = useQueryClient();
 
-  const { data: membersResponse, isLoading } = useQuery({
+  const { data: members = [], isLoading } = useQuery({
     queryKey: ['members'],
     queryFn: async () => {
       const { data } = await client.get('/members');
       return data;
     },
   });
-  const members: any[] = membersResponse?.items ?? [];
 
   const createMutation = useMutation({
     mutationFn: async (newMember: any) => {
@@ -37,20 +35,15 @@ export const Members: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
       setIsModalOpen(false);
-      setFormError(null);
-    },
-    onError: (err: any) => {
-      const msg = err.response?.data?.message;
-      setFormError(Array.isArray(msg) ? msg.join(', ') : msg || 'Error al registrar miembro');
     },
   });
 
   const filteredMembers = members.filter((m: any) => {
-    const matchesSearch =
+    const matchesSearch = 
       `${m.firstName} ${m.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
       m.email.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || m.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesType = typeFilter === 'ALL' || m.type === typeFilter;
+    return matchesSearch && matchesType;
   });
 
   return (
@@ -85,15 +78,15 @@ export const Members: React.FC = () => {
         </div>
 
         <div className="flex gap-2 p-1 bg-surface-container-low border border-white/5 rounded-2xl">
-          {['ALL', 'ACTIVE', 'INACTIVE', 'PENDING'].map((s) => (
+          {['ALL', 'VOLUNTEER', 'PARTNER'].map((t) => (
             <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
+              key={t}
+              onClick={() => setTypeFilter(t)}
               className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                statusFilter === s ? 'bg-secondary text-on-secondary shadow-lg shadow-secondary/20' : 'text-gray-500 hover:text-white'
+                typeFilter === t ? 'bg-secondary text-on-secondary shadow-lg shadow-secondary/20' : 'text-gray-500 hover:text-white'
               }`}
             >
-              {s === 'ALL' ? 'Todos' : s === 'ACTIVE' ? 'Activos' : s === 'INACTIVE' ? 'Inactivos' : 'Pendientes'}
+              {t === 'ALL' ? 'Todos' : t === 'VOLUNTEER' ? 'Voluntarios' : 'Socios'}
             </button>
           ))}
         </div>
@@ -123,11 +116,9 @@ export const Members: React.FC = () => {
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-bold text-white truncate">{m.firstName} {m.lastName}</h3>
                     <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${
-                      m.status === 'ACTIVE' ? 'bg-secondary/10 text-secondary'
-                      : m.status === 'PENDING' ? 'bg-tertiary/10 text-tertiary'
-                      : 'bg-gray-500/10 text-gray-500'
+                      m.type === 'VOLUNTEER' ? 'bg-primary/10 text-primary' : 'bg-tertiary/10 text-tertiary'
                     }`}>
-                      {m.status === 'ACTIVE' ? 'Activo' : m.status === 'PENDING' ? 'Pendiente' : 'Inactivo'}
+                      {m.type === 'VOLUNTEER' ? 'Voluntario' : 'Socio'}
                     </span>
                   </div>
 
@@ -183,20 +174,18 @@ export const Members: React.FC = () => {
                   </button>
                 </div>
 
-                <form
+                <form 
                   onSubmit={(e: any) => {
                     e.preventDefault();
                     const formData = new FormData(e.target);
-                    const rut = (formData.get('rut') as string | null)?.trim();
                     createMutation.mutate({
-                      rut: rut || undefined,
                       firstName: formData.get('firstName'),
                       lastName: formData.get('lastName'),
                       email: formData.get('email'),
-                      phone: formData.get('phone') || undefined,
-                      status: formData.get('status'),
+                      phone: formData.get('phone'),
+                      type: formData.get('type'),
                     });
-                  }}
+                  }} 
                   className="space-y-6"
                 >
                   <div className="grid grid-cols-2 gap-4">
@@ -209,34 +198,23 @@ export const Members: React.FC = () => {
                       <input name="lastName" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">RUT</label>
-                      <input name="rut" placeholder="12.345.678-9" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Teléfono</label>
-                      <input name="phone" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
-                    </div>
-                  </div>
                   <div>
                     <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Email</label>
                     <input name="email" type="email" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Estado</label>
-                    <select name="status" defaultValue="ACTIVE" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 appearance-none">
-                      <option value="ACTIVE" className="bg-surface">Activo</option>
-                      <option value="PENDING" className="bg-surface">Pendiente</option>
-                      <option value="INACTIVE" className="bg-surface">Inactivo</option>
-                    </select>
-                  </div>
-
-                  {formError && (
-                    <div className="bg-error/10 border border-error/20 text-error text-sm p-4 rounded-xl text-center font-medium">
-                      {formError}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Teléfono</label>
+                      <input name="phone" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
                     </div>
-                  )}
+                    <div>
+                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Tipo</label>
+                      <select name="type" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 appearance-none">
+                        <option value="VOLUNTEER" className="bg-surface">Voluntario</option>
+                        <option value="PARTNER" className="bg-surface">Socio</option>
+                      </select>
+                    </div>
+                  </div>
 
                   <button
                     disabled={createMutation.isPending}

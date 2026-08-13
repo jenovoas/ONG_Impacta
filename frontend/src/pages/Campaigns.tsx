@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Target,
-  Plus,
-  Calendar,
-  X,
-  Check,
+import { 
+  Target, 
+  Plus, 
+  Calendar, 
+  TrendingUp, 
+  X, 
+  Check, 
   Loader2
 } from 'lucide-react';
 import client from '../api/client';
@@ -13,7 +14,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export const Campaigns: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: campaigns = [], isLoading } = useQuery({
@@ -32,11 +32,6 @@ export const Campaigns: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
       setIsModalOpen(false);
-      setFormError(null);
-    },
-    onError: (err: any) => {
-      const msg = err.response?.data?.message;
-      setFormError(Array.isArray(msg) ? msg.join(', ') : msg || 'Error al crear campaña');
     },
   });
 
@@ -96,27 +91,27 @@ export const Campaigns: React.FC = () => {
                   </button>
                 </div>
 
-                <form
+                <form 
                   onSubmit={(e: any) => {
                     e.preventDefault();
                     const formData = new FormData(e.target);
                     createMutation.mutate({
-                      name: formData.get('name'),
-                      description: formData.get('description') || undefined,
-                      goalAmount: Number(formData.get('goalAmount')),
+                      title: formData.get('title'),
+                      description: formData.get('description'),
+                      targetAmount: Number(formData.get('targetAmount')),
                       endDate: formData.get('endDate') ? new Date(formData.get('endDate') as string).toISOString() : undefined,
                     });
-                  }}
+                  }} 
                   className="space-y-6"
                 >
                   <div>
-                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Nombre de la Campaña</label>
-                    <input name="name" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" placeholder="Ej: Reforestación Parque Central" />
+                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Título de la Campaña</label>
+                    <input name="title" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" placeholder="Ej: Reforestación Parque Central" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Meta ($ CLP)</label>
-                      <input name="goalAmount" type="number" min="1" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" placeholder="1000000" />
+                      <input name="targetAmount" type="number" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" placeholder="1.000.000" />
                     </div>
                     <div>
                       <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Fecha Límite</label>
@@ -127,12 +122,6 @@ export const Campaigns: React.FC = () => {
                     <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Descripción</label>
                     <textarea name="description" rows={3} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" />
                   </div>
-
-                  {formError && (
-                    <div className="bg-error/10 border border-error/20 text-error text-sm p-4 rounded-xl text-center font-medium">
-                      {formError}
-                    </div>
-                  )}
 
                   <button
                     disabled={createMutation.isPending}
@@ -156,12 +145,10 @@ export const Campaigns: React.FC = () => {
 };
 
 const CampaignCard = ({ campaign }: { campaign: any }) => {
-  const current = Number(campaign.currentAmount ?? 0);
-  const goal = Number(campaign.goalAmount ?? 0);
-  const progress = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
-
+  const progress = Math.min((campaign.currentAmount / campaign.targetAmount) * 100, 100);
+  
   return (
-    <motion.div
+    <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className="glass-card rounded-[32px] p-8 border border-white/5 relative overflow-hidden group"
@@ -172,11 +159,11 @@ const CampaignCard = ({ campaign }: { campaign: any }) => {
 
       <div className="relative z-10">
         <div className="flex justify-between items-start mb-6">
-          <h3 className="text-2xl font-black text-white uppercase italic tracking-tight">{campaign.name}</h3>
+          <h3 className="text-2xl font-black text-white uppercase italic tracking-tight">{campaign.title}</h3>
           <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
             campaign.status === 'ACTIVE' ? 'bg-secondary/10 text-secondary' : 'bg-gray-500/10 text-gray-500'
           }`}>
-            {campaign.status === 'ACTIVE' ? 'En Curso' : campaign.status === 'COMPLETED' ? 'Finalizada' : 'Cancelada'}
+            {campaign.status === 'ACTIVE' ? 'En Curso' : 'Finalizada'}
           </span>
         </div>
 
@@ -188,20 +175,20 @@ const CampaignCard = ({ campaign }: { campaign: any }) => {
           <div className="flex justify-between items-end">
             <div>
               <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Recaudado</p>
-              <p className="text-3xl font-black text-white">${current.toLocaleString('es-CL')}</p>
+              <p className="text-3xl font-black text-white">${campaign.currentAmount?.toLocaleString()}</p>
             </div>
             <div className="text-right">
-              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Meta: ${goal.toLocaleString('es-CL')}</p>
+              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Meta: ${campaign.targetAmount?.toLocaleString()}</p>
               <p className="text-tertiary font-black text-lg">{progress.toFixed(1)}%</p>
             </div>
           </div>
 
           <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 p-1">
-            <motion.div
+            <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className={`h-full rounded-full ${progress >= 100 ? 'bg-secondary' : 'bg-tertiary'} shadow-[0_0_15px_rgba(255,184,119,0.3)]`}
+              className={`h-full rounded-full ${progress >= 100 ? 'bg-secondary' : 'bg-tertiary'} shadow-[0_0_15px_rgba(255,184,119,0.3)]`} 
             />
           </div>
 
@@ -209,8 +196,12 @@ const CampaignCard = ({ campaign }: { campaign: any }) => {
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-gray-500" />
               <span className="text-xs font-bold text-gray-400">
-                {campaign.endDate ? `Hasta ${new Date(campaign.endDate).toLocaleDateString('es-CL')}` : 'Sin fecha límite'}
+                {campaign.endDate ? `Hasta ${new Date(campaign.endDate).toLocaleDateString()}` : 'Sin fecha límite'}
               </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-gray-500" />
+              <span className="text-xs font-bold text-gray-400">Trend: +12% hoy</span>
             </div>
           </div>
         </div>

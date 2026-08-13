@@ -8,8 +8,8 @@ export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
   @Get('me/summary')
-  getSummary() {
-    return this.organizationsService.getSummary();
+  getSummary(@CurrentTenant() orgId: string) {
+    return this.organizationsService.getSummary(orgId);
   }
 
   @Get('me')

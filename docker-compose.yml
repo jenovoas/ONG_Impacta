@@ -37,19 +37,12 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: impacta-backend
-    ports:
-      - "8085:3001"
     environment:
       NODE_ENV: production
       PORT: 3001
       DATABASE_URL: postgresql://impacta:impacta_pass@postgres:5432/impacta?schema=public
       REDIS_URL: redis://redis:6379/0
-      MINIO_ENDPOINT: 10.89.5.19
-      MINIO_PORT: 9000
-      MINIO_USE_SSL: 'false'
-      MINIO_ACCESS_KEY: minio_admin
-      MINIO_SECRET_KEY: minio_password_2026
-      MINIO_BUCKET: impacta
+      # CORS configuration might be needed here
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,7 +51,6 @@ services:
     networks:
       - default
       - proxy
-      - infra_default
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -80,8 +72,6 @@ services:
       args:
         VITE_API_URL: https://api-impacta.pinguinoseguro.cl
     container_name: impacta-frontend
-    ports:
-      - "8086:80"
     networks:
       - default
       - proxy
@@ -105,8 +95,6 @@ services:
       context: ./landing
       dockerfile: Dockerfile
     container_name: impacta-landing
-    ports:
-      - "3002:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -117,7 +105,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.impacta-landing-http.rule=Host(`impacta.pinguinoseguro.cl`) || (Host(`pinguinoseguro.cl`) && PathPrefix(`/impacta`))"
+      - "traefik.http.routers.impacta-landing-http.rule=Host(`impacta.pinguinoseguro.cl`)"
       - "traefik.http.routers.impacta-landing-http.entrypoints=web"
       - "traefik.http.routers.impacta-landing-http.middlewares=https-redirect@file"
       - "traefik.http.routers.impacta-landing.rule=Host(`impacta.pinguinoseguro.cl`)"
@@ -125,21 +113,12 @@ services:
       - "traefik.http.routers.impacta-landing.tls.certresolver=powerdns"
       - "traefik.http.routers.impacta-landing.tls.domains[0].main=pinguinoseguro.cl"
       - "traefik.http.routers.impacta-landing.tls.domains[0].sans=*.pinguinoseguro.cl"
-      - "traefik.http.middlewares.impacta-stripprefix.stripprefix.prefixes=/impacta"
-      - "traefik.http.routers.impacta-landing-path.rule=Host(`pinguinoseguro.cl`) && PathPrefix(`/impacta`)"
-      - "traefik.http.routers.impacta-landing-path.entrypoints=websecure"
-      - "traefik.http.routers.impacta-landing-path.middlewares=impacta-stripprefix"
-      - "traefik.http.routers.impacta-landing-path.tls.certresolver=powerdns"
-      - "traefik.http.routers.impacta-landing-path.tls.domains[0].main=pinguinoseguro.cl"
-      - "traefik.http.routers.impacta-landing-path.tls.domains[0].sans=*.pinguinoseguro.cl"
       - "traefik.http.services.impacta-landing.loadbalancer.server.port=3000"
     restart: unless-stopped
 
 networks:
   default:
   proxy:
-    external: true
-  infra_default:
     external: true
 
 volumes:

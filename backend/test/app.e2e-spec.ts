@@ -1,21 +1,29 @@
-import { Test } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../src/app.module';
+import { App } from 'supertest/types';
+import { AppModule } from './../src/app.module';
 
-describe('App (e2e)', () => {
-  let app: INestApplication;
-  beforeAll(async () => {
-    const mod = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    app = mod.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+describe('AppController (e2e)', () => {
+  let app: INestApplication<App>;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
     await app.init();
   });
-  afterAll(async () => await app.close());
 
-  it('GET /health → 200 {status: ok}', async () => {
-    const res = await request(app.getHttpServer()).get('/health').expect(200);
-    expect(res.body.status).toBe('ok');
-    expect(res.body.timestamp).toMatch(/\d{4}-\d{2}-\d{2}T/);
+  it('/ (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/')
+      .expect(200)
+      .expect('Hello World!');
+  });
+
+  afterEach(async () => {
+    await app.close();
   });
 });

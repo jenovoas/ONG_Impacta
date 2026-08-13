@@ -1,7 +1,7 @@
 # Arquitectura Técnica - Impacta+
 
 | **Versión** | 1.0 |
-| ------------- | ----- |
+|-------------|-----|
 | **Fecha** | 4 de abril de 2026 |
 | **Estado** | En desarrollo |
 | **Dominio** | impacta.pinguinoseguro.cl |
@@ -65,9 +65,8 @@
 ---
 
 ### 2.1 Frontend
-
 | Tecnología | Versión | Propósito |
-| ------------ | --------- | ----------- |
+|------------|---------|-----------|
 | **React** | 18.x | Librería UI principal |
 | **Next.js** | 14.x | Landing Page, SSR, SEO |
 | **Vite** | 5.x | Build tool para dashboard |
@@ -85,9 +84,8 @@
 | **React Table** | 8.x | Tablas avanzadas |
 
 ### 2.2 Backend
-
 | Tecnología | Versión | Propósito |
-| ------------ | --------- | ----------- |
+|------------|---------|-----------|
 | **Node.js** | 20.x LTS | Runtime |
 | **NestJS** | 10.x | Framework backend |
 | **TypeScript** | 5.x | Tipado estático |
@@ -103,9 +101,8 @@
 | **Playwright** | latest | Tests E2E y Visuales |
 
 ### 2.3 Infraestructura
-
 | Tecnología | Versión | Propósito |
-| ------------ | --------- | ----------- |
+|------------|---------|-----------|
 | **Docker** | 24.x | Contenedores |
 | **Docker Compose** | 2.x | Orquestación local |
 | **Nginx** | 1.25.x | Reverse proxy, SSL |
@@ -119,7 +116,6 @@
 ---
 
 ### 3.1 Monorepo (Turborepo)
-
 ```
 impacta-saas/
 ├── apps/
@@ -158,7 +154,6 @@ impacta-saas/
 ```
 
 ### 3.2 Backend (NestJS) - Estructura Modular
-
 ```
 apps/api/
 ├── src/
@@ -206,7 +201,6 @@ apps/api/
 ---
 
 ### 4.1 Multi-tenancy
-
 ```prisma
 // Schema Prisma simplificado
 
@@ -238,7 +232,6 @@ enum PlanType {
 ```
 
 ### 4.2 Usuarios y Autenticación
-
 ```prisma
 model User {
   id            String    @id @default(uuid())
@@ -279,7 +272,6 @@ model Position {
 ```
 
 ### 4.3 Módulo Contable Chileno
-
 ```prisma
 model AccountingPlan {
   id             String   @id @default(uuid())
@@ -341,7 +333,6 @@ model AccountingLine {
 ```
 
 ### 4.4 Socios y Voluntarios
-
 ```prisma
 model Member {
   id             String   @id @default(uuid())
@@ -404,7 +395,6 @@ enum PaymentFrequency {
 ---
 
 ### 9.2 Docker Compose (Producción)
-
 ```yaml
 version: '3.8'
 
@@ -479,23 +469,20 @@ volumes:
 ---
 
 ### 11.1 Estrategia de Backup
-
 | Tipo | Frecuencia | Retención | Ubicación |
-| ------ | ------------ | ----------- | ----------- |
+|------|------------|-----------|-----------|
 | **Database** | Cada 6 horas | 30 días | Local + S3 |
 | **Archivos** | Diario | 90 días | S3 |
 | **Logs** | Diario | 7 días | Local |
 | **Config** | On change | 10 versiones | Git + S3 |
 
 ### 11.2 RTO/RPO
-
 | Métrica | Objetivo |
 |---------|----------|
 | **RTO** (Recovery Time Objective) | 4 horas |
 | **RPO** (Recovery Point Objective) | 6 horas |
 
 ### 11.3 Script de Backup
-
 ```bash
 #!/bin/bash
 # backup.sh
@@ -516,19 +503,16 @@ find $BACKUP_DIR -name "*.sql.gz" -mtime +30 -delete
 ---
 
 ### 12.1 Protección de Datos
-
 - Cumplimiento **Ley 19.628** (Protección de la Vida Privada)
 - Registro de bases de datos en **Registro Nacional de Bancos de Datos**
 
 ### 12.2 Contabilidad
-
 - Libros contables según **Normas Chilenas de Contabilidad**
 - Exportación de datos para **SII** (Formularios F29, F39)
 
 ---
 
 ### 13.1 Escalabilidad Horizontal
-
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Load Balancer                        │

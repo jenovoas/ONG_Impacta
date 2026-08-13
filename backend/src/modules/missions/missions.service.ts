@@ -6,30 +6,32 @@ import { CreateMissionDto } from './dto/create-mission.dto';
 export class MissionsService {
   constructor(private readonly prisma: DatabaseService) { }
 
-  async create(dto: CreateMissionDto) {
+  async create(orgId: string, dto: CreateMissionDto) {
     const { tasks, ...missionData } = dto;
 
-    return this.prisma.tenant.mission.create({
+    return this.prisma.mission.create({
       data: {
         ...missionData,
+        organizationId: orgId,
         tasks: tasks ? {
           create: tasks,
         } : undefined,
-      } as any, // Prisma extension inyecta organizationId en runtime (ver prisma-multi-tenant.extension.ts)
+      },
       include: { tasks: true },
     });
   }
 
-  async findAll() {
-    return this.prisma.tenant.mission.findMany({
+  async findAll(orgId: string) {
+    return this.prisma.mission.findMany({
+      where: { organizationId: orgId },
       include: { tasks: true },
       orderBy: { startDate: 'desc' },
     });
   }
 
-  async findOne(id: string) {
-    const mission = await this.prisma.tenant.mission.findFirst({
-      where: { id },
+  async findOne(orgId: string, id: string) {
+    const mission = await this.prisma.mission.findFirst({
+      where: { id, organizationId: orgId },
       include: { tasks: true },
     });
 
@@ -40,12 +42,11 @@ export class MissionsService {
     return mission;
   }
 
-  async updateTaskStatus(missionId: string, taskId: string, isCompleted: boolean) {
-    // Verificar que la misión pertenece a la organización (esto es automático via findOne)
-    await this.findOne(missionId);
+  async updateTaskStatus(orgId: string, missionId: string, taskId: string, isCompleted: boolean) {
+    // Verificar que la misión pertenece a la organización
+    const mission = await this.findOne(orgId, missionId);
 
-    // MissionTask no tiene organizationId, pero filtramos por missionId
-    return this.prisma.tenant.missionTask.update({
+    return this.prisma.missionTask.update({
       where: { id: taskId, missionId },
       data: { isCompleted },
     });
