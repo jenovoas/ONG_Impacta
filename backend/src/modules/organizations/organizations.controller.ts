@@ -14,6 +14,12 @@ export class OrganizationsController {
     return this.organizationsService.getPublicStats();
   }
 
+  @Public()
+  @Get('slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.organizationsService.findBySlug(slug);
+  }
+
   @Get('me/summary')
   getSummary(@CurrentTenant() orgId: string) {
     return this.organizationsService.getSummary(orgId);
@@ -37,10 +43,5 @@ export class OrganizationsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.organizationsService.findOne(id);
-  }
-
-  @Get('slug/:slug')
-  findBySlug(@Param('slug') slug: string) {
-    return this.organizationsService.findBySlug(slug);
   }
 }
