@@ -39,4 +39,8 @@ export class StorageService implements OnModuleInit {
     
     return `${protocol}://${host}/${this.bucketName}/${fileName}`;
   }
+
+  async getFileStream(fileName: string) {
+    return this.minioClient.getObject(this.bucketName, fileName);
+  }
 }
