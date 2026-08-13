@@ -42,7 +42,8 @@ services:
       PORT: 3001
       DATABASE_URL: postgresql://impacta:impacta_pass@postgres:5432/impacta?schema=public
       REDIS_URL: redis://redis:6379/0
-      # CORS configuration might be needed here
+    ports:
+      - "3001:3001"
     depends_on:
       postgres:
         condition: service_healthy
