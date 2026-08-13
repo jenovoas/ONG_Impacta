@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { EarthBackground } from '../components/Background/EarthBackground';
 import { 
   ArrowRight, 
@@ -13,21 +12,10 @@ import {
   ShieldCheck, 
   CheckCircle2
 } from 'lucide-react';
-import client from '../api/client';
-
 export const LandingPage: React.FC = () => {
   const [showDemoModal, setShowDemoModal] = React.useState(false);
   const [demoSubmitted, setDemoSubmitted] = React.useState(false);
   const [demoForm, setDemoForm] = React.useState({ name: '', email: '', org: '', phone: '' });
-
-  // Fetch real public stats from backend
-  const { data: stats } = useQuery({
-    queryKey: ['public-stats'],
-    queryFn: async () => {
-      const { data } = await client.get('/organizations/public-stats');
-      return data;
-    },
-  });
 
   const handleDemoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,28 +115,20 @@ export const LandingPage: React.FC = () => {
             {/* Stats Bar */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto p-6 rounded-2xl glass-card border border-[#2a2a2a]">
               <div className="p-4 text-center">
-                <div className="text-3xl font-extrabold text-white font-headline">
-                  {stats ? `${stats.speciesCount}` : '3'}
-                </div>
+                <div className="text-3xl font-extrabold text-white font-headline">3</div>
                 <div className="text-xs font-medium text-[#bec7d3] mt-1">Especies Registradas</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
-                <div className="text-3xl font-extrabold text-[#00a8ff] font-headline">
-                  {stats ? `$${Number(stats.totalDonated).toLocaleString()}` : '$900.000'}
-                </div>
+                <div className="text-3xl font-extrabold text-[#00a8ff] font-headline">$900.000</div>
                 <div className="text-xs font-medium text-[#bec7d3] mt-1">Donado en Plataforma</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
-                <div className="text-3xl font-extrabold text-[#00d4aa] font-headline">
-                  {stats ? `${stats.missionsCount}` : '1'}
-                </div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">Misiones de Campo</div>
+                <div className="text-3xl font-extrabold text-[#00d4aa] font-headline">1</div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">Misión de Campo</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
-                <div className="text-3xl font-extrabold text-[#ffb877] font-headline">
-                  {stats ? `${stats.orgsCount}` : '1'}
-                </div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">ONGs Registradas</div>
+                <div className="text-3xl font-extrabold text-[#ffb877] font-headline">1</div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">ONG Registrada</div>
               </div>
             </div>
           </div>
