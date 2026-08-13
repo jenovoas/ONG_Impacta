@@ -1,11 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { EarthBackground } from '../components/Background/EarthBackground';
 
 export const LandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-[#e5e2e1] flex flex-col font-sans selection:bg-[#00a8ff]/30 selection:text-[#95ccff]">
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#0e0e0e]/80 border-b border-[#2a2a2a]/60 transition-all">
+    <div className="min-h-screen bg-transparent text-[#e5e2e1] flex flex-col font-sans selection:bg-[#00a8ff]/30 selection:text-[#95ccff] relative">
+      <EarthBackground />
+      
+      {/* Content wrapper over Three.js canvas */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+        {/* Top Navbar */}
+        <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#0e0e0e]/70 border-b border-[#2a2a2a]/60 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
@@ -281,6 +286,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </footer>
+      </div>
     </div>
   );
 };

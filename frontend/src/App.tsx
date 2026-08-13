@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LoginPage } from './pages/Login';
+import { LandingPage } from './pages/LandingPage';
 import { Overview } from './pages/Overview';
 import { Species } from './pages/Species';
 import { Donations } from './pages/Donations';
@@ -20,6 +21,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
+
           <Route 
             path="/login" 
             element={token ? <Navigate to="/dashboard/overview" /> : <LoginPage />} 
@@ -39,7 +42,7 @@ function App() {
             <Route path="organization" element={<OrganizationProfile />} />
           </Route>
 
-          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>
     </QueryClientProvider>
