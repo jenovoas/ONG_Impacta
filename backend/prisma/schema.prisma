@@ -29,17 +29,23 @@ model Organization {
 }
 
 model User {
-  id            String    @id @default(uuid())
+  id             String   @id @default(uuid())
   organizationId String
-  email         String
-  passwordHash  String
-  role          String
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  
-  organization  Organization @relation(fields: [organizationId], references: [id])
+  email          String
+  passwordHash   String?  // null cuando el user es solo OAuth (sin password local)
+  role           String   @default("VIEWER")
+  isActive       Boolean  @default(true)
+  emailVerified  Boolean  @default(false)
+  avatarUrl      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  oauthAccounts  OAuthAccount[]
+  refreshTokens  RefreshToken[]
 
   @@unique([organizationId, email])
+  @@index([email])
 }
 
 model Member {
@@ -147,3 +153,39 @@ model DemoRequest {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// Vincula un User con su identidad en un provider externo (Google, Facebook, GitHub).
+// Un User puede tener varias OAuthAccount (multi-provider linking).
+model OAuthAccount {
+  id              String   @id @default(uuid())
+  userId          String
+  provider        String   // 'google' | 'facebook' | 'github'
+  providerUserId  String   // ID estable que entrega el provider para este user
+  providerEmail   String?  // Email que el provider devolvió al momento del link
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@index([providerEmail])
+}
+
+// Refresh tokens persistidos (db-backed para permitir revocación en logout).
+// El client recibe el token plano; acá guardamos solo el hash SHA-256.
+model RefreshToken {
+  id          String   @id @default(uuid())
+  userId      String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+  userAgent   String?
+  ipAddress   String?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
