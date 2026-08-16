@@ -69,7 +69,9 @@ export class OrganizationsService {
 
     return {
       speciesCount,
-      totalDonated: donationsAgg._sum.amount || 0,
+      // CLP is integer-only (no decimals), so Number() is safe and prevents
+      // Prisma's Decimal from serializing to JSON as a string.
+      totalDonated: Number(donationsAgg._sum.amount) || 0,
       donationsCount: donationsAgg._count || 0,
       missionsCount,
       orgsCount,

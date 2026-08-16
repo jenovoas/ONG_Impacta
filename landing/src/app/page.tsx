@@ -10,6 +10,8 @@ async function getPublicStats() {
   }
 }
 
+import DemoButton from "@/components/DemoButton";
+
 export default async function LandingPage() {
   const appDashboardUrl = "https://app-impacta.pinguinoseguro.cl";
   const stats = await getPublicStats();
@@ -90,13 +92,7 @@ export default async function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <a
-              href={`${appDashboardUrl}/login`}
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] font-bold text-base hover:opacity-95 transition-all shadow-xl shadow-[#00a8ff]/25 flex items-center justify-center gap-3"
-            >
-              <span>Solicitar Demostración</span>
-              <span className="material-symbols-outlined text-xl">rocket_launch</span>
-            </a>
+            <DemoButton variant="hero" />
             <a
               href="#modules"
               className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#1c1b1b] border border-[#2a2a2a] text-[#e5e2e1] font-semibold text-base hover:bg-[#20201f] transition-all flex items-center justify-center gap-2"
@@ -248,7 +244,7 @@ export default async function LandingPage() {
                 <div className="w-3 h-3 rounded-full bg-[#ffb877]" />
                 <div className="w-3 h-3 rounded-full bg-[#00d4aa]" />
               </div>
-              <span className="text-xs font-mono text-[#bec7d3]">dashboard.impacta.cl</span>
+              <span className="text-xs font-mono text-[#bec7d3]">app-impacta.pinguinoseguro.cl</span>
             </div>
             <div className="space-y-4">
               <div className="p-4 rounded-xl bg-[#1c1b1b] border border-[#2a2a2a] flex items-center justify-between">
@@ -284,15 +280,18 @@ export default async function LandingPage() {
             ¿Listo para llevar el impacto de tu ONG al siguiente nivel?
           </h2>
           <p className="text-base md:text-lg text-[#bec7d3] mb-8 max-w-xl mx-auto">
-            Únete a la red de organizaciones que ya están transformando la conservación ecológica con transparencia y tecnología.
+            Únete a las <span className="text-white font-bold">{orgsCount}</span> {orgsCount === 1 ? "organización" : "organizaciones"} que ya están transformando la conservación ecológica con transparencia y tecnología.
           </p>
-          <a
-            href={`${appDashboardUrl}/login`}
-            className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] font-bold text-base hover:opacity-90 transition-opacity shadow-lg shadow-[#00a8ff]/20"
-          >
-            <span>Iniciar Sesión en Demo</span>
-            <span className="material-symbols-outlined">arrow_forward</span>
-          </a>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <DemoButton variant="cta" />
+            <a
+              href={`${appDashboardUrl}/login`}
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#1c1b1b] border border-[#2a2a2a] text-[#e5e2e1] font-semibold text-base hover:bg-[#20201f] transition-all"
+            >
+              <span>Ya tengo cuenta</span>
+              <span className="material-symbols-outlined">login</span>
+            </a>
+          </div>
         </div>
       </section>
 
