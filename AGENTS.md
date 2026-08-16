@@ -18,14 +18,18 @@ Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier 
 
 ## Infraestructura (servidor fan)
 
-**Rocky 9, podman rootless, traefik v3.**
+**Rocky 9, podman rootless. Serving edge: nginx directo (sin traefik).**
 
-- Host compartido con **múltiples proyectos en producción** (sentinel, pinguinoseguro, laespiguita, portfolio, minio).
+- Host compartido con **múltiples proyectos en producción** (pinguinoseguro, laespiguita, lotaindomito, micelia). **No** confundir con el antiguo "servidor Fenix" — esa infra ya no existe.
 - **Regla dura: NO tocar infra existente.** Solo agregar servicios. No consolidar, no reciclar, no borrar contenedores "huérfanos" sin consultar.
-- Wildcard cert `*.pinguinoseguro.cl` vía resolver `powerdns` (DNS-01). Cubre un nivel de subdominio — `api.impacta.pinguinoseguro.cl` **no** está cubierto, usar `api-impacta.pinguinoseguro.cl`.
-- Red externa compartida: `proxy` (traefik vive ahí).
-- Convenciones del compose: nombre de contenedor con guiones (`impacta-backend`), volúmenes con sufijo SELinux `:z`, labels traefik según patrón de sentinel.
-- Documentación de infra detallada: `~/Desarrollo/sentinel/` (fuera del repo).
+- Wildcard cert `*.pinguinoseguro.cl` instalado vía certbot + DNS-01 PowerDNS (`/etc/letsencrypt/live/pinguinoseguro.cl/`). Cubre un nivel de subdominio — `api.impacta.pinguinoseguro.cl` **no** está cubierto, usar `api-impacta.pinguinoseguro.cl`.
+- **Patrón de serving (idéntico al resto de proyectos del server):**
+  - Frontends estáticos → nginx sirve archivos desde `/var/www/<dominio>/`. Config en `/etc/nginx/conf.d/<dominio>.conf`.
+  - Servicios con runtime (backend Node, Next.js standalone) → contenedor podman con `ports: "<x>:<x>"` publicado al host, nginx hace `proxy_pass http://127.0.0.1:<x>`.
+  - NO usar redes externas tipo `proxy` ni labels traefik — eso era del server Fenix.
+- Convenciones del compose: nombre de contenedor con guiones (`impacta-backend`), volúmenes con sufijo SELinux `:z`.
+- Configuración nginx activa de impacta en el server: `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf`.
+- Docs históricas del setup con traefik (referencia, NO operativo): `~/sentinel/` en el server.
 
 ## Comandos base
 

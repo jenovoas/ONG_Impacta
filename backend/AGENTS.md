@@ -1,6 +1,6 @@
 # Backend — guía para agentes
 
-API REST multi-tenant para Impacta+. Expuesta solo internamente (sin labels traefik) hasta la fase C del [../PLAN.md](../PLAN.md).
+API REST multi-tenant para Impacta+. Expuesta solo internamente (sin dominio público) hasta la fase C del [../PLAN.md](../PLAN.md).
 
 ## Stack
 
@@ -78,7 +78,7 @@ npm run prisma:seed                # si existe prisma/seed.ts
 ## Deploy
 
 - Imagen: `./backend/Dockerfile` (multi-stage, `node:20-alpine`, user no-root).
-- En [../docker-compose.yml](../docker-compose.yml) como servicio `backend` — **sin labels traefik aún**. Se expondrá como `api-impacta.pinguinoseguro.cl` en fase C3 del PLAN (subdominio de primer nivel, cubierto por el wildcard `*.pinguinoseguro.cl`).
+- En [../docker-compose.yml](../docker-compose.yml) como servicio `backend` con puerto `3001` publicado al host. Se expone como `api-impacta.pinguinoseguro.cl` vía nginx (`/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf`, `proxy_pass http://127.0.0.1:3001`).
 - Depende de `postgres` y `redis` con healthcheck.
 
 ## Testing

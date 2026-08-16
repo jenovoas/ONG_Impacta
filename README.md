@@ -26,10 +26,10 @@
 - **ORM**: Prisma 5 con extensiones para Multi-tenancy transparente.
 - **Database**: PostgreSQL 16 + Redis 7 (Caching & BullMQ).
 
-### Infraestructura (Servidor Fenix)
+### Infraestructura (Servidor fan)
 - **Runtime**: Podman Rootless (Rocky Linux 9).
 - **Orquestación**: Podman Compose.
-- **Edge**: Traefik v3 con resolución DNS-01 (PowerDNS) para certificados wildcard SSL.
+- **Edge**: Nginx directo (sin traefik). Certificados wildcard SSL vía certbot + DNS-01 PowerDNS.
 - **Storage**: MinIO (S3 Compatible) para la gestión de assets multimedia.
 
 ---
