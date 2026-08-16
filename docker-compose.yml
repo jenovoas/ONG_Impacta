@@ -57,14 +57,15 @@ services:
       context: ./landing
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_BACKEND_URL: https://api-impacta.pinguinoseguro.cl
+        # Container uses host network, so localhost:3001 reaches the backend.
+        # The public HTTPS URL only works for browser-side fetches, not SSR.
+        NEXT_PUBLIC_BACKEND_URL: http://localhost:3001
     container_name: impacta-landing
+    network_mode: host
     environment:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
-    ports:
-      - "3080:3000"
     restart: unless-stopped
 
 networks:
