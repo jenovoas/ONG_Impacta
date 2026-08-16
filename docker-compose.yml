@@ -51,25 +51,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  landing:
-    image: localhost/ong_impacta_landing:latest
-    build:
-      context: ./landing
-      dockerfile: Dockerfile
-      args:
-        # Container uses host network, so localhost:3001 reaches the backend.
-        # The public HTTPS URL only works for browser-side fetches, not SSR.
-        NEXT_PUBLIC_BACKEND_URL: http://localhost:3001
-    container_name: impacta-landing
-    network_mode: host
-    environment:
-      NODE_ENV: production
-      # Host port 3000 is already taken by pinguinoseguro-web.
-      # With host network, container binds directly to this host port.
-      PORT: 3080
-      HOSTNAME: 0.0.0.0
-    restart: unless-stopped
-
 networks:
   default:
 

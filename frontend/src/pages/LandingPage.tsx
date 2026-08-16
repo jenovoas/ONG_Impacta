@@ -15,16 +15,65 @@ import {
 export const LandingPage: React.FC = () => {
   const [showDemoModal, setShowDemoModal] = React.useState(false);
   const [demoSubmitted, setDemoSubmitted] = React.useState(false);
+  const [demoSubmitting, setDemoSubmitting] = React.useState(false);
+  const [demoError, setDemoError] = React.useState<string | null>(null);
   const [demoForm, setDemoForm] = React.useState({ name: '', email: '', org: '', phone: '' });
 
-  const handleDemoSubmit = (e: React.FormEvent) => {
+  // Live stats from backend (replaces hardcoded mock values)
+  const [stats, setStats] = React.useState({
+    speciesCount: 0,
+    totalDonated: 0,
+    donationsCount: 0,
+    missionsCount: 0,
+    orgsCount: 0,
+    membersCount: 0,
+  });
+  const [statsLoading, setStatsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    fetch('/api/organizations/public-stats')
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        setStats({
+          speciesCount: d.speciesCount ?? 0,
+          totalDonated: Number(d.totalDonated) || 0,
+          donationsCount: d.donationsCount ?? 0,
+          missionsCount: d.missionsCount ?? 0,
+          orgsCount: d.orgsCount ?? 0,
+          membersCount: d.membersCount ?? 0,
+        });
+      })
+      .catch(() => { /* keep zeros on error */ })
+      .finally(() => setStatsLoading(false));
+  }, []);
+
+  const formatCLP = (n: number) => `$${n.toLocaleString('es-CL')}`;
+
+  const handleDemoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setDemoSubmitted(true);
-    setTimeout(() => {
-      setShowDemoModal(false);
-      setDemoSubmitted(false);
-      setDemoForm({ name: '', email: '', org: '', phone: '' });
-    }, 2500);
+    setDemoError(null);
+    setDemoSubmitting(true);
+    try {
+      const res = await fetch('/api/demo-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(demoForm),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.message || `Error ${res.status}`);
+      }
+      setDemoSubmitted(true);
+      setTimeout(() => {
+        setShowDemoModal(false);
+        setDemoSubmitted(false);
+        setDemoForm({ name: '', email: '', org: '', phone: '' });
+      }, 2500);
+    } catch (err) {
+      setDemoError(err instanceof Error ? err.message : 'Error desconocido');
+    } finally {
+      setDemoSubmitting(false);
+    }
   };
 
   return (
@@ -112,23 +161,31 @@ export const LandingPage: React.FC = () => {
               </a>
             </div>
 
-            {/* Stats Bar */}
+            {/* Stats Bar — live from /api/organizations/public-stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto p-6 rounded-2xl glass-card border border-[#2a2a2a]">
               <div className="p-4 text-center">
-                <div className="text-3xl font-extrabold text-white font-headline">3</div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">Especies Registradas</div>
+                <div className="text-3xl font-extrabold text-white font-headline">
+                  {statsLoading ? '…' : stats.speciesCount}
+                </div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">Especies Monitoreadas</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
-                <div className="text-3xl font-extrabold text-[#00a8ff] font-headline">$900.000</div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">Donado en Plataforma</div>
+                <div className="text-3xl font-extrabold text-[#00a8ff] font-headline">
+                  {statsLoading ? '…' : formatCLP(stats.totalDonated)}
+                </div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">Recaudado en la red</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
-                <div className="text-3xl font-extrabold text-[#00d4aa] font-headline">1</div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">Misión de Campo</div>
+                <div className="text-3xl font-extrabold text-[#00d4aa] font-headline">
+                  {statsLoading ? '…' : stats.missionsCount}
+                </div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">Misiones de Campo</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
-                <div className="text-3xl font-extrabold text-[#ffb877] font-headline">1</div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">ONG Registrada</div>
+                <div className="text-3xl font-extrabold text-[#ffb877] font-headline">
+                  {statsLoading ? '…' : stats.orgsCount}
+                </div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">ONGs Activas</div>
               </div>
             </div>
           </div>
@@ -403,11 +460,18 @@ export const LandingPage: React.FC = () => {
                     />
                   </div>
 
+                  {demoError && (
+                    <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                      {demoError}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full py-4 mt-2 rounded-xl bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] font-bold text-sm hover:opacity-90 transition-opacity"
+                    disabled={demoSubmitting}
+                    className="w-full py-4 mt-2 rounded-xl bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Enviar Solicitud
+                    {demoSubmitting ? 'Enviando…' : 'Enviar Solicitud'}
                   </button>
                 </form>
               </div>
