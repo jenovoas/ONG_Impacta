@@ -142,8 +142,8 @@ export class AuthService {
     if (stored.expiresAt < new Date()) throw new UnauthorizedException('Refresh token expirado');
     if (!stored.user.isActive) throw new UnauthorizedException('User inactivo');
 
-    // Sin rotación: emitimos nuevo access pero conservamos el mismo refresh.
-    // Si quisieras rotación, acá marcamos stored.revokedAt y emitimos un par nuevo.
+    // Atomic rotation: revoca el refresh usado (anti-replay) y emite un par nuevo.
+    // Un refresh_token puede usarse UNA sola vez (mitigates theft reuse).
     const tokens = await this.generateTokenPair(
       {
         id: stored.user.id,
@@ -153,6 +153,11 @@ export class AuthService {
       },
       ctx,
     );
+
+    await this.database.refreshToken.update({
+      where: { id: stored.id },
+      data: { revokedAt: new Date() },
+    });
 
     return {
       ...tokens,
