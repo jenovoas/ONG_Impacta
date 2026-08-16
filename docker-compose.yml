@@ -72,7 +72,7 @@ services:
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_BACKEND_URL: https://api-impacta.pinguinoseguro.cl
     ports:
-      - "3000:3000"
+      - "3080:3000"
     restart: unless-stopped
 
 networks:

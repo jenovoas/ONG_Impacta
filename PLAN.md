@@ -12,7 +12,7 @@ Documento autosuficiente: cualquier agente puede recoger este plan sin depender 
 - `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto en `https://api-impacta.pinguinoseguro.cl` (nginx `proxy_pass` al contenedor `impacta-backend` en `127.0.0.1:3001`).
 - `landing/` — Next.js 16.2.4 (standalone) + Tailwind v4 + Manrope/Inter. **Desplegado** en `https://impacta.pinguinoseguro.cl` con diseño "Digital Steward / New Identity 2026" aplicado. Stats hero bar conectadas al backend (`GET /organizations/public-stats`).
 - `frontend/` — Vite + React 19. **Pantallas implementadas**: Login, Overview (Dashboard), Members, Donations, Campaigns, Species, Missions, Organization Profile. Consume API real (`app-impacta.pinguinoseguro.cl` servido por nginx como estáticos desde `/var/www/impacta.pinguinoseguro.cl/`). Sin diseño visual aplicado aún — solo scaffold funcional.
-- `docker-compose.yml` — servicios `postgres` (puerto 5435), `redis` (6381), `backend` (puerto 3001 publicado al host), `frontend` (build estático, copiar `dist/` a `/var/www/impacta.pinguinoseguro.cl/`), `landing` (puerto 3000 publicado al host, nginx `proxy_pass`).
+- `docker-compose.yml` — servicios `postgres` (puerto 5435), `redis` (6381), `backend` (puerto 3001 publicado al host), `frontend` (build estático, copiar `dist/` a `/var/www/impacta.pinguinoseguro.cl/`), `landing` (puerto 3080 publicado al host → 3000 interno, nginx `proxy_pass`).
 - **Prisma schema:** 8 modelos — `Organization`, `User`, `Member`, `Donation`, `Campaign`, `Species`, `Mission`, `MissionTask`. DB corriendo, migraciones aplicadas.
 - **MinIO storage service** integrado para upload de imágenes (species).
 
@@ -103,7 +103,7 @@ Fuente de verdad: **Google Stitch project `4741044715461206908`** ("Interfaz Dis
 
 - **Infra:** siempre `podman build --network=host` (workaround slirp4netns EIDLETIMEOUT). `podman-compose up -d <service>` para deploy incremental.
 - **Volúmenes SELinux:** sufijo `:z` en los mounts (ya aplicado).
-- **Sin traefik.** Para agregar un servicio nuevo: si es frontend estático, publicar el `dist/` al host y agregar server block nginx. Si es servicio con runtime, publicar puerto al host en compose y agregar `proxy_pass http://127.0.0.1:<puerto>` en nginx. NO usar labels traefik ni redes externas — eso es vestigio del server Fenix.
+- **Sin traefik.** Para agregar un servicio nuevo: si es frontend estático, publicar el `dist/` al host y agregar server block nginx. Si es servicio con runtime, publicar puerto al host en compose y agregar `proxy_pass http://127.0.0.1:<puerto>` en nginx. NO usar labels traefik ni redes externas — eso es vestigio del server Fenix. **Elegir puerto host libre** (3000 está ocupado por `pinguinoseguro-web` en el server fan).
 - **Nunca** modificar servicios de otros proyectos en el compose global del servidor.
 - **Verificar tras cada deploy:** `curl -s -o /dev/null -w "%{http_code}\n" https://<host>` debe dar 200.
 - **Convención de commits:** `feat(<módulo>): <descripción>` / `fix(...)` / `chore(...)`. Scope = módulo NestJS o `landing`, `frontend`, `infra`, `docs`.
