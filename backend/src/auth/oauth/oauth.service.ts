@@ -48,10 +48,19 @@ export class OAuthService {
    */
   isProviderConfigured(provider: OAuthProvider): boolean {
     switch (provider) {
-      case 'google':   return !!process.env.GOOGLE_CLIENT_ID;
-      case 'facebook': return true; // Facebook verifica online, no requiere config server-side
-      case 'github':   return true; // GitHub idem
-      default:         return false;
+      case 'google':
+        // GoogleStrategy hace verifyIdToken con GOOGLE_CLIENT_ID. Sin él falla.
+        return !!process.env.GOOGLE_CLIENT_ID;
+      case 'facebook':
+        // FacebookStrategy usa app_id + app_secret como credenciales del servidor
+        // en el debug_token call. Ambos requeridos.
+        return !!process.env.FACEBOOK_APP_ID && !!process.env.FACEBOOK_APP_SECRET;
+      case 'github':
+        // GithubStrategy usa Basic auth con client_id:client_secret para /user.
+        // Ambos requeridos (client_id solo o secret solo no alcanzan).
+        return !!process.env.GITHUB_CLIENT_ID && !!process.env.GITHUB_CLIENT_SECRET;
+      default:
+        return false;
     }
   }
 }
