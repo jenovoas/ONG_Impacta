@@ -11,12 +11,20 @@ import { DonationsModule } from './modules/donations/donations.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { SpeciesModule } from './modules/species/species.module';
 import { MissionsModule } from './modules/missions/missions.module';
+import { DemoRequestsModule } from './modules/demo-requests/demo-requests.module';
 
 @Module({
   imports: [
-    DatabaseModule, 
-    AuthModule, 
-    OrganizationsModule, UsersModule, MembersModule, DonationsModule, CampaignsModule, SpeciesModule, MissionsModule
+    DatabaseModule,
+    AuthModule,
+    OrganizationsModule,
+    UsersModule,
+    MembersModule,
+    DonationsModule,
+    CampaignsModule,
+    SpeciesModule,
+    MissionsModule,
+    DemoRequestsModule
   ],
   controllers: [AppController],
   providers: [AppService],

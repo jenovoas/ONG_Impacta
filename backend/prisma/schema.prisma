@@ -135,3 +135,15 @@ model MissionTask {
 
   mission         Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
 }
+
+model DemoRequest {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  org         String   // Nombre de la ONG/organización del lead
+  phone       String?
+  message     String?
+  status      String   @default("NEW") // NEW, CONTACTED, QUALIFIED, ARCHIVED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
