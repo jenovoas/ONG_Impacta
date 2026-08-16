@@ -8,7 +8,7 @@ export class DemoRequestsService {
 
   async create(dto: CreateDemoRequestDto) {
     // Reject obviously-spammy submissions
-    const dup = await this.prisma.base.demoRequest.findFirst({
+    const dup = await this.prisma.demoRequest.findFirst({
       where: {
         email: dto.email,
         createdAt: { gte: new Date(Date.now() - 5 * 60 * 1000) }, // last 5 min
@@ -18,7 +18,7 @@ export class DemoRequestsService {
       throw new BadRequestException('Duplicate submission within 5 minutes');
     }
 
-    const created = await this.prisma.base.demoRequest.create({
+    const created = await this.prisma.demoRequest.create({
       data: {
         name: dto.name,
         email: dto.email,
@@ -32,7 +32,7 @@ export class DemoRequestsService {
   }
 
   async findAll() {
-    return this.prisma.base.demoRequest.findMany({
+    return this.prisma.demoRequest.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
