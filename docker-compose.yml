@@ -51,15 +51,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: https://api-impacta.pinguinoseguro.cl
-    container_name: impacta-frontend
-    restart: unless-stopped
-
   landing:
     image: localhost/ong_impacta_landing:latest
     build:
