@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import client from '../api/client';
 import { useAuthStore } from '../store/auth.store';
+import type { AuthUser } from '../store/auth.store';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -21,7 +22,12 @@ export const LoginPage: React.FC = () => {
 
     try {
       const { data } = await client.post('/auth/login', { email, password, orgSlug });
-      setAuth(data.user, data.access_token);
+      const user: AuthUser = {
+        id: data.user.id, email: data.user.email,
+        role: data.user.role, organizationId: data.user.organizationId,
+        organization: data.user.organization,
+      };
+      setAuth(user, data.access_token, data.refresh_token);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al iniciar sesión');
@@ -120,6 +126,11 @@ export const LoginPage: React.FC = () => {
               )}
             </button>
           </form>
+
+        <p className="text-center text-sm text-gray-400 mt-6">
+          ¿No tienes cuenta?{' '}
+          <Link to="/register" className="text-primary hover:underline">Crea una organización</Link>
+        </p>
 
           <div className="mt-8 pt-6 border-t border-white/5 space-y-3">
             <p className="text-xs text-gray-500 text-center font-bold uppercase tracking-wider">Credenciales de Prueba</p>

@@ -30,7 +30,7 @@ const navItems = [
 ];
 
 export const Sidebar: React.FC = () => {
-  const logout = useAuthStore((state) => state.logout);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
 
@@ -73,7 +73,7 @@ export const Sidebar: React.FC = () => {
         </div>
 
         <button
-          onClick={() => { logout(); navigate('/login'); }}
+          onClick={() => { clearAuth(); navigate('/login'); }}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-error hover:bg-error/10 transition-colors font-bold"
         >
           <LogOut className="w-5 h-5" />
