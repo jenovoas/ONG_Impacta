@@ -76,6 +76,7 @@ Para próximos bloques de trabajo ver [PLAN.md](PLAN.md).
 - Verifica lo que dice la memoria contra el repo actual antes de recomendar archivos/funciones concretas — pueden haber cambiado.
 - Ejecución de tareas: completas, no atajos. El usuario ha pedido explícitamente "no me simplifiques cosas".
 - Cambios en infra/compose/servicios visibles: confirmar antes de aplicar.
+- **Lección 16-ago-2026 (Path A revert):** nunca reemplaces un diseño más rico con uno más pobre. El frontend React tiene `EarthBackground` (Three.js), `logo.png`, navbar con Inicio/Módulos/Impacto Vivo, cards con "Ver módulo en acción", modal con logo, footer con imagen. El Next.js landing genérico NO tiene nada de eso. Si una decisión arquitectural ("Path A: deploy Next.js") requiere borrar elementos visuales visibles (animaciones, branding, secciones), **parar y consultar al usuario**.
 
 
 ## Source of truth y anti-patrones (leer antes de operar)

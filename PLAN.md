@@ -10,10 +10,13 @@ Documento autosuficiente: cualquier agente puede recoger este plan sin depender 
 
 **Stack:**
 - `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto en `https://api-impacta.pinguinoseguro.cl` (nginx `proxy_pass` al contenedor `impacta-backend` en `127.0.0.1:3001`).
-- `landing/` — Next.js 16.2.4 (standalone) + Tailwind v4 + Manrope/Inter. **Desplegado** en `https://impacta.pinguinoseguro.cl` con diseño "Digital Steward / New Identity 2026" aplicado. Stats hero bar conectadas al backend (`GET /organizations/public-stats`).
-- `frontend/` — Vite + React 19. **Pantallas implementadas**: Login, Overview (Dashboard), Members, Donations, Campaigns, Species, Missions, Organization Profile. Consume API real (`app-impacta.pinguinoseguro.cl` servido por nginx como estáticos desde `/var/www/impacta.pinguinoseguro.cl/`). Sin diseño visual aplicado aún — solo scaffold funcional.
-- `docker-compose.yml` — servicios `postgres` (puerto 5435), `redis` (6381), `backend` (puerto 3001 publicado al host), `landing` (puerto 3080 publicado al host → 3000 interno, nginx `proxy_pass`). **El frontend NO es un servicio del compose**: se construye estático con `npm run build` y el `dist/` se copia manualmente a `/var/www/impacta.pinguinoseguro.cl/` para que nginx lo sirva en `app-impacta.pinguinoseguro.cl`.
-- **Prisma schema:** 8 modelos — `Organization`, `User`, `Member`, `Donation`, `Campaign`, `Species`, `Mission`, `MissionTask`. DB corriendo, migraciones aplicadas.
+- `landing/` — Next.js 16.2.4 (standalone) + Tailwind v4 + Manrope/Inter. **NO desplegado en producción desde `1380fb9`.** El código se conserva en el repo como referencia (incluye el wiring real: `DemoRequest` POST, `public-stats` fetch, `DemoModal` con focus trap + scroll lock). Path A (deploy Next.js en `impacta.pinguinoseguro.cl`) fue revocado por el usuario: degradaba visualmente el sitio (sin Three.js EarthBackground, sin `logo.png`, sin navbar completa, 4972 chars menos de contenido).
+- `frontend/` — Vite + React 19. **Sirve DOS sitios:**
+  - **`https://impacta.pinguinoseguro.cl`** (marketing) — `LandingPage.tsx` con `EarthBackground` (Three.js: tierra rotando + nubes + atmósfera + estrellas), `logo.png` (491 KB), navbar `Inicio / Módulos / Impacto Vivo`, module cards con "Ver módulo en acción", demo modal con logo imagen (POST a `/api/demo-requests`, dedup 5min/email), stats bar con datos REALES desde `/api/organizations/public-stats` (`{speciesCount, totalDonated, donationsCount, missionsCount, orgsCount, membersCount}`), Live Impact mockup, footer con logo.
+  - **`https://app-impacta.pinguinoseguro.cl`** (dashboard SPA) — Login, Overview, Members, Donations, Campaigns, Species, Missions, Organization Profile.
+  - Mismo build estático (`npm run build` → `dist/`), copiado a `/var/www/impacta.pinguinoseguro.cl/` y servido por nginx.
+- `docker-compose.yml` — servicios `postgres` (puerto 5435), `redis` (6381), `backend` (puerto 3001 publicado al host). **NO incluye `landing` desde `1380fb9`** — Path A revocado. **El frontend NO es un servicio del compose**: se construye estático con `npm run build` y el `dist/` se copia manualmente a `/var/www/impacta.pinguinoseguro.cl/`.
+- **Prisma schema:** 8 modelos — `Organization`, `User`, `Member`, `Donation`, `Campaign`, `Species`, `Mission`, `MissionTask`. DB corriendo, migraciones aplicadas (incluida `20260816190000_add_demo_requests`).
 - **MinIO storage service** integrado para upload de imágenes (species).
 
 **Módulos backend existentes y su estado:**
@@ -26,8 +29,7 @@ Documento autosuficiente: cualquier agente puede recoger este plan sin depender 
 - ✅ `missions` — Misiones de campo con subtasks (`MissionTask`)
 - ✅ `auth` — JWT + bcrypt, login por email + orgSlug, refresh token
 - ✅ `storage` — Servicio MinIO con `getFileStream`
-
-**Fases A y D completas.** Ver log de commits reciente.
+- ✅ `demo-requests` — Lead form público del landing (sin tenant, sin auth). Endpoint `POST /api/demo-requests` con dedup de 5 min por email. Endpoint `GET /demo-requests` protegido por `@Roles`. Schema dedicado: `DemoRequest { id, name, email, org, phone?, message?, status: NEW|CONTACTED|REJECTED, createdAt }` con índice en `(email, createdAt)`.
 
 **Módulos backend NO implementados (si existen):** revisar `ls src/modules/`
 
