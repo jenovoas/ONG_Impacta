@@ -4,18 +4,32 @@ Documento autosuficiente: cualquier agente puede recoger este plan sin depender 
 
 ---
 
-## 0. Estado actual (2026-04-17)
+## 0. Estado actual (2026-08-16)
 
-**Infra:** servidor compartido `fenix` (Rocky 9, podman rootless). Traefik v3 con `proxy` network externa, wildcard `*.pinguinoseguro.cl` vía `powerdns` DNS-01. **NO TOCAR infra existente** de los otros proyectos (sentinel, pinguinoseguro, laespiguita, portfolio, minio). Solo agregar servicios.
+**Infra:** servidor compartido `fan` (Rocky 9, podman rootless). Traefik v3 con `proxy` network externa, wildcard `*.pinguinoseguro.cl` vía `powerdns` DNS-01. **NO TOCAR infra existente** de los otros proyectos (sentinel, pinguinoseguro, laespiguita, portfolio, minio). Solo agregar servicios.
 
 **Stack:**
-- `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto solo internamente en `impacta-backend:3001`.
-- `landing/` — Next.js 16.2.4 (standalone) + Tailwind v4 + Manrope/Inter. **Desplegado** en `https://impacta.pinguinoseguro.cl` con diseño "Digital Steward / New Identity 2026" aplicado.
-- `frontend/` — Vite + React 19 (scaffold default, sin diseño aplicado). Será la app `app.impacta.pinguinoseguro.cl`.
-- `docker-compose.yml` — servicios `postgres` (puerto 5435), `redis` (6381), `backend` (solo red interna), `landing` (traefik labels + https-redirect + wildcard cert).
-- **Prisma schema:** modelos `Organization`, `User`, `Member`. DB corriendo, migraciones pendientes de generar.
+- `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto en `https://api-impacta.pinguinoseguro.cl` (traefik labels configurados).
+- `landing/` — Next.js 16.2.4 (standalone) + Tailwind v4 + Manrope/Inter. **Desplegado** en `https://impacta.pinguinoseguro.cl` con diseño "Digital Steward / New Identity 2026" aplicado. Stats hero bar conectadas al backend (`GET /organizations/public-stats`).
+- `frontend/` — Vite + React 19. **Pantallas implementadas**: Login, Overview (Dashboard), Members, Donations, Campaigns, Species, Missions, Organization Profile. Consume API real (`app-impacta.pinguinoseguro.cl` expuesto vía traefik). Sin diseño visual aplicado aún — solo scaffold funcional.
+- `docker-compose.yml` — servicios `postgres` (puerto 5435), `redis` (6381), `backend` (puerto 3001 + traefik), `frontend` (traefik `app-impacta.pinguinoseguro.cl`), `landing` (traefik `impacta.pinguinoseguro.cl`).
+- **Prisma schema:** 8 modelos — `Organization`, `User`, `Member`, `Donation`, `Campaign`, `Species`, `Mission`, `MissionTask`. DB corriendo, migraciones aplicadas.
+- **MinIO storage service** integrado para upload de imágenes (species).
 
-**Módulos backend existentes:** `organizations` (CRUD básico con DTO tipado). Nada más.
+**Módulos backend existentes y su estado:**
+- ✅ `organizations` — CRUD completo + `findBySlug` + `getSummary` + `publicStats`
+- ✅ `users` — CRUD de usuarios con roles (`SUPERADMIN`, `ADMIN`, `OPERATOR`, `VIEWER`)
+- ✅ `members` — CRUD de socios/voluntarios con validación RUT chileno
+- ✅ `donations` — Gestión de donaciones (PENDING → SUCCEEDED por callback)
+- ✅ `campaigns` — Campañas de recaudación con meta y progreso
+- ✅ `species` — Biblioteca de especies con upload a MinIO
+- ✅ `missions` — Misiones de campo con subtasks (`MissionTask`)
+- ✅ `auth` — JWT + bcrypt, login por email + orgSlug, refresh token
+- ✅ `storage` — Servicio MinIO con `getFileStream`
+
+**Fases A y D completas.** Ver log de commits reciente.
+
+**Módulos backend NO implementados (si existen):** revisar `ls src/modules/`
 
 ---
 
@@ -44,100 +58,44 @@ Fuente de verdad: **Google Stitch project `4741044715461206908`** ("Interfaz Dis
 
 ## 2. Backlog ordenado
 
-### Fase A — Base multi-tenant del backend (bloqueante)
+### Fase C — Frontend app (`app-impacta.pinguinoseguro.cl`)
 
-**A1. Migración inicial Prisma + seed**
-- `cd backend && npx prisma migrate dev --name init`
-- Crear `prisma/seed.ts` con 1 organización demo (`slug: 'demo'`, `plan: 'PRO'`) y 1 usuario admin (`admin@demo.impacta.cl` / password hasheado bcrypt).
-- Agregar script `"prisma:seed": "ts-node prisma/seed.ts"` en `package.json`.
-- **AC:** `npx prisma migrate status` limpio; `npx prisma studio` muestra los registros.
+**Pre-requisitos cumplidos:**
+- Backend expuesto en `api-impacta.pinguinoseguro.cl` ✅
+- Frontend desplegado en `app-impacta.pinguinoseguro.cl` ✅
+- CORS configurado ✅
 
-**A2. Módulo `auth` (JWT + bcrypt)**
-- Paquetes: `@nestjs/jwt`, `@nestjs/passport`, `passport`, `passport-jwt`, `bcrypt`.
-- Endpoints: `POST /auth/login` (email + password + orgSlug), `POST /auth/refresh`, `GET /auth/me`.
-- JWT payload: `{ sub: userId, orgId, role }`. Secret desde `JWT_SECRET` en `.env`.
-- Guard `JwtAuthGuard` global + decorator `@Public()` para excluir rutas.
-- **AC:** login contra la org demo devuelve access + refresh token. `GET /auth/me` con Bearer devuelve el user sin `passwordHash`.
-
-**A3. Tenant context middleware**
-- Middleware que extrae `orgId` del JWT y lo inyecta en `req.tenant`.
-- Decorator `@CurrentTenant()` para controllers.
-- Refactorizar `OrganizationsService.findOne` y futuros services para filtrar por `orgId` automáticamente (considerar Prisma middleware o extension).
-- **AC:** cualquier query cross-tenant (pedir recurso de otra org con token de la org demo) devuelve 404, nunca filtra datos.
-
-**A4. Módulo `users`**
-- CRUD de usuarios dentro de la organización. Roles: `SUPERADMIN`, `ADMIN`, `OPERATOR`, `VIEWER`.
-- Guard `RolesGuard` + decorator `@Roles(...)`.
-- **AC:** solo `ADMIN`+ puede crear/listar usuarios; `OPERATOR` recibe 403.
-
-**A5. Módulo `members` (socios/voluntarios)**
-- CRUD + filtros (búsqueda por nombre, estado, paginación). RUT chileno validado (dígito verificador).
-- Estados: `ACTIVE`, `INACTIVE`, `PENDING`.
-- **AC:** endpoint `GET /members?status=ACTIVE&page=1&pageSize=20` paginado; crear socio con RUT inválido → 400.
-
-### Fase B — Módulos de producto (según PRD)
-
-Leer [Impacta+PRD.md](Impacta+PRD.md) antes de cada uno.
-
-**B1. Módulo `donations`**
-- Modelo Prisma: `Donation { id, organizationId, memberId?, amount, currency, status, gatewayRef?, createdAt }`.
-- Endpoints: crear intención de pago, callback de pasarela (mock primero), listado con totales.
-- Stub de integración ImpactaPay — interfaz `PaymentGateway` con impl `MockPaymentGateway`.
-- **AC:** donación creada queda en estado `PENDING`; callback la pasa a `SUCCEEDED`.
-
-**B2. Módulo `campaigns`**
-- Campañas de recaudación con meta, fecha fin, progreso calculado.
-- **AC:** endpoint `GET /campaigns/:id/progress` devuelve `{ raised, goal, percentage, donorCount }`.
-
-**B3. Módulo `species` (Biblioteca de Especies)**
-- Modelo: `Species { id, organizationId, scientificName, commonName, status (IUCN), habitat, images[] }`.
-- Upload de imágenes a MinIO (ya corre en el servidor — endpoint y credenciales en `~/Desarrollo/sentinel/`).
-- **AC:** crear especie con imagen sube a MinIO y devuelve URL firmada.
-
-**B4. Módulo `missions` (Rescate Ecológico)**
-- Modelo: `Mission { id, organizationId, title, location (lat/lng), startDate, status, volunteers[] }`.
-- Asignación de voluntarios desde `members`.
-- **AC:** crear misión y asignar 3 voluntarios; `GET /missions/:id` devuelve la lista.
-
-### Fase C — Frontend app (`app.impacta.pinguinoseguro.cl`)
-
-**Pre-requisitos:**
-- DNS ya apunta por wildcard — no hacer nada.
-- Cert wildcard de un nivel cubre `app.impacta.pinguinoseguro.cl` ✅.
-- **NO** funciona `api.impacta.pinguinoseguro.cl` (segundo nivel) — si el backend necesita exponerse, usar `api-impacta.pinguinoseguro.cl` o proxy bajo `/api` del mismo host.
-
-**C1. Bootstrap del frontend**
-- `frontend/` ya es Vite + React 19. Agregar: React Router 7, TanStack Query, Tailwind v4, zod, react-hook-form, axios.
+**C1. Aplicar diseño al frontend (prioridad alta)**
+- El frontend tiene páginas funcionales pero sin diseño visual. Portar el design system desde Stitch para cada pantalla:
+  1. `Login` — buscar screen "Login" en Stitch
+  2. `Overview` (Dashboard) — KPIs visuales con datos reales
+  3. `Members list + detail`
+  4. `Donations list + create`
+  5. `Campaigns`
+  6. `Species library`
+  7. `Missions`
+  8. `Settings / Organization profile`
+- Para cada pantalla: `mcp__stitch__get_screen` → HTML → componente React que consume API del backend. Reutilizar tokens, no crear variantes de color.
 - Portar tokens de diseño desde `landing/app/globals.css` a `frontend/src/index.css` (mismo `@theme`).
-- Cargar Manrope + Inter + Material Symbols.
-- Crear `Dockerfile` multi-stage (deps → build → nginx:alpine servir `dist/`). Basarse en el patrón de `landing/Dockerfile`.
-- Agregar servicio `frontend` a `docker-compose.yml` con traefik labels para `app.impacta.pinguinoseguro.cl` (copiar labels de `landing`, cambiar Host y nombres de router).
 
-**C2. Pantallas — traer de Stitch una por una**
-Orden sugerido:
-1. `Login` — buscar screen "Login" en Stitch (`mcp__stitch__list_screens` del proyecto).
-2. `Dashboard` — overview con KPIs (árboles, especies, recaudación).
-3. `Members list + detail`
-4. `Donations list + create`
-5. `Campaigns`
-6. `Species library`
-7. `Missions`
-8. `Settings / Organization profile`
+**C2. Mejorar landing page**
+- ✅ Hero stats conectados al backend (`publicStats`)
+- ⚠️ Revisar si hay secciones maquetadas/hardcoded restantes (features, modules cards están estáticas)
+- Sección "Live Impact Feature Highlight" tiene mockup falso (ventana simulada) — podría reemplazarse por captura real del dashboard o componente interactivo real
 
-Para cada pantalla: `mcp__stitch__get_screen` → HTML → componente React que consume la API del backend vía TanStack Query. Reutilizar tokens, no crear variantes de color.
+### Fase D — Pulido (en curso)
 
-**C3. Exponer backend detrás de traefik** (hacer junto con C1)
-- Opción recomendada: agregar labels al servicio `backend` con host `api-impacta.pinguinoseguro.cl` (subdominio de primer nivel, cubierto por wildcard).
-- Si se prefiere mismo origen: agregar path `/api` al frontend via traefik middleware stripprefix.
-- CORS en `main.ts`: whitelist del host del frontend.
-- **AC:** `curl https://api-impacta.pinguinoseguro.cl/health` → 200 OK.
+- **D1.** Tests: E2E para auth y CRUDs principales (`@nestjs/testing` + supertest)
+- **D2.** CI GitHub Actions: lint + build + test en cada PR
+- **D3.** Observabilidad: logs estructurados con pino, integración Grafana/Loki
+- **D4.** README operativo en raíz
 
-### Fase D — Pulido
+### Bloqueantes futuros
 
-- **D1.** Tests: `@nestjs/testing` unit + supertest e2e para auth y un CRUD completo.
-- **D2.** CI GitHub Actions: lint + build + test en cada PR.
-- **D3.** Observabilidad: integrar backend con el Grafana/Loki del servidor (ver sentinel docs). Logs estructurados con pino.
-- **D4.** README operativo en la raíz con: cómo levantar local, cómo desplegar, endpoints disponibles.
+- Integración real con pasarela de pago (ImpactaPay) — actualmente mock
+- Sistema de notificaciones (emails, webhooks)
+- Analytics/BI para dashboards de impacto
+- Multi-language (i18n)
 
 ---
 
@@ -148,6 +106,7 @@ Para cada pantalla: `mcp__stitch__get_screen` → HTML → componente React que 
 - **Traefik labels:** copiar el patrón de `landing` en `docker-compose.yml` — router HTTP con middleware `https-redirect@file` + router HTTPS con `tls.certresolver=powerdns`.
 - **Nunca** modificar servicios de otros proyectos en el compose global del servidor.
 - **Verificar tras cada deploy:** `curl -s -o /dev/null -w "%{http_code}\n" https://<host>` debe dar 200.
+- **Convención de commits:** `feat(<módulo>): <descripción>` / `fix(...)` / `chore(...)`. Scope = módulo NestJS o `landing`, `frontend`, `infra`, `docs`.
 
 ---
 
@@ -155,6 +114,5 @@ Para cada pantalla: `mcp__stitch__get_screen` → HTML → componente React que 
 
 1. Leer este plan completo.
 2. Leer [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md), [DISENO_IDENTIDAD_VISUAL.md](DISENO_IDENTIDAD_VISUAL.md), [Impacta+PRD.md](Impacta+PRD.md) para contexto de producto.
-3. Empezar por **A1** y avanzar en orden. No saltar fases.
-4. Antes de UI: traer maqueta de Stitch. Antes de DB: revisar el schema actual.
-5. Commit por tarea con mensaje `feat(<módulo>): <AC cumplido>`.
+3. El backend está completo — siguiente foco es **aplicar diseño al frontend** (Fase C1) siguiendo Stitch.
+4. Antes de UI: traer maqueta de Stitch. Commit por tarea con mensaje `feat(<módulo>): <AC cumplido>`.

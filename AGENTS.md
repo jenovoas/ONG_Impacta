@@ -16,7 +16,7 @@ Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier 
 
 **Antes de crear/modificar UI:** traer la pantalla con `mcp__stitch__get_screen` y portar con los tokens existentes. No improvisar paleta.
 
-## Infraestructura (servidor fenix)
+## Infraestructura (servidor fan)
 
 **Rocky 9, podman rootless, traefik v3.**
 

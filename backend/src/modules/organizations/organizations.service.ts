@@ -55,7 +55,7 @@ export class OrganizationsService {
   }
 
   async getPublicStats() {
-    const [speciesCount, donationsAgg, missionsCount, orgsCount] = await Promise.all([
+    const [speciesCount, donationsAgg, missionsCount, orgsCount, membersCount] = await Promise.all([
       this.prisma.species.count(),
       this.prisma.donation.aggregate({
         where: { status: 'SUCCEEDED' },
@@ -64,6 +64,7 @@ export class OrganizationsService {
       }),
       this.prisma.mission.count(),
       this.prisma.organization.count(),
+      this.prisma.member.count(),
     ]);
 
     return {
@@ -72,6 +73,7 @@ export class OrganizationsService {
       donationsCount: donationsAgg._count || 0,
       missionsCount,
       orgsCount,
+      membersCount,
     };
   }
 }
