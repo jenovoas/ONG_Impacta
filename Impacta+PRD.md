@@ -375,7 +375,7 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 | **Cache** | Redis | Sesiones, cache de consultas frecuentes |
 | **Colas** | Bull/Redis | Tareas asíncronas (emails, reportes, push notifications) |
 | **Almacenamiento** | AWS S3 / Cloudflare R2 | Fotos, documentos, archivos |
-| **Hosting** | **Servidor Fenix** (impacta.pinguinoseguro.cl) | Infraestructura propia, control total |
+| **Hosting** | **Servidor fan** (impacta.pinguinoseguro.cl) | Infraestructura propia (Rocky 10.2 + podman rootless), control total, sin traefik (nginx directo) |
 | **Pagos** | MercadoPago + PayPal + Stripe | Cobertura regional e internacional |
 | **Dominio** | impacta.pinguinoseguro.cl | Dominio principal del sistema |
 | **i18n** | react-i18next + i18next | Internacionalización Español/Inglés |
@@ -384,7 +384,7 @@ Crear una plataforma SaaS que centralice y automatice la gestión operativa de O
 ### 4.3 Infraestructura y Despliegue
 | Componente | Configuración | Ubicación |
 |------------|---------------|-----------|
-| **Servidor** | Servidor Fenix | On-premise / Data Center |
+| **Servidor** | Servidor fan | Rocky 10.2, podman rootless, nginx directo |
 | **Dominio** | impacta.pinguinoseguro.cl | DNS configurado |
 | **SSL/TLS** | Certificado Let's Encrypt o comercial | Renovación automática |
 | **Reverse Proxy** | Nginx | Balanceo y seguridad |

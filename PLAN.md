@@ -6,7 +6,7 @@ Documento autosuficiente: cualquier agente puede recoger este plan sin depender 
 
 ## 0. Estado actual (2026-08-16)
 
-**Infra:** servidor compartido `fan` (Rocky 9, podman rootless). Serving edge: nginx directo (sin traefik). Wildcard `*.pinguinoseguro.cl` vía certbot + DNS-01 PowerDNS. **NO TOCAR infra existente** de los otros proyectos (pinguinoseguro, laespiguita, lotaindomito, micelia). Solo agregar servicios. Ver [AGENTS.md](AGENTS.md) sección Infraestructura para el patrón de serving.
+**Infra:** servidor compartido `fan` (Rocky 10.2 (Red Quartz), podman rootless). Serving edge: nginx directo (sin traefik). Wildcard `*.pinguinoseguro.cl` vía certbot + DNS-01 PowerDNS. **NO TOCAR infra existente** de los otros proyectos (pinguinoseguro, laespiguita, lotaindomito, micelia). Solo agregar servicios. Ver [AGENTS.md](AGENTS.md) sección Infraestructura para el patrón de serving.
 
 **Stack:**
 - `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto en `https://api-impacta.pinguinoseguro.cl` (nginx `proxy_pass` al contenedor `impacta-backend` en `127.0.0.1:3001`).

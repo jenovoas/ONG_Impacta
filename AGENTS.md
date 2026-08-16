@@ -18,7 +18,7 @@ Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier 
 
 ## Infraestructura (servidor fan)
 
-**Rocky 9, podman rootless. Serving edge: nginx directo (sin traefik).**
+**Rocky 10.2 (Red Quartz), podman rootless. Serving edge: nginx directo (sin traefik).**
 
 - Host compartido con **múltiples proyectos en producción** (pinguinoseguro, laespiguita, lotaindomito, micelia). **No** confundir con el antiguo "servidor Fenix" — esa infra ya no existe.
 - **Regla dura: NO tocar infra existente.** Solo agregar servicios. No consolidar, no reciclar, no borrar contenedores "huérfanos" sin consultar.
