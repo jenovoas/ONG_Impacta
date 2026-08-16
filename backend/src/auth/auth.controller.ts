@@ -19,7 +19,8 @@ import { OAuthLoginDto, OAuthRegisterDto } from './dto/oauth.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly oauth: OAuthService,private readonly authService: AuthService) {}
 
   // ====================================================================
   // Local (email + password)
@@ -107,9 +108,9 @@ export class AuthController {
   @Get('oauth/providers')
   listProviders() {
     return {
-      google: { configured: !!process.env.GOOGLE_CLIENT_ID },
-      facebook: { configured: true },  // FB verifica online, sin config server-side
-      github: { configured: true },
+      google:   { configured: this.oauth.isProviderConfigured('google') },
+      facebook: { configured: this.oauth.isProviderConfigured('facebook') },
+      github:   { configured: this.oauth.isProviderConfigured('github') },
     };
   }
 
