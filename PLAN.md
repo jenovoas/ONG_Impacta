@@ -33,6 +33,42 @@ Documento autosuficiente: cualquier agente puede recoger este plan sin depender 
 
 ---
 
+## 0.5 Source of truth y reglas duras (anti-patrones)
+
+> **Esta sección es load-bearing.** Documenta un desastre específico del 13-ago-2026 que destruyó meses de trabajo y la regla que se codificó tras él. **Leer antes de cualquier operación no trivial.**
+
+### El desastre
+
+En el commit `af06edb` (mensaje: *"revert: restore original 3D EarthBackground, Dashboard and repo state from 8ba8bec"*) un agente revirtió el repo al estado del commit `8ba8bec` (abril 2026), bajo el supuesto de que era "el estado bueno". **Pero `8ba8bec` no contenía la landing Next.js** — esa se agregó el mismo día, en commits posteriores a `8ba8bec`. El revert borró:
+
+- La landing completa (`landing/src/app/*`, `landing/Dockerfile`, `landing/next.config.ts`, etc.).
+- Decenas de archivos del backend a un estado pre-multi-tenant.
+- Documentación que ya estaba corregida.
+
+Después, varios agentes修复 parcialmente moviendo el LandingPage al frontend React y agregando `public-stats`. El estado vivo quedó en el servidor pero **nunca se mergeó de vuelta a `origin/main`** de forma coherente.
+
+### La regla
+
+**`fan/main` ES el estado de producción.** Cualquier rama de recovery debe basarse en `fan/main`, no en un commit histórico más viejo. Esto aplica incluso si el commit histórico "parece bueno" por su mensaje.
+
+Workflow correcto:
+```bash
+# Antes de proponer CUALQUIER cambio de historia / recovery / rebase:
+git fetch fan main
+git log origin/main..fan/main       # ¿hay commits locales en fan no en origin?
+git fetch origin main
+git log fan/main..origin/main       # ¿hay algo en origin que fan no tiene?
+
+# Si vas a "restaurar" algo: el baseline es fan/main, NUNCA un commit anterior.
+# Si docs y código están desfasados: arreglar en commits surgicales, no reescritura masiva.
+```
+
+### Por qué se preservan las menciones a "Fenix" en AGENTS.md/PLAN.md
+
+Las dos referencias explícitas a "Fenix" en estos archivos son **advertencias intencionales** ("No confundir con el antiguo servidor Fenix — esa infra ya no existe" y "NO usar redes externas tipo proxy ni labels traefik — eso era del server Fenix"). Están preservadas verbatim para que un agente futuro que aterrice sin contexto no reintroduzca traefik o use rutas del server fenix viejo (`/home/jnovoas/Desarrollo/`). **No las "limpies" sin reemplazarlas con un test que verifique que el lector las va a entender igual.**
+
+---
+
 ## 1. Design system — "The Digital Steward"
 
 Fuente de verdad: **Google Stitch project `4741044715461206908`** ("Interfaz Diseño Proyecto"). Acceso vía MCP Stitch (`mcp__stitch__list_screens`, `get_screen`, etc.). ~25 pantallas diseñadas (desktop 1280 + mobile 390).
