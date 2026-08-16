@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
+import { OAuthService } from './oauth/oauth.service';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { LoginDto } from './dto/login.dto';
@@ -20,7 +21,8 @@ import { OAuthLoginDto, OAuthRegisterDto } from './dto/oauth.dto';
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly oauth: OAuthService,private readonly authService: AuthService) {}
+    private readonly oauth: OAuthService,
+    private readonly authService: AuthService) {}
 
   // ====================================================================
   // Local (email + password)
