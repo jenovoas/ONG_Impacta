@@ -56,12 +56,13 @@ services:
     build:
       context: ./landing
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BACKEND_URL: https://api-impacta.pinguinoseguro.cl
     container_name: impacta-landing
     environment:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
-      NEXT_PUBLIC_BACKEND_URL: https://api-impacta.pinguinoseguro.cl
     ports:
       - "3080:3000"
     restart: unless-stopped
