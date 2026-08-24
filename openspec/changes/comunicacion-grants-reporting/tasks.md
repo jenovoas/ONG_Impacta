@@ -25,4 +25,4 @@
 
 - [ ] 5.1 Tests backend: anti-dup de jornadas (mismo `memberId + stepId` re-ejecutado no reenvía), aislamiento de grants/observaciones entre dos tenants, validación lat/lng y `iucnStatus` enum
 - [ ] 5.2 Docs: `README.md` con nuevas rutas `/jornadas`, `/subvenciones`, `/board`; nota de consentimiento y soberanía de datos en `AGENTS.md`/guía de comunicación
-- [ ] 5.3 Verificación: `npm run build` frontend y backend, `npm test` backend verde, `./deploy.sh frontend`, `./deploy.sh verify` (impacta 200, app-impacta 301, api 401, public-stats real) y navegación manual de las 4 pantallas nuevas
+- [ ] 5.3 Verificación: `npm run build` frontend y backend, `npm test` backend verde, `./deploy.sh frontend`, `./deploy.sh verify` (impacta 200, impacta.pinguinoseguro.cl 301, api 401, public-stats real) y navegación manual de las 4 pantallas nuevas

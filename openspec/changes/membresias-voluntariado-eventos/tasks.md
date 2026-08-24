@@ -30,4 +30,4 @@
 
 - [ ] 5.1 Aislamiento: grep `organizationId` en `memberships/volunteers/events` services (filtro obligatorio en todo query/update), tests con dos tenants en una misma sesión
 - [ ] 5.2 Docs: actualizar `README.md` y `AGENTS.md` regla #1 con los tres módulos y rutas nuevas
-- [ ] 5.3 Verificación: `npm run build` frontend y backend, `npm test` backend completo, `./deploy.sh` (frontend y backend) y `./deploy.sh verify` (impacta 200, api 401, `app-impacta` 301), test manual de tier, turno y check-in QR
+- [ ] 5.3 Verificación: `npm run build` frontend y backend, `npm test` backend completo, `./deploy.sh` (frontend y backend) y `./deploy.sh verify` (impacta 200, api 401, `impacta.pinguinoseguro.cl` 301), test manual de tier, turno y check-in QR

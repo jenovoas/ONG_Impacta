@@ -106,10 +106,10 @@ Fuente de verdad: **Google Stitch project `4741044715461206908`** ("Interfaz Dis
 
 > **Nota:** esta fase fue planificada cuando el diseño era multi-dominio. Desde el
 > 24-ago-2026 rige la regla #1: UN SOLO SISTEMA en `impacta.pinguinoseguro.cl`;
-> `app-impacta.*` solo redirige (301) y la API vive en `api-impacta.*`.
+> Todo vive bajo `https://impacta.pinguinoseguro.cl`.
 
 **Pre-requisitos cumplidos:**
-- Backend expuesto en `impacta.pinguinoseguro.cl/api` ✅
+- Backend expuesto en `/api` bajo `impacta.pinguinoseguro.cl` ✅
 - Frontend desplegado en `impacta.pinguinoseguro.cl` (landing + auth + dashboard, un build) ✅
 - CORS configurado ✅
 

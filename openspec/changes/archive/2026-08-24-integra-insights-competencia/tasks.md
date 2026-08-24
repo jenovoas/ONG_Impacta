@@ -24,6 +24,6 @@
 
 ## 5. Hardening + docs + verificación
 
-- [x] 5.1 Limpieza: verificar que `app-impacta` sigue 301 y que `misiones-db` aisla por `orgId:userId` — grep `pendingSync` sin filtro debe fallar
+- [x] 5.1 Limpieza: verificar que `impacta.pinguinoseguro.cl` sigue 301 y que `misiones-db` aisla por `orgId:userId` — grep `pendingSync` sin filtro debe fallar
 - [x] 5.2 Docs: actualizar `AGENTS.md` regla #1 y `README.md` con nuevas rutas `/portal` y nota offline
-- [x] 5.3 Verificación post-deploy: `npm run build` frontend/backend, `npm test` backend 11/11, `./deploy.sh frontend`, `./deploy.sh verify` (impacta 200, app-impacta 301, api 401, public-stats real), navegación manual `/portal` + offline (Airplane mode) en Chrome
+- [x] 5.3 Verificación post-deploy: `npm run build` frontend/backend, `npm test` backend 11/11, `./deploy.sh frontend`, `./deploy.sh verify` (impacta 200, impacta.pinguinoseguro.cl 301, api 401, public-stats real), navegación manual `/portal` + offline (Airplane mode) en Chrome

@@ -1,6 +1,6 @@
 ## Context
 
-Impacta+ es **UN SOLO SISTEMA** estable: Vite+React 19 + TanStack Query en `https://impacta.pinguinoseguro.cl/`, backend NestJS 11 + Prisma 5 + Postgres nativo en `api-impacta.*`, nginx `proxy_pass /api/` → `127.0.0.1:3001`. Multi-tenant estricto con `organizationId` en cada registro, CLP entero.
+Impacta+ es **UN SOLO SISTEMA** estable: Vite+React 19 + TanStack Query en `https://impacta.pinguinoseguro.cl/`, backend NestJS 11 + Prisma 5 + Postgres nativo en `impacta.pinguinoseguro.cl/api`, nginx `proxy_pass /api/` → `127.0.0.1:3001`. Multi-tenant estricto con `organizationId` en cada registro, CLP entero.
 
 Hoy `Campaign { goalAmount, currentAmount, status }` con `Donation { amount, status, recurringStatus, campaignId, gatewayRef }`. `recurringStatus` (ACTIVE/PAUSED/CANCELLED) es un flag sobre una donación puntual, no una suscripción con ciclo de cobro. El portal donante existe (`PortalDonante.tsx` + `PATCH /donations/recurring/:id`) pero opera sobre ese flag, sin pasarela chilena real ni cobro programado. No hay crowdfunding personal ni trazabilidad de pago por gift/QR.
 

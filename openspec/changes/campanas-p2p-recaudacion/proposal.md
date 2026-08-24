@@ -38,5 +38,5 @@ Impacta+ ya tiene `Donation.recurringStatus` (ACTIVE/PAUSED/CANCELLED) y portal 
   - `payments` — integración Webpay Plus Malla (transbank-sdk) y/o Flow; webhook/callback de confirmación.
 - **Prisma** (`backend/prisma/schema.prisma`): `CampaignP2PPage`, `RecurringSubscription`, campos `captureId`/`chargeReference` y relación `giftOf`/`sourceType` en `Donation`.
 - **Frontend** (`frontend/src/pages/`): `CampanaP2P.tsx` (crear/editar página), `P2PPublicPage.tsx` (ruta pública de compartir con QR), ampliación de `PortalDonante.tsx` para gestionar suscripciones Webpay/Flow (complementa `portal-donante`), `RecurringSubscription` UI (frequency selector en donaciones).
-- **Infra**: sin cambios — sigue dominio único `impacta.*`, API en `api-impacta.*`, `app-impacta` 301. Se añaden credentials de Webpay/Flow al `.env` (solo server).
+- **Infra**: sin cambios — sigue dominio único `impacta.*`, API en `impacta.pinguinoseguro.cl/api`, `impacta.pinguinoseguro.cl` 301. Se añaden credentials de Webpay/Flow al `.env` (solo server).
 - **Riesgos**: duplicado de cobro en retry de pasarela (mitigado por idempotencia `chargeReference`); enumeración de URLs P2P (mitigado por slug aleatorio + 404 genérico); fuera de scope el CRM/Salesforce complejo.

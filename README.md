@@ -15,7 +15,7 @@
 | :--- | :--- | :--- |
 | **🌐 Plataforma** | [impacta.pinguinoseguro.cl](https://impacta.pinguinoseguro.cl) | Landing pública (EarthBackground 3D, stats reales, demo modal) + acceso, portal donante y dashboard |
 | **⚙️ Backend API** | [impacta.pinguinoseguro.cl/api](https://impacta.pinguinoseguro.cl/api) | API NestJS multi-tenant |
-| ~~app-impacta~~ | — | Dominio legado: redirige a `impacta.*`; no agregar funcionalidad ahí |
+
 
 ---
 

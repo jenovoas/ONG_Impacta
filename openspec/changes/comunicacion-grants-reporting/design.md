@@ -1,6 +1,6 @@
 ## Context
 
-Impacta+ está estabilizado como **UN SOLO SISTEMA** (landing + front + panel en `https://impacta.pinguinoseguro.cl`, `app-impacta` 301, fake data eliminada). Stack: Vite+React 19 + TanStack Query, NestJS 11 + Prisma 5 + Postgres nativo + Redis, nginx proxy `/api/` → `127.0.0.1:3001`, multi-tenant estricto por `organizationId`. Hoy Especies es CRUD básico, no existen Journey/Segment ni Grant/BoardMember. Investigación muestra que Procurios gana por journeys, Serv.ly por engagement/comunidades, MissionOps por grants+board+KPIs y SERCA por especies con UICN/observaciones/mapas — todo aditivo sin romper dominio único ni multi-tenant.
+Impacta+ está estabilizado como **UN SOLO SISTEMA** (landing + front + panel en `https://impacta.pinguinoseguro.cl`, `impacta.pinguinoseguro.cl` 301, fake data eliminada). Stack: Vite+React 19 + TanStack Query, NestJS 11 + Prisma 5 + Postgres nativo + Redis, nginx proxy `/api/` → `127.0.0.1:3001`, multi-tenant estricto por `organizationId`. Hoy Especies es CRUD básico, no existen Journey/Segment ni Grant/BoardMember. Investigación muestra que Procurios gana por journeys, Serv.ly por engagement/comunidades, MissionOps por grants+board+KPIs y SERCA por especies con UICN/observaciones/mapas — todo aditivo sin romper dominio único ni multi-tenant.
 
 ## Goals / Non-Goals
 

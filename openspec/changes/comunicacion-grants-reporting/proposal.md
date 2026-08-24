@@ -32,6 +32,6 @@ Si no integramos estos tres aprendizajes, Impacta+ sigue como “CRM de campaña
 
 - **Frontend**: `frontend/src/pages/Jornadas.tsx`, `frontend/src/pages/Subvenciones.tsx`, `frontend/src/pages/BoardPortal.tsx`, `frontend/src/pages/EspeciesAvanzada.tsx` + componentes (editor de journey, editor de plantilla, mapa Leaflet), rutas nuevas en `App.tsx`, extensión de `frontend/src/pages/Especies.tsx`.
 - **Backend**: `backend/src/modules/comunicacion` (Segment, Journey, JourneyStep, plantillas, envío), `backend/src/modules/subvenciones` (Grant, GrantDocument, BoardMember), `backend/src/modules/especies` (SpeciesObservation, multimedia, `GET /species/:id/map`), Prisma models nuevos.
-- **Infra**: Sin cambios — sigue dominio único `impacta.*` (API en `api-impacta.*`), `app-impacta` 301. Nativo systemd. Envío email/SMS a través de proveedor transaccional (Resend/Twilio) con API keys en `.env`; sin infra nueva.
+- **Infra**: Sin cambios — sigue dominio único `impacta.*` (API en `impacta.pinguinoseguro.cl/api`), `impacta.pinguinoseguro.cl` 301. Nativo systemd. Envío email/SMS a través de proveedor transaccional (Resend/Twilio) con API keys en `.env`; sin infra nueva.
 - **Docs**: `README.md`, `openspec/specs/jornadas-comunicacion`, `subvenciones-board`, `especies-avanzada`.
 - **Riesgos**: envío no deseado (spam) requiere consenso/log; soberanía de datos de donantes localizando PII en Postgres nativo y plantillas sin exponer tokens; observaciones geo-referenciadas deben aislarse por tenant.

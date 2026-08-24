@@ -4,7 +4,7 @@ Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier 
 
 ## ⚠️ UN SOLO SISTEMA — UN SOLO DOMINIO (regla #1 — consolidado 2026-08-24)
 
-> 🛑 **ANTI-ALUCINACIÓN (NUNCA INVENTES SUBDOMINIOS):** En sesiones pasadas, varias IAs arruinaron el despliegue al inventar e intentar usar subdominios falsos como , , , , etc. **ESTO ESTÁ ESTRICTAMENTE PROHIBIDO**. Todo (frontend, API, webhooks de pagos) se rutea bajo . Configurar o sugerir despliegues en otros subdominios romperá la aplicación.
+> 🛑 **ANTI-ALUCINACIÓN (NUNCA INVENTES SUBDOMINIOS):** En sesiones pasadas, varias IAs arruinaron el despliegue al inventar e intentar usar subdominios falsos. **ESTO ESTÁ ESTRICTAMENTE PROHIBIDO**. Todo (frontend, API, webhooks de pagos) se rutea bajo **`https://impacta.pinguinoseguro.cl`**. Configurar o sugerir despliegues en otros subdominios romperá la aplicación.
 
 **Impacta+ es UN SOLO SISTEMA con 3 capas en un mismo build:** Landing + Front (auth) + Panel de Control de Usuarios. Todo lo usuario-facing vive en **`https://impacta.pinguinoseguro.cl`**:
 
@@ -12,18 +12,18 @@ Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier 
 |---|---|
 | `/` | 🌐 **Landing pública** (marketing) — EarthBackground 3D, logo.png, navbar, cards "Ver módulo en acción", demo modal, stats reales |
 | `/login`, `/register` | 🔐 Acceso — requiere credenciales |
-| `/portal` | 🎁 **Portal Donante** — historial, recibos PDF y recurrencia self-service (desde `integra-insights-competencia`) |
+| `/portal` | 🎁 **Portal Donante** — historial, recibos PDF y recurrencia self-service |
 | `/dashboard/*` | 📊 **Panel de Control de Usuarios** — Overview, Members, Donations, Campaigns, Species, Missions (offline-first con IndexedDB + sync), Profile |
 
 Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` → entra a `/dashboard`. Sin sesión, solo landing. Donantes usan `/portal` con mismo dominio único.
 
-- **Desambiguación obligatoria:** **LandingPage** = componente React en [`frontend/src/pages/LandingPage.tsx`](frontend/src/pages/LandingPage.tsx) (parte del build de `frontend/`). **`landing/`** = proyecto Next.js separado, NO desplegado, conservado como referencia. Nunca uses "landing" y "dashboard" como sinónimos ni mezcles sus responsabilidades — esa confusión causó el desastre del 13-ago (ver más abajo).
+- **Desambiguación obligatoria:** **LandingPage** = componente React en [`frontend/src/pages/LandingPage.tsx`](frontend/src/pages/LandingPage.tsx) (parte del build de `frontend/`). **`landing/`** = proyecto Next.js separado, NO desplegado, conservado como referencia. Nunca uses "landing" y "dashboard" como sinónimos ni mezcles sus responsabilidades — esa confusión causó el desastre del 13-ago.
 
 ## Estructura del monorepo
 
 - [backend/](backend/) — NestJS 11 + Prisma 5 + Postgres. Ver [backend/AGENTS.md](backend/AGENTS.md).
 - [landing/](landing/) — Next.js 16 + Tailwind v4. **NO desplegado en producción** (Path A revocado el 16-ago-2026). Conservado solo como referencia de diseño (tokens `@theme` en `app/globals.css`) y wiring real (`DemoRequest`, `public-stats`).
-- [frontend/](frontend/) — Vite + React 19 + TanStack Query. **Sirve UN SOLO SISTEMA** (ver regla #1): Landing (`LandingPage.tsx` en `/`) + Front auth (`/login`, `/register`) + Panel de Control de Usuarios (`/dashboard/*`: Overview, Members, Donations, Campaigns, Species, Missions, Profile). Un build → `/var/www/impacta.pinguinoseguro.cl/`.
+- [frontend/](frontend/) — Vite + React 19 + TanStack Query. **Sirve UN SOLO SISTEMA** (ver regla #1): Landing (`LandingPage.tsx` en `/`) + Front auth (`/login`, `/register`) + Panel de Control de Usuarios (`/dashboard/*`). Un build → `/var/www/impacta.pinguinoseguro.cl/`.
 - [infra/nginx/](infra/nginx/) — copia versionada de la config nginx activa en el server.
 - [Impacta+PRD.md](Impacta+PRD.md), [DISENO_IDENTIDAD_VISUAL.md](DISENO_IDENTIDAD_VISUAL.md) — producto y marca.
 - [docker-compose.yml](docker-compose.yml) — **solo desarrollo local** (postgres 5435 + redis 6381 + backend). En producción NADA corre en contenedores.
@@ -38,15 +38,15 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 
 **VM Azure `fenix`, Ubuntu 24.04 LTS. Serving edge: nginx directo. Este stack NO usa contenedores en producción.**
 
-> ⚠️ **Nota de nombres (leer con cuidado):** hubo un server antiguo también llamado "Fenix" (pre-2026, ruta `/home/jnovoas/Desarrollo/`) y uno llamado **`fan`** (Rocky/podman, **apagado el 23-ago-2026**, ruta `/home/jnovoas/ONG_Impacta/`). El server ACTUAL es esta VM Azure llamada `fenix`, path `/home/jnovoas/proyectos/ONG_Impacta/`. Cualquier doc que hable de podman rootless, puertos host 5435/6381/3080 o volúmenes SELinux `:z` describe el server fan RETIRADO — ya no aplica.
+> ⚠️ **Nota de nombres:** hubo un server antiguo también llamado "Fenix" (pre-2026, ruta `/home/jnovoas/Desarrollo/`) y uno llamado **`fan`** (Rocky/podman, **apagado el 23-ago-2026**, ruta `/home/jnovoas/ONG_Impacta/`). El server ACTUAL es esta VM Azure llamada `fenix`, path `/home/jnovoas/proyectos/ONG_Impacta/`. Cualquier doc que hable de podman rootless, puertos host 5435/6381/3080 o volúmenes SELinux `:z` describe el server fan RETIRADO — ya no aplica.
 
 - Host compartido con **múltiples proyectos en producción** (pinguinoseguro, laespiguita, lotaindomito, micelia, portfolio, transcript). **Regla dura: NO tocar infra existente de otros proyectos.** Solo agregar servicios.
-- Wildcard cert `*.pinguinoseguro.cl` (`/etc/letsencrypt/live/pinguinoseguro.cl/`). Cubre un nivel de subdominio — usar `impacta.pinguinoseguro.cl/api` (**no** `api.impacta.pinguinoseguro.cl`).
+- Wildcard cert `*.pinguinoseguro.cl` (`/etc/letsencrypt/live/pinguinoseguro.cl/`). Cubre un nivel de subdominio. **NO usar subdominios para Impacta+.**
 - **Stack de Impacta en fenix (todo nativo):**
   - PostgreSQL 16 nativo — servicio systemd `postgresql`, escucha `127.0.0.1:5432`, DB `impacta`
   - Redis nativo — servicio systemd `redis-server`, escucha `127.0.0.1:6379`
   - Backend NestJS — servicio systemd **`impacta-backend.service`** (unit file en `/etc/systemd/system/`, user `jnovoas`, WorkingDirectory `~/proyectos/ONG_Impacta/backend`, `EnvironmentFile=~/proyectos/ONG_Impacta/.env`), puerto 3001
-  - Frontend — **un solo sistema** servido por nginx desde `/var/www/impacta.pinguinoseguro.cl/` (landing + dashboard); `app-impacta.*` no sirve contenido — solo `301` a `impacta.*`. Nginx hace `proxy_pass http://127.0.0.1:3001` para `/api/`
+  - Frontend — **un solo sistema** servido por nginx desde `/var/www/impacta.pinguinoseguro.cl/` (landing + dashboard). Nginx hace `proxy_pass http://127.0.0.1:3001` para `/api/`.
 - Configuración nginx activa: `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf` (copia versionada en [infra/nginx/](infra/nginx/)).
 
 ## Comandos base
@@ -65,19 +65,15 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 Verificación manual rápida:
 ```bash
 systemctl status impacta-backend.service
-for h in impacta api-impacta; do
-  curl -s -o /dev/null -w "$h.pinguinoseguro.cl: %{http_code}\n" -m 5 https://$h.pinguinoseguro.cl/
-done
-curl -s -o /dev/null -w "impacta.pinguinoseguro.cl: %{http_code} (debe ser 301 → impacta.*)\n" -m 5 https://impacta.pinguinoseguro.cl/
+curl -s -o /dev/null -w "impacta.pinguinoseguro.cl: %{http_code}\n" -m 5 https://impacta.pinguinoseguro.cl/
 curl -s https://impacta.pinguinoseguro.cl/api/organizations/public-stats | jq .
 ```
 
 ## Estado actual (2026-08-24 — single system)
 
-- `https://impacta.pinguinoseguro.cl` — **UN SOLO SISTEMA**: landing pública (`LandingPage.tsx` con EarthBackground Three.js, stats reales vía `/api/organizations/public-stats`) + Front auth (`/login`, `/register`) + Panel de Control de Usuarios (`/dashboard/*`: Overview, Members, Donations, Campaigns, Species, Missions, Profile). Un build → `/var/www/impacta.pinguinoseguro.cl/`.
-- `https://impacta.pinguinoseguro.cl` — **no sirve contenido**, solo `301 → https://impacta.pinguinoseguro.cl` (legado para bookmarks/DNS viejos). No agregar funcionalidad ahí — es un solo sistema, no dos.
-- `https://impacta.pinguinoseguro.cl/api` — backend NestJS 11 corriendo como `impacta-backend.service`. Nota: `/health` responde 404 actualmente (endpoint no existe en el código pese a menciones históricas).
-- Producción quedó sincronizada con `origin/main` durante la migración del 23-ago-2026 y consolidación a dominio único del 24-ago-2026 (verificado: `301` para app-impacta, bundle desplegado = build de main).
+- `https://impacta.pinguinoseguro.cl` — **UN SOLO SISTEMA**: landing pública (`LandingPage.tsx` con EarthBackground Three.js, stats reales vía `/api/organizations/public-stats`) + Front auth (`/login`, `/register`) + Panel de Control de Usuarios (`/dashboard/*`). Un build → `/var/www/impacta.pinguinoseguro.cl/`.
+- `https://impacta.pinguinoseguro.cl/api` — backend NestJS 11 corriendo como `impacta-backend.service`.
+- Producción quedó sincronizada con `origin/main` durante la migración del 23-ago-2026 y consolidación a dominio único del 24-ago-2026.
 
 ## Convenciones de commits
 
@@ -89,7 +85,6 @@ curl -s https://impacta.pinguinoseguro.cl/api/organizations/public-stats | jq .
 - Ejecución de tareas: completas, no atajos. El usuario ha pedido explícitamente "no me simplifiques cosas".
 - Cambios en infra/compose/servicios visibles: confirmar antes de aplicar.
 - **Lección 16-ago-2026 (Path A revert):** nunca reemplaces un diseño más rico con uno más pobre. El frontend React tiene `EarthBackground` (Three.js), `logo.png`, navbar con Inicio/Módulos/Impacto Vivo, cards con "Ver módulo en acción", modal con logo, footer con imagen. El Next.js landing genérico NO tiene nada de eso. Si una decisión arquitectural ("Path A: deploy Next.js") requiere borrar elementos visuales visibles (animaciones, branding, secciones), **parar y consultar al usuario**.
-
 
 ## Source of truth y anti-patrones (leer antes de operar)
 
@@ -121,4 +116,4 @@ git checkout -b feat/<scope>
 #    luego deploy con ./deploy.sh frontend|backend y verificar
 ```
 
-Si encuentras docs desfasados (como pasó aquí con "Rocky 9" → "Rocky 10.2", "Servidor Fenix" → "Servidor fan"), arréglalos en commits surgicales — **no reescribas masivamente el archivo**.
+Si encuentras docs desfasados, arréglalos en commits quirúrgicos — **no reescribas masivamente el archivo**.
