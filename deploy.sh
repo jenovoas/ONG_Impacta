@@ -6,12 +6,13 @@
 #   ./deploy.sh frontend   # build de frontend/ → copia dist/ a /var/www/ (landing + dashboard)
 #   ./deploy.sh backend    # build de backend/  → restart del servicio systemd impacta-backend
 #   ./deploy.sh migrate    # ejecuta prisma migrate deploy contra la DB nativa
-#   ./deploy.sh verify     # verificación post-deploy de los 3 dominios + API
+#   ./deploy.sh verify     # verificación post-deploy (dominio único + API + redirect legado)
 #
 # Realidad de producción (ver AGENTS.md):
 #   - Postgres 16 y Redis corren NATIVOS como servicios systemd (no hay contenedores).
 #   - El backend corre como servicio systemd `impacta-backend.service` desde backend/dist/.
-#   - Ambos dominios web (landing + dashboard) se sirven desde /var/www/impacta.pinguinoseguro.cl/.
+#   - Dominio único impacta.pinguinoseguro.cl sirve landing + dashboard desde /var/www/impacta.pinguinoseguro.cl/.
+#   - app-impacta.pinguinoseguro.cl es solo redirect 301 legado (no sirve contenido).
 
 set -euo pipefail
 
@@ -29,7 +30,7 @@ require_repo_root() {
 
 deploy_frontend() {
   require_repo_root
-  log "Build de frontend/ (sirve landing impacta.* Y dashboard app-impacta.*)..."
+  log "Build de frontend/ (dominio único impacta.* — landing + dashboard)..."
   (
     cd "$REPO_ROOT/frontend"
     npm ci --silent 2>/dev/null || npm install --silent
@@ -41,7 +42,7 @@ deploy_frontend() {
   sudo rsync -a --delete --chown=www-data:www-data \
     --exclude='.well-known' \
     "$REPO_ROOT/frontend/dist/" "$WWW_DIR/"
-  ok "Frontend desplegado en $WWW_DIR (ambos dominios)"
+  ok "Frontend desplegado en $WWW_DIR (dominio único impacta.*)"
 }
 
 deploy_backend() {
@@ -84,6 +85,7 @@ verify() {
     code=$(curl -s -o /dev/null -w '%{http_code}' -m 8 "https://$h.pinguinoseguro.cl/" || echo 'ERR')
     case "$h" in
       api-impacta) [[ "$code" == '200' || "$code" == '401' ]] && verdict='ok (API responde)' || { verdict='FAIL'; fails=$((fails+1)); } ;;
+      app-impacta) [[ "$code" == '301' ]] && verdict='ok (301 → impacta.*)' || { verdict='FAIL (esperaba 301)'; fails=$((fails+1)); } ;;
       *)           [[ "$code" == '200' ]] && verdict='ok' || { verdict='FAIL'; fails=$((fails+1)); } ;;
     esac
     printf '  %-28s %s %s\n' "$h.pinguinoseguro.cl" "$code" "$verdict"
