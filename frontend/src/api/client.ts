@@ -1,8 +1,12 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/auth.store';
 
+// El backend vive detrás del proxy /api/ de nginx (que strippea el prefijo).
+// VITE_API_URL permite apuntar a otro origen (ej: api-impacta directo en dev).
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '',
+  baseURL: API_BASE,
 });
 
 client.interceptors.request.use((config) => {
@@ -32,7 +36,7 @@ client.interceptors.response.use(
     try {
       if (!refreshing) {
         refreshing = axios
-          .post((import.meta.env.VITE_API_URL || '') + '/auth/refresh',
+          .post(API_BASE + '/auth/refresh',
             { refreshToken }, { headers: { 'Content-Type': 'application/json' } })
           .then((r) => {
             const { access_token, refresh_token } = r.data;
