@@ -61,10 +61,7 @@ export class AuthService {
   }
 
   async login(user: any, ctx?: { userAgent?: string; ipAddress?: string }) {
-    return this.generateTokenPair(
-      { id: user.id, email: user.email, orgId: user.organizationId, role: user.role },
-      ctx,
-    );
+    return this.issueTokensForUser(user, ctx);
   }
 
   async register(dto: RegisterDto, ctx?: { userAgent?: string; ipAddress?: string }) {

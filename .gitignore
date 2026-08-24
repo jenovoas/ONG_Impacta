@@ -28,4 +28,7 @@ build
 # Agent/tool session state (no es código del proyecto)
 .omo/
 .dsh/
+.playwright-mcp/
+.code-review-graph/
+.codegraph/
 
