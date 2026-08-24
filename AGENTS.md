@@ -17,9 +17,7 @@ Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier 
 
 Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` → entra a `/dashboard`. Sin sesión, solo landing. Donantes usan `/portal` con mismo dominio único.
 
-- **`app-impacta.pinguinoseguro.cl` está DEPRECADO y NO es un segundo sistema**: quedó del diseño anterior de dos dominios. Hoy **no sirve contenido** — nginx hace `return 301 https://impacta.pinguinoseguro.cl$request_uri` (el `LegacyDomainRedirect` en `frontend/src/App.tsx` queda solo como respaldo en JS). No agregues funcionalidad ahí; la sesión vive en el localStorage de un único dominio a propósito. Es un solo sistema, no dos.
 - **Desambiguación obligatoria:** **LandingPage** = componente React en [`frontend/src/pages/LandingPage.tsx`](frontend/src/pages/LandingPage.tsx) (parte del build de `frontend/`). **`landing/`** = proyecto Next.js separado, NO desplegado, conservado como referencia. Nunca uses "landing" y "dashboard" como sinónimos ni mezcles sus responsabilidades — esa confusión causó el desastre del 13-ago (ver más abajo).
-- La API se sirve en la misma ruta: `impacta.pinguinoseguro.cl/api/` (proxy a :3001). `api-impacta.*` redirige (301) a `impacta.*`.
 
 ## Estructura del monorepo
 

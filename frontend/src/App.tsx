@@ -21,23 +21,12 @@ const queryClient = new QueryClient();
 // (/), login, registro y dashboard. app-* quedó como legado y redirige ahí,
 // porque la sesión vive en el localStorage de UN dominio (zustand persist).
 
-function LegacyDomainRedirect() {
-  const { pathname, search } = useLocation();
-  useEffect(() => {
-    if (window.location.hostname.startsWith('app-')) {
-      window.location.replace(`https://impacta.pinguinoseguro.cl${pathname}${search}`);
-    }
-  }, [pathname, search]);
-  return null;
-}
-
 function App() {
   const accessToken = useAuthStore((state) => state.accessToken);
 
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <LegacyDomainRedirect />
         <Routes>
           <Route path="/" element={<LandingPage />} />
 

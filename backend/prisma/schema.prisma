@@ -24,6 +24,8 @@ model Organization {
   members     Member[]
   donations   Donation[]
   campaigns   Campaign[]
+  p2pPages    CampaignP2PPage[]
+  subscriptions RecurringSubscription[]
   species     Species[]
   missions    Mission[]
 }
@@ -61,6 +63,8 @@ model Member {
   
   organization   Organization @relation(fields: [organizationId], references: [id])
   donations      Donation[]
+  p2pPages       CampaignP2PPage[]
+  subscriptions  RecurringSubscription[]
 
   @@unique([organizationId, rut])
 }
@@ -78,9 +82,18 @@ model Donation {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+    sourceType      String?  // DIRECT, P2P, SUBSCRIPTION
+  sourceId        String?  // Id of P2P Page or Subscription
+  captureId       String?  @unique // Ref única real de la pasarela para este cobro puntual
+  chargeReference String?  @unique // Idempotencia de job de cobro
+  p2pPageId       String?
+  subscriptionId  String?
+
   organization    Organization @relation(fields: [organizationId], references: [id])
   member          Member?      @relation(fields: [memberId], references: [id])
   campaign        Campaign?    @relation(fields: [campaignId], references: [id])
+  p2pPage         CampaignP2PPage? @relation(fields: [p2pPageId], references: [id])
+  subscription    RecurringSubscription? @relation(fields: [subscriptionId], references: [id])
 }
 
 model Campaign {
@@ -98,7 +111,50 @@ model Campaign {
 
   organization    Organization @relation(fields: [organizationId], references: [id])
   donations       Donation[]
+  p2pPages        CampaignP2PPage[]
+  subscriptions   RecurringSubscription[]
 }
+
+model CampaignP2PPage {
+  id              String   @id @default(uuid())
+  organizationId  String
+  campaignId      String
+  memberId        String
+  slug            String
+  title           String
+  personalGoal    Decimal? @db.Decimal(15, 2)
+  currentAmount   Decimal  @default(0) @db.Decimal(15, 2)
+  status          String   @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  campaign        Campaign     @relation(fields: [campaignId], references: [id])
+  member          Member       @relation(fields: [memberId], references: [id])
+  donations       Donation[]
+
+  @@unique([organizationId, slug])
+}
+
+model RecurringSubscription {
+  id              String   @id @default(uuid())
+  organizationId  String
+  memberId        String
+  campaignId      String?
+  frequency       String   // MONTHLY, QUARTERLY, ANNUAL
+  amount          Decimal  @db.Decimal(15, 2)
+  nextChargeAt    DateTime
+  status          String   @default("ACTIVE") // ACTIVE, PAUSED, CANCELLED
+  captureId       String?  @unique // Referencia al token/mandato en la pasarela (Webpay/Flow)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  member          Member       @relation(fields: [memberId], references: [id])
+  campaign        Campaign?    @relation(fields: [campaignId], references: [id])
+  donations       Donation[]
+}
+
 
 model Species {
   id              String   @id @default(uuid())

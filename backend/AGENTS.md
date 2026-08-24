@@ -2,7 +2,6 @@
 
 > 🛑 **ANTI-ALUCINACIÓN (NUNCA INVENTES SUBDOMINIOS):** En sesiones pasadas, varias IAs arruinaron el despliegue al inventar e intentar usar subdominios falsos como , , , , etc. **ESTO ESTÁ ESTRICTAMENTE PROHIBIDO**. Todo (frontend, API, webhooks de pagos) se rutea bajo . Configurar o sugerir despliegues en otros subdominios romperá la aplicación.
 
-API REST multi-tenant para Impacta+. Expuesta como `https://api-impacta.pinguinoseguro.cl` vía nginx (`proxy_pass http://127.0.0.1:3001`) y como `https://impacta.pinguinoseguro.cl/api/` (proxy same-origin). Ver [../AGENTS.md](../AGENTS.md) regla #1 — UN SOLO SISTEMA: `impacta.*` sirve landing + front + panel, `app-impacta.*` es solo `301`, la API va aparte.
 
 ## Stack
 
