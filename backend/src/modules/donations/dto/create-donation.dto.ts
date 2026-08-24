@@ -17,4 +17,12 @@ export class CreateDonationDto {
   @IsUUID()
   @IsOptional()
   campaignId?: string;
+
+  @IsString()
+  @IsOptional()
+  sourceType?: 'DIRECT' | 'P2P' | 'SUBSCRIPTION';
+
+  @IsUUID()
+  @IsOptional()
+  p2pPageId?: string;
 }

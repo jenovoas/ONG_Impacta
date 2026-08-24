@@ -43,18 +43,33 @@ export class DonationsService {
       }
     }
 
+    // Si se provee p2pPageId, verificar que exista y esté activo
+    if (dto.p2pPageId) {
+      const p2pPage = await this.prisma.campaignP2PPage.findUnique({
+        where: { id: dto.p2pPageId },
+      });
+      if (!p2pPage || p2pPage.organizationId !== orgId) {
+        throw new NotFoundException('P2P page not found in this organization');
+      }
+    }
+
+    const sourceType = dto.sourceType || (dto.p2pPageId ? 'P2P' : 'DIRECT');
+    const sourceId = dto.p2pPageId || dto.campaignId || null;
+
     const donation = await this.prisma.donation.create({
       data: {
         organizationId: orgId,
         memberId: dto.memberId,
         campaignId: dto.campaignId,
+        p2pPageId: dto.p2pPageId,
         amount: dto.amount,
         currency: dto.currency || 'CLP',
         status: 'PENDING',
+        sourceType,
+        sourceId,
       },
     });
 
-    // Aquí se llamaría a la pasarela de pago para obtener un link/token
     const gatewayRef = `mock_ref_${Math.random().toString(36).substring(7)}`;
 
     const updatedDonation = await this.prisma.donation.update({
@@ -64,7 +79,6 @@ export class DonationsService {
 
     return {
       ...updatedDonation,
-      // Mock hasta integrar pasarela real; dominio único por regla #1 (AGENTS.md).
       paymentUrl: `${process.env.APP_PUBLIC_URL ?? 'https://impacta.pinguinoseguro.cl'}/pay/${updatedDonation.gatewayRef}`,
     };
   }
@@ -73,18 +87,9 @@ export class DonationsService {
     return this.prisma.donation.findMany({
       where: { organizationId: orgId },
       include: {
-        member: {
-          select: {
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-        campaign: {
-          select: {
-            name: true,
-          },
-        },
+        member: { select: { firstName: true, lastName: true, email: true } },
+        campaign: { select: { name: true } },
+        p2pPage: { select: { title: true, slug: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -103,27 +108,79 @@ export class DonationsService {
     return donation;
   }
 
-  async handleCallback(gatewayRef: string, status: 'SUCCEEDED' | 'FAILED') {
-    const donation = await this.prisma.donation.findFirst({
-      where: { gatewayRef },
-    });
+  
+  async confirmDonation(reference: { gatewayRef?: string; captureId?: string }, status: 'SUCCEEDED' | 'FAILED') {
+    const refWhere = reference.captureId
+      ? { captureId: reference.captureId }
+      : reference.gatewayRef
+      ? { gatewayRef: reference.gatewayRef }
+      : null;
 
-    if (!donation) {
-      throw new NotFoundException('Donation not found for this reference');
+    if (!refWhere) {
+      throw new NotFoundException('Payment reference not provided');
     }
 
-    const updatedDonation = await this.prisma.donation.update({
-      where: { id: donation.id },
-      data: { status },
-    });
+    const result = await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.donation.findFirst({
+        where: refWhere,
+        include: { p2pPage: { select: { id: true, campaignId: true } } },
+      });
 
-    // Si la donación fue exitosa y pertenece a una campaña, actualizar el balance de la campaña
-    if (status === 'SUCCEEDED' && updatedDonation.campaignId) {
-      await this.campaignsService.updateBalance(updatedDonation.campaignId);
-    }
+      if (!existing) {
+        throw new NotFoundException('Donation not found for this reference');
+      }
 
-    return updatedDonation;
+      // Idempotencia: si ya fue exitosa, no duplicar
+      if (existing.status === 'SUCCEEDED') {
+        return existing;
+      }
+
+      const updated = await tx.donation.update({
+        where: { id: existing.id },
+        data: {
+          status,
+          ...(reference.captureId ? { captureId: reference.captureId } : {}),
+          ...(reference.gatewayRef ? { gatewayRef: reference.gatewayRef } : {}),
+        },
+      });
+
+      if (status === 'SUCCEEDED') {
+        const amountToAdd = updated.amount;
+
+        if (updated.p2pPageId && existing.p2pPage?.campaignId) {
+          await tx.campaignP2PPage.update({
+            where: { id: updated.p2pPageId },
+            data: {
+              currentAmount: { increment: amountToAdd },
+            },
+          });
+
+          await tx.campaign.update({
+            where: { id: existing.p2pPage.campaignId },
+            data: {
+              currentAmount: { increment: amountToAdd },
+            },
+          });
+        } else if (updated.campaignId) {
+          await tx.campaign.update({
+            where: { id: updated.campaignId },
+            data: {
+              currentAmount: { increment: amountToAdd },
+            },
+          });
+        }
+      }
+
+      return updated;
+    }, { isolationLevel: 'Serializable' });
+
+    return result;
   }
+
+  async handleCallback(gatewayRef: string, status: 'SUCCEEDED' | 'FAILED') {
+    return this.confirmDonation({ gatewayRef }, status);
+  }
+
 
   // --- Endpoints para Portal Donante ---
 
