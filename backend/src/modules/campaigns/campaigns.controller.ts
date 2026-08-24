@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
 import { CampaignsService } from './campaigns.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { CreateP2PPageDto } from './dto/p2p-page.dto';
+import { UpdateP2PPageDto } from './dto/update-p2p-page.dto';
+import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 
@@ -48,6 +50,30 @@ export class CampaignsController {
     @Param('pageId') pageId: string,
   ) {
     return this.campaignsService.getP2PPageById(orgId, campaignId, pageId);
+  }
+
+
+  @Patch(':id/p2p/:pageId')
+  updateP2PPage(
+    @CurrentTenant() orgId: string,
+    @Param('id') campaignId: string,
+    @Param('pageId') pageId: string,
+    @Body() dto: UpdateP2PPageDto,
+  ) {
+    return this.campaignsService.updateP2PPageStatus(orgId, campaignId, pageId, dto.status);
+  }
+
+  @Patch(':id')
+  @Roles('ADMIN')
+  updateCampaign(
+    @CurrentTenant() orgId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateCampaignDto,
+  ) {
+    if (dto.status === 'COMPLETED') {
+      return this.campaignsService.completeCampaign(orgId, id);
+    }
+    return this.campaignsService.updateCampaign(orgId, id, dto);
   }
 
 }
