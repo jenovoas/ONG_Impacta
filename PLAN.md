@@ -4,19 +4,22 @@ Documento autosuficiente: cualquier agente puede recoger este plan sin depender 
 
 ---
 
-## 0. Estado actual (2026-08-16)
+## 0. Estado actual (2026-08-24)
 
-**Infra:** servidor compartido `fan` (Rocky 10.2 (Red Quartz), podman rootless). Serving edge: nginx directo (sin traefik). Wildcard `*.pinguinoseguro.cl` vía certbot + DNS-01 PowerDNS. **NO TOCAR infra existente** de los otros proyectos (pinguinoseguro, laespiguita, lotaindomito, micelia). Solo agregar servicios. Ver [AGENTS.md](AGENTS.md) sección Infraestructura para el patrón de serving.
+**Infra:** servidor **`fenix`**, VM **Azure** con Ubuntu 24.04 LTS. Serving edge: nginx directo. **Stack 100% nativo — NADA corre en contenedores en producción.** Wildcard `*.pinguinoseguro.cl` (`/etc/letsencrypt/live/pinguinoseguro.cl/`). **NO TOCAR infra existente** de los otros proyectos del server (pinguinoseguro, laespiguita, lotaindomito, micelia, portfolio, transcript). Solo agregar servicios. Ver [AGENTS.md](AGENTS.md) sección Infraestructura para el patrón de serving.
+
+> Historia: el stack vivió antes en un VM llamada `fan` (Rocky + podman rootless), **apagada el 23-ago-2026**. La migración a fenix cambió el runtime: postgres/redis nativos vía systemd, backend como proceso node bajo systemd. Todo lo que mencione podman/compose en producción está obsoleto.
 
 **Stack:**
-- `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto en `https://api-impacta.pinguinoseguro.cl` (nginx `proxy_pass` al contenedor `impacta-backend` en `127.0.0.1:3001`).
-- `landing/` — Next.js 16.2.4 (standalone) + Tailwind v4 + Manrope/Inter. **NO desplegado en producción desde `1380fb9`.** El código se conserva en el repo como referencia (incluye el wiring real: `DemoRequest` POST, `public-stats` fetch, `DemoModal` con focus trap + scroll lock). Path A (deploy Next.js en `impacta.pinguinoseguro.cl`) fue revocado por el usuario: degradaba visualmente el sitio (sin Three.js EarthBackground, sin `logo.png`, sin navbar completa, 4972 chars menos de contenido).
-- `frontend/` — Vite + React 19. **Sirve DOS sitios:**
-  - **`https://impacta.pinguinoseguro.cl`** (marketing) — `LandingPage.tsx` con `EarthBackground` (Three.js: tierra rotando + nubes + atmósfera + estrellas), `logo.png` (491 KB), navbar `Inicio / Módulos / Impacto Vivo`, module cards con "Ver módulo en acción", demo modal con logo imagen (POST a `/api/demo-requests`, dedup 5min/email), stats bar con datos REALES desde `/api/organizations/public-stats` (`{speciesCount, totalDonated, donationsCount, missionsCount, orgsCount, membersCount}`), Live Impact mockup, footer con logo.
-  - **`https://app-impacta.pinguinoseguro.cl`** (dashboard SPA) — Login, Overview, Members, Donations, Campaigns, Species, Missions, Organization Profile.
-  - Mismo build estático (`npm run build` → `dist/`), copiado a `/var/www/impacta.pinguinoseguro.cl/` y servido por nginx.
-- `docker-compose.yml` — servicios `postgres` (puerto 5435), `redis` (6381), `backend` (puerto 3001 publicado al host). **NO incluye `landing` desde `1380fb9`** — Path A revocado. **El frontend NO es un servicio del compose**: se construye estático con `npm run build` y el `dist/` se copia manualmente a `/var/www/impacta.pinguinoseguro.cl/`.
-- **Prisma schema:** 8 modelos — `Organization`, `User`, `Member`, `Donation`, `Campaign`, `Species`, `Mission`, `MissionTask`. DB corriendo, migraciones aplicadas (incluida `20260816190000_add_demo_requests`).
+- `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto en `https://api-impacta.pinguinoseguro.cl` (nginx `proxy_pass` al servicio systemd `impacta-backend.service` escuchando en `127.0.0.1:3001`).
+- `landing/` — Next.js 16.2.4 (standalone) + Tailwind v4 + Manrope/Inter. **NO desplegado en producción desde `1380fb9`.** El código se conserva en el repo como referencia (incluye el wiring real: `DemoRequest` POST, `public-stats` fetch, `DemoModal` con focus trap + scroll lock). Path A (deploy Next.js en `impacta.pinguinoseguro.cl`) fue revocado por el usuario: degradaba visualmente el sitio (sin Three.js EarthBackground, sin `logo.png`, sin navbar completa).
+- `frontend/` — Vite + React 19. **Sirve DOS sitios desde UN SOLO build:**
+  - **`https://impacta.pinguinoseguro.cl`** (marketing público) — `LandingPage.tsx` con `EarthBackground` (Three.js: tierra rotando + nubes + atmósfera + estrellas), `logo.png`, navbar, module cards con "Ver módulo en acción", demo modal (POST a `/api/demo-requests`, dedup 5min/email), stats bar con datos REALES desde `/api/organizations/public-stats`. Sin login solo se ve esto.
+  - **`https://app-impacta.pinguinoseguro.cl`** (dashboard SPA) — Login, Overview, Members, Donations, Campaigns, Species, Missions, Organization Profile. Requiere login/registro.
+  - Mismo build estático (`npm run build` → `dist/`), copiado a `/var/www/impacta.pinguinoseguro.cl/` y servido por nginx para ambos dominios.
+- **PostgreSQL 16 NATIVO** (systemd `postgresql`, `127.0.0.1:5432`), DB `impacta`. Migraciones aplicadas (incluida `20260816190000_add_demo_requests`). **Redis NATIVO** (systemd `redis-server`, `127.0.0.1:6379`).
+- [docker-compose.yml](docker-compose.yml) queda **solo para desarrollo local** fuera del server.
+- **Prisma schema:** 8 modelos — `Organization`, `User`, `Member`, `Donation`, `Campaign`, `Species`, `Mission`, `MissionTask`.
 - **MinIO storage service** integrado para upload de imágenes (species).
 
 **Módulos backend existentes y su estado:**
@@ -51,18 +54,19 @@ Después, varios agentes修复 parcialmente moviendo el LandingPage al frontend 
 
 ### La regla
 
-**`fan/main` ES el estado de producción.** Cualquier rama de recovery debe basarse en `fan/main`, no en un commit histórico más viejo. Esto aplica incluso si el commit histórico "parece bueno" por su mensaje.
+**El estado de producción es el repo en este mismo server (`fenix`, `/home/jnovoas/proyectos/ONG_Impacta/`) sincronizado con `origin/main`**, más lo desplegado en `/var/www/impacta.pinguinoseguro.cl/`. Cualquier rama de recovery se basa en `origin/main`, nunca en un commit histórico "que parece bueno".
+
+> Histórico: esta regla decía "`fan/main` ES el estado de producción" y mandaba a hacer `git fetch fan main`. **fan fue apagado el 23-ago-2026** — esas instrucciones ya no aplican; ahora trabajamos directamente en el server.
 
 Workflow correcto:
 ```bash
-# Antes de proponer CUALQUIER cambio de historia / recovery / rebase:
-git fetch fan main
-git log origin/main..fan/main       # ¿hay commits locales en fan no en origin?
-git fetch origin main
-git log fan/main..origin/main       # ¿hay algo en origin que fan no tiene?
+# Antes de proponer CUALQUIER cambio destructivo / recovery / rebase:
+git status                          # ¿repo limpio y sincronizado con origin?
+git log origin/main..HEAD           # ¿hay commits locales sin pushear?
+# Verificar producción: bundle de /var/www vs build actual, systemctl status impacta-backend
 
-# Si vas a "restaurar" algo: el baseline es fan/main, NUNCA un commit anterior.
-# Si docs y código están desfasados: arreglar en commits surgicales, no reescritura masiva.
+# Si vas a "restaurar" algo: el baseline es origin/main + lo desplegado, NUNCA un commit anterior.
+# Si docs y código están desfasados: arreglar en commits quirúrgicos, no reescritura masiva.
 ```
 
 ### Por qué se preservan las menciones a "Fenix" en AGENTS.md/PLAN.md

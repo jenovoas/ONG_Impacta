@@ -9,12 +9,13 @@
 
 ## 🚀 Ecosistema Productivo
 
-| Servicio | Enlace Directo | Estado |
+> **Dos sitios, un solo build:** la landing y el dashboard salen del mismo artefacto estático de `frontend/`; nginx los enruta por dominio. Sin sesión, `impacta.*` solo muestra la landing.
+
+| Servicio | Enlace Directo | Qué es |
 | :--- | :--- | :--- |
-| **🌐 Landing Page** | [impacta.pinguinoseguro.cl](https://impacta.pinguinoseguro.cl) | `Operational` |
-| **📱 Dashboard App** | [app-impacta.pinguinoseguro.cl](https://app-impacta.pinguinoseguro.cl) | `Development` |
-| **⚙️ Backend API** | [api-impacta.pinguinoseguro.cl](https://api-impacta.pinguinoseguro.cl) | `Stable` |
-| **📡 Health Check** | [/health](https://api-impacta.pinguinoseguro.cl/health) | `Pass` |
+| **🌐 Landing Page** | [impacta.pinguinoseguro.cl](https://impacta.pinguinoseguro.cl) | Marketing público de la ONG — EarthBackground 3D, stats reales, demo modal. Punto de entrada: de aquí se llega al dashboard vía login/registro |
+| **📱 Dashboard App** | [app-impacta.pinguinoseguro.cl](https://app-impacta.pinguinoseguro.cl) | La aplicación (Overview, Members, Donations, Campaigns, Species, Missions). Requiere autenticación |
+| **⚙️ Backend API** | [api-impacta.pinguinoseguro.cl](https://api-impacta.pinguinoseguro.cl) | API NestJS multi-tenant |
 
 ---
 
@@ -22,14 +23,14 @@
 
 ### Core
 - **Backend**: NestJS 11 (Node 20+) con arquitectura modular.
-- **Frontend**: Vite + React 19 (Dashboard) y Next.js 16 (Landing).
+- **Frontend**: Vite + React 19 — sirve la landing pública Y el dashboard (mismo build).
 - **ORM**: Prisma 5 con extensiones para Multi-tenancy transparente.
 - **Database**: PostgreSQL 16 + Redis 7 (Caching & BullMQ).
 
-### Infraestructura (Servidor fan)
-- **Runtime**: Podman Rootless (Rocky Linux 9).
-- **Orquestación**: Podman Compose.
-- **Edge**: Nginx directo (sin traefik). Certificados wildcard SSL vía certbot + DNS-01 PowerDNS.
+### Infraestructura (Servidor fenix — Azure)
+- **VM**: Azure, Ubuntu 24.04 LTS.
+- **Runtime**: 100% nativo — Postgres 16 y Redis como servicios systemd; backend como servicio systemd (`impacta-backend.service`).
+- **Edge**: Nginx directo, certificados wildcard SSL (`/etc/letsencrypt/live/pinguinoseguro.cl/`).
 - **Storage**: MinIO (S3 Compatible) para la gestión de assets multimedia.
 
 ---
@@ -37,11 +38,11 @@
 ## 📂 Estructura del Proyecto
 
 ```text
-├── backend/     # API RESTful, Lógica de negocio y Tenants
-├── frontend/    # Aplicación React 19 (Dashboard administrativo)
-├── landing/     # Sitio público optimizado (SEO & Performance)
-├── prisma/      # Esquemas de datos y migraciones
-└── docs/        # Guías técnicas y documentación de diseño
+├── backend/        # API RESTful, lógica de negocio y tenants
+├── frontend/       # React 19 — landing pública + dashboard (un build, dos dominios)
+├── landing/        # Next.js de referencia, NO desplegado (Path A revocado)
+├── infra/nginx/    # Copia versionada de la config nginx activa
+└── deploy.sh       # Deploy de frontend/backend en fenix
 ```
 
 ---
@@ -57,10 +58,12 @@
 
 ## 🛠️ Desarrollo Local
 
-1. Levantar dependencias: `podman-compose up -d postgres redis`
+1. Levantar dependencias: `docker compose up -d postgres redis` (compose = solo desarrollo local; en producción todo es nativo)
 2. Configurar entorno: `cp .env.example .env`
 3. Backend: `cd backend && npm i && npx prisma migrate dev && npm run start:dev`
-4. Dashboard: `cd frontend && npm i && npm run dev`
+4. Dashboard + landing: `cd frontend && npm i && npm run dev`
+
+> Deploy en producción (server fenix): ver [`deploy.sh`](deploy.sh) y [AGENTS.md](AGENTS.md).
 
 ---
 *Desarrollado con ❤️ para el ecosistema de conservación por el equipo de **PinguinoSeguro**.*

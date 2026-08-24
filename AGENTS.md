@@ -2,13 +2,31 @@
 
 Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier trabajo no trivial **lee [PLAN.md](PLAN.md)** (fases A→D con criterios de aceptación) y [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md) para el modelo de dominio.
 
+## ⚠️ LOS DOS SITIOS — regla #1 (leer ANTES de tocar cualquier UI)
+
+Impacta es una ONG con **dos sitios distintos**, ambos servidos desde **un solo build de `frontend/`**:
+
+| Dominio | Qué ES | Acceso |
+|---|---|---|
+| `https://impacta.pinguinoseguro.cl` | 🌐 **LANDING PÚBLICA** (marketing de la ONG) — EarthBackground 3D, logo.png, navbar Inicio/Módulos, cards "Ver módulo en acción", demo modal, stats reales del backend | Público — sin login solo se ve la landing |
+| `https://app-impacta.pinguinoseguro.cl` | 📊 **LA APP CON DASHBOARD** — Login, Overview, Members, Donations, Campaigns, Species, Missions, Profile | Requiere login o registro |
+
+Flujo de usuario: landing (`impacta.*`) → login/registro → dashboard (`app-impacta.*`). Sin sesión, solo landing.
+
+**Por qué esta regla existe:** en ago-2026 agentes confundieron la landing con el dashboard, mezclaron ambos y nadie supo cuál era cuál (ver "El desastre del 13-ago" más abajo). Desambiguación obligatoria:
+
+- **LandingPage** = componente React en [`frontend/src/pages/LandingPage.tsx`](frontend/src/pages/LandingPage.tsx) que sirve el marketing público. Es parte del build de `frontend/`.
+- **`landing/`** = proyecto Next.js separado, **NO desplegado** (Path A revocado el 16-ago-2026), conservado solo como referencia de diseño/wiring.
+- Ambos dominios nginx apuntan al MISMO directorio `/var/www/impacta.pinguinoseguro.cl/`; el SPA decide qué mostrar según el dominio. **Nunca reemplaces el contenido visible de un dominio con el otro. Nunca uses "landing" y "dashboard" como sinónimos.**
+
 ## Estructura del monorepo
 
 - [backend/](backend/) — NestJS 11 + Prisma 5 + Postgres. Ver [backend/AGENTS.md](backend/AGENTS.md).
-- [landing/](landing/) — Next.js 16 + Tailwind v4. Desplegado. Ver [landing/AGENTS.md](landing/AGENTS.md).
-- [frontend/](frontend/) — Vite + React 19 + TanStack Query. Pantallas: Login, Overview, Members, Donations, Campaigns, Species, Missions, Profile. Sirve estáticos en `https://app-impacta.pinguinoseguro.cl/` vía nginx (NO contenedor).
+- [landing/](landing/) — Next.js 16 + Tailwind v4. **NO desplegado en producción** (Path A revocado el 16-ago-2026). Conservado solo como referencia de diseño (tokens `@theme` en `app/globals.css`) y wiring real (`DemoRequest`, `public-stats`).
+- [frontend/](frontend/) — Vite + React 19 + TanStack Query. **Sirve LOS DOS SITIOS** (ver regla #1): LandingPage para `impacta.*` y el dashboard (Login, Overview, Members, Donations, Campaigns, Species, Missions, Profile) para `app-impacta.*`. Un build → `/var/www/impacta.pinguinoseguro.cl/`.
+- [infra/nginx/](infra/nginx/) — copia versionada de la config nginx activa en el server.
 - [Impacta+PRD.md](Impacta+PRD.md), [DISENO_IDENTIDAD_VISUAL.md](DISENO_IDENTIDAD_VISUAL.md) — producto y marca.
-- [docker-compose.yml](docker-compose.yml) — postgres, redis, backend (interno), landing (público).
+- [docker-compose.yml](docker-compose.yml) — **solo desarrollo local** (postgres 5435 + redis 6381 + backend). En producción NADA corre en contenedores.
 
 ## Design system
 
@@ -16,56 +34,49 @@ Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier 
 
 **Antes de crear/modificar UI:** traer la pantalla con `mcp__stitch__get_screen` y portar con los tokens existentes. No improvisar paleta.
 
-## Infraestructura (servidor fan)
+## Infraestructura (servidor fenix — Azure)
 
-**Rocky 10.2 (Red Quartz), podman rootless. Serving edge: nginx directo (sin traefik).**
+**VM Azure `fenix`, Ubuntu 24.04 LTS. Serving edge: nginx directo. Este stack NO usa contenedores en producción.**
 
-- Host compartido con **múltiples proyectos en producción** (pinguinoseguro, laespiguita, lotaindomito, micelia). **No** confundir con el antiguo "servidor Fenix" — esa infra ya no existe.
-- **Regla dura: NO tocar infra existente.** Solo agregar servicios. No consolidar, no reciclar, no borrar contenedores "huérfanos" sin consultar.
-- Wildcard cert `*.pinguinoseguro.cl` instalado vía certbot + DNS-01 PowerDNS (`/etc/letsencrypt/live/pinguinoseguro.cl/`). Cubre un nivel de subdominio — `api.impacta.pinguinoseguro.cl` **no** está cubierto, usar `api-impacta.pinguinoseguro.cl`.
-- **Patrón de serving (idéntico al resto de proyectos del server):**
-  - Frontends estáticos → nginx sirve archivos desde `/var/www/<dominio>/`. Config en `/etc/nginx/conf.d/<dominio>.conf`.
-  - Servicios con runtime (backend Node, Next.js standalone) → contenedor podman con `ports: "<x>:<x>"` publicado al host, nginx hace `proxy_pass http://127.0.0.1:<x>`.
-  - NO usar redes externas tipo `proxy` ni labels traefik — eso era del server Fenix.
-- Convenciones del compose: nombre de contenedor con guiones (`impacta-backend`), volúmenes con sufijo SELinux `:z`.
-- Configuración nginx activa de impacta en el server: `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf`.
-- Docs históricas del setup con traefik (referencia, NO operativo): `~/sentinel/` en el server.
+> ⚠️ **Nota de nombres (leer con cuidado):** hubo un server antiguo también llamado "Fenix" (pre-2026, ruta `/home/jnovoas/Desarrollo/`) y uno llamado **`fan`** (Rocky/podman, **apagado el 23-ago-2026**, ruta `/home/jnovoas/ONG_Impacta/`). El server ACTUAL es esta VM Azure llamada `fenix`, path `/home/jnovoas/proyectos/ONG_Impacta/`. Cualquier doc que hable de podman rootless, puertos host 5435/6381/3080 o volúmenes SELinux `:z` describe el server fan RETIRADO — ya no aplica.
+
+- Host compartido con **múltiples proyectos en producción** (pinguinoseguro, laespiguita, lotaindomito, micelia, portfolio, transcript). **Regla dura: NO tocar infra existente de otros proyectos.** Solo agregar servicios.
+- Wildcard cert `*.pinguinoseguro.cl` (`/etc/letsencrypt/live/pinguinoseguro.cl/`). Cubre un nivel de subdominio — usar `api-impacta.pinguinoseguro.cl` (**no** `api.impacta.pinguinoseguro.cl`).
+- **Stack de Impacta en fenix (todo nativo):**
+  - PostgreSQL 16 nativo — servicio systemd `postgresql`, escucha `127.0.0.1:5432`, DB `impacta`
+  - Redis nativo — servicio systemd `redis-server`, escucha `127.0.0.1:6379`
+  - Backend NestJS — servicio systemd **`impacta-backend.service`** (unit file en `/etc/systemd/system/`, user `jnovoas`, WorkingDirectory `~/proyectos/ONG_Impacta/backend`, `EnvironmentFile=~/proyectos/ONG_Impacta/.env`), puerto 3001
+  - Frontends — estáticos servidos por nginx desde `/var/www/impacta.pinguinoseguro.cl/`; nginx hace `proxy_pass http://127.0.0.1:3001` para `/api/`
+- Configuración nginx activa: `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf` (copia versionada en [infra/nginx/](infra/nginx/)).
 
 ## Comandos base
 
 ```bash
-# build de imagen (el flag de red es OBLIGATORIO — evita EIDLETIMEOUT en rootless)
-podman build --network=host -t <tag> <context>
+# Deploy de frontend (sirve landing Y dashboard — mismo build)
+./deploy.sh frontend
 
-# deploy incremental
-podman-compose up -d <service>
+# Deploy de backend (build + restart del servicio systemd)
+./deploy.sh backend
 
-# verificar
-curl -s -o /dev/null -w "%{http_code}\n" https://<host>
+# Verificación post-deploy
+./deploy.sh verify
 ```
 
-## Estado actual (2026-08-16)
-
-- `https://impacta.pinguinoseguro.cl` — landing Next.js 16 con stats reales del backend (ISR 60s).
-- `https://api-impacta.pinguinoseguro.cl` — backend NestJS 11 con multi-tenant + JWT + 9 módulos. **Fuente de verdad de servicios en runtime.**
-- `https://app-impacta.pinguinoseguro.cl` — frontend estático (Vite + React 19) servido por nginx desde `/var/www/impacta.pinguinoseguro.cl/`. **No es un contenedor** — se rebuild con `npm run build` y se copia el `dist/`.
-
-Stack vivo en `fan`:
-- postgres `impacta-db` (puerto host 5435)
-- redis `impacta-redis` (6381)
-- backend `impacta-backend` (3001)
-- landing `impacta-landing` (3080→3000 interno)
-- nginx edge proxy en `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf`
-
-Verificación rápida después de cada deploy:
+Verificación manual rápida:
 ```bash
+systemctl status impacta-backend.service
 for h in impacta api-impacta app-impacta; do
   curl -s -o /dev/null -w "$h.pinguinoseguro.cl: %{http_code}\n" -m 5 https://$h.pinguinoseguro.cl/
 done
 curl -s https://api-impacta.pinguinoseguro.cl/organizations/public-stats | jq .
 ```
 
-Para próximos bloques de trabajo ver [PLAN.md](PLAN.md).
+## Estado actual (2026-08-24)
+
+- `https://impacta.pinguinoseguro.cl` — **landing pública** (LandingPage.tsx de `frontend/`) con EarthBackground Three.js, stats reales vía `/api/organizations/public-stats`.
+- `https://app-impacta.pinguinoseguro.cl` — **dashboard** (mismo build estático), login + 8 pantallas.
+- `https://api-impacta.pinguinoseguro.cl` — backend NestJS 11 corriendo como `impacta-backend.service`. Nota: `/health` responde 404 actualmente (endpoint no existe en el código pese a menciones históricas).
+- Producción quedó sincronizada con `origin/main` durante la migración del 23-ago-2026 (verificado: bundle desplegado = build de main).
 
 ## Convenciones de commits
 
@@ -81,36 +92,32 @@ Para próximos bloques de trabajo ver [PLAN.md](PLAN.md).
 
 ## Source of truth y anti-patrones (leer antes de operar)
 
-**`fan/main` ES el estado de producción.** Cualquier rama que propongas debe basarse en `fan/main`, no en un commit más viejo del historial.
+**El estado de producción es este mismo server (`fenix`)**: el repo en `/home/jnovoas/proyectos/ONG_Impacta/` sincronizado con `origin/main`, más lo que esté desplegado en `/var/www/impacta.pinguinoseguro.cl/` y corriendo como `impacta-backend.service`. Cualquier rama que propongas debe basarse en `origin/main`.
+
+> El server anterior `fan` fue **apagado el 23-ago-2026** y con él desapareció su remote `fan`/`fan main`. Las instrucciones históricas `git fetch fan main` **ya no son ejecutables ni necesarias**: ahora se trabaja DESDE el propio server.
 
 ### El desastre del 13-ago-2026 (contexto, NO repetir)
 
-En esa fecha un commit `af06edb` ("revert: restore original 3D EarthBackground, Dashboard and repo state from 8ba8bec") borró la landing completa y revirtió docenas de archivos del backend. Estuvo mal etiquetado porque `8ba8bec` no contenía la landing Next.js — esa se agregó el mismo día en `06f8e33`. El revert borró trabajo bueno de meses y nunca fue intencional.
-
-Después varios agentes修复 parcialmente y migraron a nginx directo. El estado vivo en `fan` quedó adelante de `origin/main`.
+En esa fecha un commit `af06edb` ("revert: restore original 3D EarthBackground, Dashboard and repo state from 8ba8bec") borró la landing completa y revirtió docenas de archivos del backend. Estuvo mal etiquetado porque `8ba8bec` no contenía la landing Next.js — esa se agregó el mismo día en `06f8e33`. El revert borró trabajo bueno de meses y nunca fue intencional. La causa raíz de fondo: **el agente confundió la landing pública con el dashboard** (ver regla #1 arriba).
 
 ### Reglas duras (codificadas tras ese desastre)
 
-1. **NUNCA uses un commit pre-desastre como baseline de un recovery.** El baseline correcto SIEMPRE es `fan/main` (o lo que haya sido el último deploy vivo en el server). Si dudas: `git fetch fan main && git log origin/main..fan/main` antes de cualquier reset.
-2. **NUNCA reescribas docs correctos con info de un commit más viejo.** Las menciones históricas a "Fenix" / "traefik" en este archivo son **advertencias preservadas a propósito** ("no confundir con el antiguo servidor Fenix", "NO usar redes externas tipo proxy ni labels traefik — eso era del server Fenix"). Son load-bearing para futuros agentes.
-3. **Antes de cualquier revert destructivo o rebase de historia:** exponer el plan completo y pedir confirmación. AGENTS.md del proyecto dice "Cambios en infra/compose/servicios visibles: confirmar antes de aplicar" — un revert masivo califica.
-4. **El servidor es `fan`** (Rocky 10.2, podman rootless, nginx directo), NO `fenix`. Path en el server: `/home/jnovoas/ONG_Impacta/`. **No** `/home/jnovoas/Desarrollo/ONG_Impacta/` (esa era la ruta del server fenix viejo, ya no existe).
+1. **NUNCA uses un commit pre-desastre como baseline de un recovery.** El baseline correcto SIEMPRE es `origin/main`, y antes de cualquier reset verifica qué hay desplegado en producción (bundle de `/var/www/` vs build de main, `systemctl status impacta-backend`).
+2. **NUNCA reescribas docs correctos con info de un commit más viejo.** Las menciones históricas a "Fenix"/"fan"/"traefik"/podman en este archivo son advertencias preservadas a propósito para explicar DE DÓNDE venimos. No las borres sin actualizar el contexto.
+3. **Antes de cualquier revert destructivo o rebase de historia:** exponer el plan completo y pedir confirmación. Un revert masivo califica como cambio de infra visible.
+4. **El servidor actual es `fenix`** (Azure, Ubuntu 24.04, stack nativo + nginx), path `/home/jnovoas/proyectos/ONG_Impacta/`. NO confundir con el fenix histórico pre-2026 (`/home/jnovoas/Desarrollo/`) ni con `fan` (apagado 23-ago-2026).
 
 ### Workflow correcto para arrancar trabajo
 
 ```bash
-# 1. Verificar estado vivo en fan
-git fetch fan main
-git log origin/main..fan/main   # ¿hay commits no pusheados a origin?
+# 1. Sincronizar (estamos EN el server de producción)
+git pull origin main
 
-# 2. Sincronizar a fan (fast-forward o merge)
-git checkout main
-git merge --ff-only fan/main    # o pull origin main + merge fan/main
-
-# 3. Rama de feature DESDE main
+# 2. Rama de feature DESDE main
 git checkout -b feat/<scope>
 
-# 4. Al terminar: PR contra main, merge, push a origin, pull en fan
+# 3. Al terminar: PR contra main, merge, push a origin,
+#    luego deploy con ./deploy.sh frontend|backend y verificar
 ```
 
 Si encuentras docs desfasados (como pasó aquí con "Rocky 9" → "Rocky 10.2", "Servidor Fenix" → "Servidor fan"), arréglalos en commits surgicales — **no reescribas masivamente el archivo**.
