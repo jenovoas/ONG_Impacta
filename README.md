@@ -1,7 +1,7 @@
 # Impacta+ — Multi-tenant SaaS for NGOs 🌿
 
 [![Tech Stack](https://img.shields.io/badge/Stack-NestJS%20|%20Next.js%20|%20Prisma-000?style=for-the-badge&logo=nestjs&logoColor=white)](https://impacta.pinguinoseguro.cl)
-[![Status](https://img.shields.io/badge/Status-Beta%20V1.0-green?style=for-the-badge)](https://api-impacta.pinguinoseguro.cl/health)
+[![Status](https://img.shields.io/badge/Status-Beta%20V1.0-green?style=for-the-badge)](https://impacta.pinguinoseguro.cl/api/health)
 
 > **Impacta+** es una solución empresarial diseñada para digitalizar y escalar el impacto de organizaciones sin fines de lucro. Un ecosistema robusto que integra gestión de socios, recaudación de fondos y monitoreo de proyectos de conservación bajo una arquitectura multi-tenant de alto rendimiento.
 
@@ -14,7 +14,7 @@
 | Servicio | Enlace Directo | Qué es |
 | :--- | :--- | :--- |
 | **🌐 Plataforma** | [impacta.pinguinoseguro.cl](https://impacta.pinguinoseguro.cl) | Landing pública (EarthBackground 3D, stats reales, demo modal) + acceso, portal donante y dashboard |
-| **⚙️ Backend API** | [api-impacta.pinguinoseguro.cl](https://api-impacta.pinguinoseguro.cl) | API NestJS multi-tenant |
+| **⚙️ Backend API** | [impacta.pinguinoseguro.cl/api](https://impacta.pinguinoseguro.cl/api) | API NestJS multi-tenant |
 | ~~app-impacta~~ | — | Dominio legado: redirige a `impacta.*`; no agregar funcionalidad ahí |
 
 ---

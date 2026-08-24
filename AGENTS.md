@@ -41,7 +41,7 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 > ⚠️ **Nota de nombres (leer con cuidado):** hubo un server antiguo también llamado "Fenix" (pre-2026, ruta `/home/jnovoas/Desarrollo/`) y uno llamado **`fan`** (Rocky/podman, **apagado el 23-ago-2026**, ruta `/home/jnovoas/ONG_Impacta/`). El server ACTUAL es esta VM Azure llamada `fenix`, path `/home/jnovoas/proyectos/ONG_Impacta/`. Cualquier doc que hable de podman rootless, puertos host 5435/6381/3080 o volúmenes SELinux `:z` describe el server fan RETIRADO — ya no aplica.
 
 - Host compartido con **múltiples proyectos en producción** (pinguinoseguro, laespiguita, lotaindomito, micelia, portfolio, transcript). **Regla dura: NO tocar infra existente de otros proyectos.** Solo agregar servicios.
-- Wildcard cert `*.pinguinoseguro.cl` (`/etc/letsencrypt/live/pinguinoseguro.cl/`). Cubre un nivel de subdominio — usar `api-impacta.pinguinoseguro.cl` (**no** `api.impacta.pinguinoseguro.cl`).
+- Wildcard cert `*.pinguinoseguro.cl` (`/etc/letsencrypt/live/pinguinoseguro.cl/`). Cubre un nivel de subdominio — usar `impacta.pinguinoseguro.cl/api` (**no** `api.impacta.pinguinoseguro.cl`).
 - **Stack de Impacta en fenix (todo nativo):**
   - PostgreSQL 16 nativo — servicio systemd `postgresql`, escucha `127.0.0.1:5432`, DB `impacta`
   - Redis nativo — servicio systemd `redis-server`, escucha `127.0.0.1:6379`
@@ -68,15 +68,15 @@ systemctl status impacta-backend.service
 for h in impacta api-impacta; do
   curl -s -o /dev/null -w "$h.pinguinoseguro.cl: %{http_code}\n" -m 5 https://$h.pinguinoseguro.cl/
 done
-curl -s -o /dev/null -w "app-impacta.pinguinoseguro.cl: %{http_code} (debe ser 301 → impacta.*)\n" -m 5 https://app-impacta.pinguinoseguro.cl/
-curl -s https://api-impacta.pinguinoseguro.cl/organizations/public-stats | jq .
+curl -s -o /dev/null -w "impacta.pinguinoseguro.cl: %{http_code} (debe ser 301 → impacta.*)\n" -m 5 https://impacta.pinguinoseguro.cl/
+curl -s https://impacta.pinguinoseguro.cl/api/organizations/public-stats | jq .
 ```
 
 ## Estado actual (2026-08-24 — single system)
 
 - `https://impacta.pinguinoseguro.cl` — **UN SOLO SISTEMA**: landing pública (`LandingPage.tsx` con EarthBackground Three.js, stats reales vía `/api/organizations/public-stats`) + Front auth (`/login`, `/register`) + Panel de Control de Usuarios (`/dashboard/*`: Overview, Members, Donations, Campaigns, Species, Missions, Profile). Un build → `/var/www/impacta.pinguinoseguro.cl/`.
-- `https://app-impacta.pinguinoseguro.cl` — **no sirve contenido**, solo `301 → https://impacta.pinguinoseguro.cl` (legado para bookmarks/DNS viejos). No agregar funcionalidad ahí — es un solo sistema, no dos.
-- `https://api-impacta.pinguinoseguro.cl` — backend NestJS 11 corriendo como `impacta-backend.service`. Nota: `/health` responde 404 actualmente (endpoint no existe en el código pese a menciones históricas).
+- `https://impacta.pinguinoseguro.cl` — **no sirve contenido**, solo `301 → https://impacta.pinguinoseguro.cl` (legado para bookmarks/DNS viejos). No agregar funcionalidad ahí — es un solo sistema, no dos.
+- `https://impacta.pinguinoseguro.cl/api` — backend NestJS 11 corriendo como `impacta-backend.service`. Nota: `/health` responde 404 actualmente (endpoint no existe en el código pese a menciones históricas).
 - Producción quedó sincronizada con `origin/main` durante la migración del 23-ago-2026 y consolidación a dominio único del 24-ago-2026 (verificado: `301` para app-impacta, bundle desplegado = build de main).
 
 ## Convenciones de commits
