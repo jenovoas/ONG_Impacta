@@ -10,9 +10,10 @@ Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier 
 |---|---|
 | `/` | 🌐 **Landing pública** (marketing) — EarthBackground 3D, logo.png, navbar, cards "Ver módulo en acción", demo modal, stats reales |
 | `/login`, `/register` | 🔐 Acceso — requiere credenciales |
-| `/dashboard/*` | 📊 **Panel de Control de Usuarios** — Overview, Members, Donations, Campaigns, Species, Missions, Profile |
+| `/portal` | 🎁 **Portal Donante** — historial, recibos PDF y recurrencia self-service (desde `integra-insights-competencia`) |
+| `/dashboard/*` | 📊 **Panel de Control de Usuarios** — Overview, Members, Donations, Campaigns, Species, Missions (offline-first con IndexedDB + sync), Profile |
 
-Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` → entra a `/dashboard`. Sin sesión, solo landing.
+Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` → entra a `/dashboard`. Sin sesión, solo landing. Donantes usan `/portal` con mismo dominio único.
 
 - **`app-impacta.pinguinoseguro.cl` está DEPRECADO y NO es un segundo sistema**: quedó del diseño anterior de dos dominios. Hoy **no sirve contenido** — nginx hace `return 301 https://impacta.pinguinoseguro.cl$request_uri` (el `LegacyDomainRedirect` en `frontend/src/App.tsx` queda solo como respaldo en JS). No agregues funcionalidad ahí; la sesión vive en el localStorage de un único dominio a propósito. Es un solo sistema, no dos.
 - **Desambiguación obligatoria:** **LandingPage** = componente React en [`frontend/src/pages/LandingPage.tsx`](frontend/src/pages/LandingPage.tsx) (parte del build de `frontend/`). **`landing/`** = proyecto Next.js separado, NO desplegado, conservado como referencia. Nunca uses "landing" y "dashboard" como sinónimos ni mezcles sus responsabilidades — esa confusión causó el desastre del 13-ago (ver más abajo).

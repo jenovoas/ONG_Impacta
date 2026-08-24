@@ -1,10 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { CampaignsService } from '../campaigns/campaigns.service';
+import { AuthUser } from '../../auth/decorators/current-user.decorator';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+
+function sanitizePdfText(str: string): string {
+  if (!str) return '';
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\x00-\x7F]/g, '');
+}
 
 @Injectable()
 export class DonationsService {
+  private readonly logger = new Logger(DonationsService.name);
+
   constructor(
     private readonly prisma: DatabaseService,
     private readonly campaignsService: CampaignsService,
@@ -67,6 +79,11 @@ export class DonationsService {
             email: true,
           },
         },
+        campaign: {
+          select: {
+            name: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -75,7 +92,7 @@ export class DonationsService {
   async findOne(orgId: string, id: string) {
     const donation = await this.prisma.donation.findFirst({
       where: { id, organizationId: orgId },
-      include: { member: true },
+      include: { member: true, campaign: true },
     });
 
     if (!donation) {
@@ -105,5 +122,183 @@ export class DonationsService {
     }
 
     return updatedDonation;
+  }
+
+  // --- Endpoints para Portal Donante ---
+
+  private async findMemberForUser(orgId: string, user: AuthUser) {
+    if (!user || (!user.email && !user.rut)) {
+      return null;
+    }
+
+    const conditions: any[] = [];
+    if (user.email) {
+      conditions.push({ email: user.email });
+    }
+    if (user.rut) {
+      conditions.push({ rut: user.rut });
+    }
+
+    return this.prisma.member.findFirst({
+      where: {
+        organizationId: orgId,
+        OR: conditions,
+      },
+    });
+  }
+
+  async findMyDonations(orgId: string, user: AuthUser) {
+    const member = await this.findMemberForUser(orgId, user);
+    if (!member) {
+      return [];
+    }
+
+    return this.prisma.donation.findMany({
+      where: {
+        organizationId: orgId,
+        memberId: member.id,
+      },
+      include: {
+        campaign: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async generateReceiptPdf(orgId: string, user: AuthUser, donationId: string): Promise<Buffer> {
+    const member = await this.findMemberForUser(orgId, user);
+    if (!member) {
+      this.logger.warn(`denied_attempt: No member found for user ${user?.email} in org ${orgId}`);
+      throw new NotFoundException('Donation not found');
+    }
+
+    const donation = await this.prisma.donation.findFirst({
+      where: { id: donationId },
+      include: {
+        campaign: true,
+        organization: true,
+        member: true,
+      },
+    });
+
+    if (!donation || donation.organizationId !== orgId || donation.memberId !== member.id) {
+      this.logger.warn(
+        `denied_attempt: donation ${donationId} ownership verification failed for member ${member.id} in org ${orgId}`,
+      );
+      throw new NotFoundException('Donation not found');
+    }
+
+    const org = donation.organization;
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([595.28, 841.89]);
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    const { width, height } = page.getSize();
+    const margin = 50;
+
+    const primaryColor = rgb(0.08, 0.45, 0.38);
+    const darkText = rgb(0.1, 0.1, 0.1);
+    const grayText = rgb(0.4, 0.4, 0.4);
+
+    page.drawText(sanitizePdfText(org?.name || 'ONG Impacta+'), {
+      x: margin,
+      y: height - margin - 20,
+      size: 20,
+      font: boldFont,
+      color: primaryColor,
+    });
+
+    page.drawText(sanitizePdfText(`Organizacion: ${org?.slug || orgId}`), {
+      x: margin,
+      y: height - margin - 40,
+      size: 10,
+      font,
+      color: grayText,
+    });
+
+    page.drawText('COMPROBANTE DE DONACION', {
+      x: margin,
+      y: height - margin - 85,
+      size: 16,
+      font: boldFont,
+      color: darkText,
+    });
+
+    page.drawLine({
+      start: { x: margin, y: height - margin - 95 },
+      end: { x: width - margin, y: height - margin - 95 },
+      thickness: 1,
+      color: primaryColor,
+    });
+
+    let y = height - margin - 130;
+    const lineSpacing = 24;
+
+    const drawRow = (label: string, value: string) => {
+      page.drawText(sanitizePdfText(label), { x: margin, y, size: 11, font: boldFont, color: darkText });
+      page.drawText(sanitizePdfText(value), { x: margin + 160, y, size: 11, font, color: darkText });
+      y -= lineSpacing;
+    };
+
+    drawRow('No. Recibo:', donation.id);
+    drawRow('Fecha:', new Date(donation.createdAt).toISOString().slice(0, 10));
+    drawRow('Donante:', `${member.firstName} ${member.lastName}`);
+    drawRow('RUT Donante:', member.rut || 'N/A');
+    drawRow('Campana:', donation.campaign?.name || 'Aporte General');
+
+    const amountClp = Math.round(Number(donation.amount));
+    drawRow('Monto:', `$${amountClp.toLocaleString('es-CL')} CLP`);
+    drawRow('Estado:', donation.status);
+    if (donation.recurringStatus) {
+      drawRow('Recurrencia:', donation.recurringStatus);
+    }
+
+    page.drawText(
+      sanitizePdfText('Este documento es un comprobante de donacion emitido por Impacta+.'),
+      {
+        x: margin,
+        y: margin + 20,
+        size: 9,
+        font,
+        color: grayText,
+      },
+    );
+
+    const pdfBytes = await pdfDoc.save();
+    return Buffer.from(pdfBytes);
+  }
+
+  async updateRecurringStatus(
+    orgId: string,
+    user: AuthUser,
+    donationId: string,
+    status: 'PAUSED' | 'CANCELLED' | 'ACTIVE',
+  ) {
+    const member = await this.findMemberForUser(orgId, user);
+    if (!member) {
+      this.logger.warn(`denied_attempt: No member found for user ${user?.email} in org ${orgId}`);
+      throw new NotFoundException('Donation not found');
+    }
+
+    const donation = await this.prisma.donation.findFirst({
+      where: { id: donationId, organizationId: orgId },
+    });
+
+    if (!donation || donation.memberId !== member.id) {
+      this.logger.warn(
+        `denied_attempt: recurring status change on donation ${donationId} denied for member ${member.id} in org ${orgId}`,
+      );
+      throw new NotFoundException('Donation not found');
+    }
+
+    return this.prisma.donation.update({
+      where: { id: donation.id },
+      data: { recurringStatus: status },
+    });
   }
 }

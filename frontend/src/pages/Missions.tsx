@@ -11,30 +11,61 @@ import {
   Check,
   Loader2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  WifiOff,
+  RefreshCw,
+  CloudOff
 } from 'lucide-react';
 import client from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthStore } from '../store/auth.store';
+import { getAll, saveMissions, putTask, markTaskSynced, type Mission, type MissionTask } from '../lib/missions-db';
+import { useMissionsSync } from '../lib/useMissionsSync';
 
 export const Missions: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: missions = [], isLoading } = useQuery({
-    queryKey: ['missions'],
+  const { user } = useAuthStore();
+  const orgId = user?.organizationId;
+  const userId = user?.id;
+
+  const { isOnline, pendingCount, isSyncing, syncPending, refreshPendingCount } = useMissionsSync();
+
+  const { data: missions = [], isLoading } = useQuery<Mission[]>({
+    queryKey: ['missions', orgId, userId],
     queryFn: async () => {
-      const { data } = await client.get('/missions');
-      return data;
+      if (isOnline) {
+        try {
+          const { data } = await client.get('/missions');
+          if (orgId && userId && Array.isArray(data)) {
+            await saveMissions(orgId, userId, data);
+            return await getAll(orgId, userId);
+          }
+          return data;
+        } catch (error) {
+          if (orgId && userId) {
+            const cached = await getAll(orgId, userId);
+            if (cached && cached.length > 0) return cached;
+          }
+          throw error;
+        }
+      } else {
+        if (orgId && userId) {
+          return await getAll(orgId, userId);
+        }
+        return [];
+      }
     },
   });
 
   const createMutation = useMutation({
-    mutationFn: async (newMission: any) => {
+    mutationFn: async (newMission: { title: string; location?: string; startDate?: string; description?: string }) => {
       const { data } = await client.post('/missions', newMission);
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['missions'] });
+      queryClient.invalidateQueries({ queryKey: ['missions', orgId, userId] });
       setIsModalOpen(false);
     },
   });
@@ -43,17 +74,37 @@ export const Missions: React.FC = () => {
     <div className="space-y-8">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter">
-            Misiones de <span className="text-primary">Rescate</span>
-          </h1>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter">
+              Misiones de <span className="text-primary">Rescate</span>
+            </h1>
+
+            {!isOnline ? (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold">
+                <WifiOff className="w-4 h-4 animate-pulse" />
+                <span>Sin conexión — guardado local</span>
+              </div>
+            ) : pendingCount > 0 ? (
+              <button
+                onClick={() => syncPending()}
+                disabled={isSyncing}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold hover:bg-primary/20 transition-colors"
+              >
+                <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                <span>{isSyncing ? 'Sincronizando...' : `Guardado local (${pendingCount} pendiente${pendingCount > 1 ? 's' : ''})`}</span>
+              </button>
+            ) : null}
+          </div>
           <p className="text-gray-500 font-medium mt-2">Coordinación logística y tareas operativas en terreno.</p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-primary text-on-primary px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform shadow-lg shadow-primary/20"
+          disabled={!isOnline}
+          title={!isOnline ? 'Crear misiones requiere conexión a internet' : undefined}
+          className="bg-primary text-on-primary px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          <Plus className="w-5 h-5" />
+          {isOnline ? <Plus className="w-5 h-5" /> : <CloudOff className="w-5 h-5" />}
           Planificar Misión
         </button>
       </header>
@@ -62,10 +113,27 @@ export const Missions: React.FC = () => {
         <div className="flex justify-center p-20">
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
         </div>
+      ) : missions.length === 0 ? (
+        <div className="glass-card rounded-3xl p-12 text-center border border-white/5 space-y-3">
+          <LifeBuoy className="w-12 h-12 text-gray-600 mx-auto" />
+          <h3 className="text-lg font-bold text-white">No hay misiones disponibles</h3>
+          <p className="text-gray-500 text-sm">
+            {!isOnline 
+              ? 'No hay misiones almacenadas localmente en este dispositivo.' 
+              : 'Crea tu primera misión para comenzar la coordinación.'}
+          </p>
+        </div>
       ) : (
         <div className="space-y-6">
-          {missions.map((m: any) => (
-            <MissionItem key={m.id} mission={m} />
+          {missions.map((m: Mission) => (
+            <MissionItem 
+              key={m.id} 
+              mission={m} 
+              isOnline={isOnline}
+              orgId={orgId}
+              userId={userId}
+              refreshPendingCount={refreshPendingCount}
+            />
           ))}
         </div>
       )}
@@ -96,14 +164,19 @@ export const Missions: React.FC = () => {
                 </div>
 
                 <form 
-                  onSubmit={(e: any) => {
+                  onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                     e.preventDefault();
-                    const formData = new FormData(e.target);
+                    const formData = new FormData(e.currentTarget);
+                    const title = formData.get('title') as string;
+                    const location = formData.get('location') as string;
+                    const startDateVal = formData.get('startDate') as string;
+                    const description = formData.get('description') as string;
+
                     createMutation.mutate({
-                      title: formData.get('title'),
-                      location: formData.get('location'),
-                      startDate: formData.get('startDate') ? new Date(formData.get('startDate') as string).toISOString() : undefined,
-                      description: formData.get('description'),
+                      title,
+                      location: location || undefined,
+                      startDate: startDateVal ? new Date(startDateVal).toISOString() : undefined,
+                      description: description || undefined,
                     });
                   }} 
                   className="space-y-6"
@@ -128,7 +201,7 @@ export const Missions: React.FC = () => {
                   </div>
 
                   <button
-                    disabled={createMutation.isPending}
+                    disabled={createMutation.isPending || !isOnline}
                     className="w-full bg-primary text-on-primary py-5 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform disabled:opacity-50"
                   >
                     {createMutation.isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : (
@@ -148,21 +221,50 @@ export const Missions: React.FC = () => {
   );
 };
 
-const MissionItem = ({ mission }: { mission: any }) => {
+interface MissionItemProps {
+  mission: Mission;
+  isOnline: boolean;
+  orgId?: string;
+  userId?: string;
+  refreshPendingCount: () => void;
+}
+
+const MissionItem: React.FC<MissionItemProps> = ({ 
+  mission, 
+  isOnline, 
+  orgId, 
+  userId, 
+  refreshPendingCount 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const toggleTaskMutation = useMutation({
     mutationFn: async ({ taskId, isCompleted }: { taskId: string; isCompleted: boolean }) => {
-      const { data } = await client.patch(`/missions/${mission.id}/tasks/${taskId}`, { isCompleted });
-      return data;
+      if (orgId && userId) {
+        await putTask(orgId, userId, mission.id, taskId, isCompleted, true);
+        await refreshPendingCount();
+      }
+
+      if (isOnline) {
+        try {
+          const { data } = await client.patch(`/missions/${mission.id}/tasks/${taskId}`, { isCompleted });
+          if (orgId && userId) {
+            await markTaskSynced(orgId, userId, mission.id, taskId);
+            await refreshPendingCount();
+          }
+          return data;
+        } catch {
+          // If network patch fails, it stays queued in IndexedDB with pendingSync: true
+        }
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['missions'] });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['missions', orgId, userId] });
     },
   });
 
-  const completedTasks = mission.tasks?.filter((t: any) => t.isCompleted).length || 0;
+  const completedTasks = mission.tasks?.filter((t: MissionTask) => t.isCompleted).length || 0;
   const totalTasks = mission.tasks?.length || 0;
   const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
@@ -229,7 +331,7 @@ const MissionItem = ({ mission }: { mission: any }) => {
 
               <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Checklist de Tareas</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {mission.tasks?.map((task: any) => (
+                {mission.tasks?.map((task: MissionTask) => (
                   <div 
                     key={task.id}
                     onClick={() => toggleTaskMutation.mutate({ taskId: task.id, isCompleted: !task.isCompleted })}

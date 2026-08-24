@@ -73,6 +73,7 @@ model Donation {
   amount          Decimal  @db.Decimal(15, 2)
   currency        String   @default("CLP")
   status          String   @default("PENDING") // PENDING, SUCCEEDED, FAILED
+  recurringStatus String?  // ACTIVE, PAUSED, CANCELLED
   gatewayRef      String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

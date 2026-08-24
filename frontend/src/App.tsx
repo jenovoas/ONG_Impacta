@@ -11,6 +11,7 @@ import { Campaigns } from './pages/Campaigns';
 import { Missions } from './pages/Missions';
 import { Members } from './pages/Members';
 import { OrganizationProfile } from './pages/OrganizationProfile';
+import { PortalDonante } from './pages/PortalDonante';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { useAuthStore } from './store/auth.store';
 
@@ -63,6 +64,11 @@ function App() {
             <Route path="members" element={<Members />} />
             <Route path="organization" element={<OrganizationProfile />} />
           </Route>
+
+          <Route
+            path="/portal"
+            element={accessToken ? <PortalDonante /> : <Navigate to="/login" />}
+          />
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

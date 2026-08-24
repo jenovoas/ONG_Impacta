@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Headers } from '@nestjs/common';
 import { MissionsService } from './missions.service';
 import { CreateMissionDto } from './dto/create-mission.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 
@@ -32,8 +33,10 @@ export class MissionsController {
     @CurrentTenant() orgId: string,
     @Param('id') id: string,
     @Param('taskId') taskId: string,
-    @Body('isCompleted') isCompleted: boolean,
+    @Body() updateTaskDto: UpdateTaskDto,
+    @Headers('if-unmodified-since') headerIfUnmodifiedSince?: string,
   ) {
-    return this.missionsService.updateTaskStatus(orgId, id, taskId, isCompleted);
+    const clientUpdatedAt = updateTaskDto?.updatedAt || headerIfUnmodifiedSince;
+    return this.missionsService.updateTaskStatus(orgId, id, taskId, updateTaskDto, clientUpdatedAt);
   }
 }
