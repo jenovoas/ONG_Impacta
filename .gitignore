@@ -24,3 +24,8 @@ Thumbs.db
 # Build artifacts
 dist
 build
+
+# Agent/tool session state (no es código del proyecto)
+.omo/
+.dsh/
+

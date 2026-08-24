@@ -4,7 +4,17 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Impacta+ | Dashboard</title>
+    <title>Impacta+ | Plataforma digital para ONGs</title>
+    <script>
+      // Regla #1 (AGENTS.md): landing pública en impacta.*, dashboard en app-impacta.*
+      // Título correcto por dominio — el mismo build sirve ambos sitios.
+      (function () {
+        var h = location.hostname;
+        if (h.startsWith('app-')) {
+          document.title = 'Impacta+ | Dashboard';
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@800&display=swap" rel="stylesheet">
