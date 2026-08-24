@@ -4,6 +4,8 @@ Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier 
 
 ## ⚠️ UN SOLO SISTEMA — UN SOLO DOMINIO (regla #1 — consolidado 2026-08-24)
 
+> 🛑 **ANTI-ALUCINACIÓN (NUNCA INVENTES SUBDOMINIOS):** En sesiones pasadas, varias IAs arruinaron el despliegue al inventar e intentar usar subdominios falsos como , , , , etc. **ESTO ESTÁ ESTRICTAMENTE PROHIBIDO**. Todo (frontend, API, webhooks de pagos) se rutea bajo . Configurar o sugerir despliegues en otros subdominios romperá la aplicación.
+
 **Impacta+ es UN SOLO SISTEMA con 3 capas en un mismo build:** Landing + Front (auth) + Panel de Control de Usuarios. Todo lo usuario-facing vive en **`https://impacta.pinguinoseguro.cl`**:
 
 | Ruta | Qué es |
