@@ -11,19 +11,19 @@ export class UsersController {
 
   @Get()
   @Roles('SUPERADMIN', 'ADMIN')
-  findAll(@CurrentTenant() tenant: { id: string }) {
-    return this.usersService.findAll(tenant.id);
+  findAll(@CurrentTenant() orgId: string) {
+    return this.usersService.findAll(orgId);
   }
 
   @Get(':id')
   @Roles('SUPERADMIN', 'ADMIN')
-  findOne(@CurrentTenant() tenant: { id: string }, @Param('id') id: string) {
-    return this.usersService.findOne(tenant.id, id);
+  findOne(@CurrentTenant() orgId: string, @Param('id') id: string) {
+    return this.usersService.findOne(orgId, id);
   }
 
   @Post()
   @Roles('SUPERADMIN', 'ADMIN')
-  create(@CurrentTenant() tenant: { id: string }, @Body() createUserDto: any) {
-    return this.usersService.create(tenant.id, createUserDto);
+  create(@CurrentTenant() orgId: string, @Body() createUserDto: any) {
+    return this.usersService.create(orgId, createUserDto);
   }
 }

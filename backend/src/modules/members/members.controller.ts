@@ -12,12 +12,12 @@ export class MembersController {
   @Get()
   @Roles('SUPERADMIN', 'ADMIN', 'OPERATOR')
   findAll(
-    @CurrentTenant() tenant: { id: string },
+    @CurrentTenant() orgId: string,
     @Query('status') status?: string,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
   ) {
-    return this.membersService.findAll(tenant.id, {
+    return this.membersService.findAll(orgId, {
       status,
       page: page ? parseInt(page) : 1,
       pageSize: pageSize ? parseInt(pageSize) : 20,
@@ -26,23 +26,23 @@ export class MembersController {
 
   @Get(':id')
   @Roles('SUPERADMIN', 'ADMIN', 'OPERATOR')
-  findOne(@CurrentTenant() tenant: { id: string }, @Param('id') id: string) {
-    return this.membersService.findOne(tenant.id, id);
+  findOne(@CurrentTenant() orgId: string, @Param('id') id: string) {
+    return this.membersService.findOne(orgId, id);
   }
 
   @Post()
   @Roles('SUPERADMIN', 'ADMIN', 'OPERATOR')
-  create(@CurrentTenant() tenant: { id: string }, @Body() createMemberDto: any) {
-    return this.membersService.create(tenant.id, createMemberDto);
+  create(@CurrentTenant() orgId: string, @Body() createMemberDto: any) {
+    return this.membersService.create(orgId, createMemberDto);
   }
 
   @Patch(':id')
   @Roles('SUPERADMIN', 'ADMIN', 'OPERATOR')
   update(
-    @CurrentTenant() tenant: { id: string },
+    @CurrentTenant() orgId: string,
     @Param('id') id: string,
     @Body() updateMemberDto: any,
   ) {
-    return this.membersService.update(tenant.id, id, updateMemberDto);
+    return this.membersService.update(orgId, id, updateMemberDto);
   }
 }

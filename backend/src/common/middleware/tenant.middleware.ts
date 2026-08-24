@@ -13,7 +13,7 @@ export class TenantMiddleware implements NestMiddleware {
       try {
         const payload = this.jwtService.decode(token) as any;
         if (payload && payload.orgId) {
-          req.tenant = { id: payload.orgId };
+          req.tenant = payload.orgId;
         }
       } catch (e) {
         // Ignore decoding errors in middleware, let the Guard handle authentication
