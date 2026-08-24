@@ -7,8 +7,8 @@ API REST multi-tenant para Impacta+. Expuesta solo internamente (sin dominio pú
 - NestJS 11 (`@nestjs/common`, `@nestjs/core`, `platform-express`)
 - Prisma 5 (`@prisma/client` + `prisma` CLI)
 - `class-validator` + `class-transformer` con `ValidationPipe` global (`whitelist: true`, `forbidNonWhitelisted: true`, `transform: true`).
-- Postgres 16 (contenedor `impacta-db`, puerto host 5435) + Redis 7 (`impacta-redis`, puerto host 6381).
-- Node 20 Alpine en runtime.
+- Postgres 16 y Redis 7 **nativos** en el server fenix como servicios systemd (`127.0.0.1:5432` / `127.0.0.1:6379`). Para desarrollo local fuera del server: `docker-compose.yml` de la raíz (puertos 5435/6381).
+- Node 20+ en runtime (el servicio systemd usa `/usr/bin/node`).
 
 ## Estructura
 
@@ -66,7 +66,7 @@ npx prisma studio                  # UI local
 npm run prisma:seed                # si existe prisma/seed.ts
 ```
 
-`DATABASE_URL` en `.env` apunta al host del contenedor: `postgresql://impacta:impacta_pass@localhost:5435/impacta?schema=public`. Dentro del contenedor `backend`, el compose lo reemplaza por `postgres:5432`.
+`DATABASE_URL` en `.env` apunta al postgres **nativo** del server: `postgresql://impacta:...@127.0.0.1:5432/impacta?schema=public` (ver [.env.example](../.env.example)).
 
 ## Gotchas
 
@@ -77,9 +77,10 @@ npm run prisma:seed                # si existe prisma/seed.ts
 
 ## Deploy
 
-- Imagen: `./backend/Dockerfile` (multi-stage, `node:20-alpine`, user no-root).
-- En [../docker-compose.yml](../docker-compose.yml) como servicio `backend` con puerto `3001` publicado al host. Se expone como `api-impacta.pinguinoseguro.cl` vía nginx (`/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf`, `proxy_pass http://127.0.0.1:3001`).
-- Depende de `postgres` y `redis` con healthcheck.
+- El backend corre como servicio systemd **`impacta-backend.service`** (unit file en `/etc/systemd/system/`, user `jnovoas`, WorkingDirectory `~/proyectos/ONG_Impacta/backend`, ejecuta `/usr/bin/node dist/src/main`, puerto 3001, `EnvironmentFile=~/proyectos/ONG_Impacta/.env`).
+- Deploy: `./deploy.sh backend` (build + restart) · Migraciones: `./deploy.sh migrate` · Verificación: `./deploy.sh verify`.
+- Expuesto como `api-impacta.pinguinoseguro.cl` vía nginx (`proxy_pass http://127.0.0.1:3001`; config versionada en [../infra/nginx/](../infra/nginx/)).
+- `backend/Dockerfile` y el compose quedan **solo para desarrollo local** — en producción no hay contenedores.
 
 ## Testing
 
