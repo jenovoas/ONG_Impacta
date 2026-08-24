@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { CampaignsService } from './campaigns.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
+import { CreateP2PPageDto } from './dto/p2p-page.dto';
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 
@@ -29,4 +30,24 @@ export class CampaignsController {
   findOne(@CurrentTenant() orgId: string, @Param('id') id: string) {
     return this.campaignsService.findOne(orgId, id);
   }
+
+  @Post(':id/p2p')
+  @Roles('ADMIN', 'MEMBER') // Permite a socios o admins invocarlo
+  createP2PPage(
+    @CurrentTenant() orgId: string,
+    @Param('id') campaignId: string,
+    @Body() createP2PPageDto: CreateP2PPageDto,
+  ) {
+    return this.campaignsService.createP2PPage(orgId, campaignId, createP2PPageDto);
+  }
+
+  @Get(':id/p2p/:pageId')
+  getP2PPage(
+    @CurrentTenant() orgId: string,
+    @Param('id') campaignId: string,
+    @Param('pageId') pageId: string,
+  ) {
+    return this.campaignsService.getP2PPageById(orgId, campaignId, pageId);
+  }
+
 }
