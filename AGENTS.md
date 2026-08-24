@@ -2,22 +2,21 @@
 
 Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier trabajo no trivial **lee [PLAN.md](PLAN.md)** (fases A→D con criterios de aceptación) y [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md) para el modelo de dominio.
 
-## ⚠️ LOS DOS SITIOS — regla #1 (leer ANTES de tocar cualquier UI)
+## ⚠️ UN SOLO DOMINIO (regla #1 — consolidado 2026-08-24)
 
-Impacta es una ONG con **dos sitios distintos**, ambos servidos desde **un solo build de `frontend/`**:
+Todo lo usuario-facing vive en **`https://impacta.pinguinoseguro.cl`**:
 
-| Dominio | Qué ES | Acceso |
-|---|---|---|
-| `https://impacta.pinguinoseguro.cl` | 🌐 **LANDING PÚBLICA** (marketing de la ONG) — EarthBackground 3D, logo.png, navbar Inicio/Módulos, cards "Ver módulo en acción", demo modal, stats reales del backend | Público — sin login solo se ve la landing |
-| `https://app-impacta.pinguinoseguro.cl` | 📊 **LA APP CON DASHBOARD** — Login, Overview, Members, Donations, Campaigns, Species, Missions, Profile | Requiere login o registro |
+| Ruta | Qué es |
+|---|---|
+| `/` | 🌐 **Landing pública** (marketing) — EarthBackground 3D, logo.png, navbar, cards "Ver módulo en acción", demo modal, stats reales |
+| `/login`, `/register` | 🔐 Acceso — requiere credenciales |
+| `/dashboard/*` | 📊 **La app** — Overview, Members, Donations, Campaigns, Species, Missions, Profile |
 
-Flujo de usuario: landing (`impacta.*`) → login/registro → dashboard (`app-impacta.*`). Sin sesión, solo landing.
+Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` → entra a `/dashboard`. Sin sesión, solo landing.
 
-**Por qué esta regla existe:** en ago-2026 agentes confundieron la landing con el dashboard, mezclaron ambos y nadie supo cuál era cuál (ver "El desastre del 13-ago" más abajo). Desambiguación obligatoria:
-
-- **LandingPage** = componente React en [`frontend/src/pages/LandingPage.tsx`](frontend/src/pages/LandingPage.tsx) que sirve el marketing público. Es parte del build de `frontend/`.
-- **`landing/`** = proyecto Next.js separado, **NO desplegado** (Path A revocado el 16-ago-2026), conservado solo como referencia de diseño/wiring.
-- Ambos dominios nginx apuntan al MISMO directorio `/var/www/impacta.pinguinoseguro.cl/`; el SPA decide qué mostrar según el dominio. **Nunca reemplaces el contenido visible de un dominio con el otro. Nunca uses "landing" y "dashboard" como sinónimos.**
+- **`app-impacta.pinguinoseguro.cl` está DEPRECADO**: quedó del diseño anterior de dos dominios y ahora existe solo como legado — el SPA redirige todo su tráfico a `impacta.*` (`LegacyDomainRedirect` en `frontend/src/App.tsx`). No agregues funcionalidad ahí; la sesión vive en el localStorage de un único dominio a propósito.
+- **Desambiguación obligatoria:** **LandingPage** = componente React en [`frontend/src/pages/LandingPage.tsx`](frontend/src/pages/LandingPage.tsx) (parte del build de `frontend/`). **`landing/`** = proyecto Next.js separado, NO desplegado, conservado como referencia. Nunca uses "landing" y "dashboard" como sinónimos ni mezcles sus responsabilidades — esa confusión causó el desastre del 13-ago (ver más abajo).
+- La API sí va aparte: `api-impacta.pinguinoseguro.cl` (nginx proxy `/api/` también funciona same-origin desde `impacta.*`).
 
 ## Estructura del monorepo
 

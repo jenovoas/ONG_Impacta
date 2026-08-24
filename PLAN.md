@@ -13,10 +13,12 @@ Documento autosuficiente: cualquier agente puede recoger este plan sin depender 
 **Stack:**
 - `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto en `https://api-impacta.pinguinoseguro.cl` (nginx `proxy_pass` al servicio systemd `impacta-backend.service` escuchando en `127.0.0.1:3001`).
 - `landing/` — Next.js 16.2.4 (standalone) + Tailwind v4 + Manrope/Inter. **NO desplegado en producción desde `1380fb9`.** El código se conserva en el repo como referencia (incluye el wiring real: `DemoRequest` POST, `public-stats` fetch, `DemoModal` con focus trap + scroll lock). Path A (deploy Next.js en `impacta.pinguinoseguro.cl`) fue revocado por el usuario: degradaba visualmente el sitio (sin Three.js EarthBackground, sin `logo.png`, sin navbar completa).
-- `frontend/` — Vite + React 19. **Sirve DOS sitios desde UN SOLO build:**
-  - **`https://impacta.pinguinoseguro.cl`** (marketing público) — `LandingPage.tsx` con `EarthBackground` (Three.js: tierra rotando + nubes + atmósfera + estrellas), `logo.png`, navbar, module cards con "Ver módulo en acción", demo modal (POST a `/api/demo-requests`, dedup 5min/email), stats bar con datos REALES desde `/api/organizations/public-stats`. Sin login solo se ve esto.
-  - **`https://app-impacta.pinguinoseguro.cl`** (dashboard SPA) — Login, Overview, Members, Donations, Campaigns, Species, Missions, Organization Profile. Requiere login/registro.
-  - Mismo build estático (`npm run build` → `dist/`), copiado a `/var/www/impacta.pinguinoseguro.cl/` y servido por nginx para ambos dominios.
+- `frontend/` — Vite + React 19. **UN SOLO dominio usuario-facing: `https://impacta.pinguinoseguro.cl`:**
+  - `/` — landing pública (`LandingPage.tsx`) con `EarthBackground` (Three.js), `logo.png`, navbar, module cards con "Ver módulo en acción", demo modal (POST a `/api/demo-requests`, dedup 5min/email), stats bar con datos REALES desde `/api/organizations/public-stats`. Sin sesión solo se ve esto.
+  - `/login`, `/register` — acceso; tras autenticar se entra a la app.
+  - `/dashboard/*` — Overview, Members, Donations, Campaigns, Species, Missions, Organization Profile.
+  - `app-impacta.pinguinoseguro.cl` quedó como legado: el SPA (`LegacyDomainRedirect` en `App.tsx`) redirige todo su tráfico a `impacta.*`.
+  - Mismo build estático (`npm run build` → `dist/`), copiado a `/var/www/impacta.pinguinoseguro.cl/` y servido por nginx.
 - **PostgreSQL 16 NATIVO** (systemd `postgresql`, `127.0.0.1:5432`), DB `impacta`. Migraciones aplicadas (incluida `20260816190000_add_demo_requests`). **Redis NATIVO** (systemd `redis-server`, `127.0.0.1:6379`).
 - [docker-compose.yml](docker-compose.yml) queda **solo para desarrollo local** fuera del server.
 - **Prisma schema:** 8 modelos — `Organization`, `User`, `Member`, `Donation`, `Campaign`, `Species`, `Mission`, `MissionTask`.

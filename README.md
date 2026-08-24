@@ -9,13 +9,13 @@
 
 ## 🚀 Ecosistema Productivo
 
-> **Dos sitios, un solo build:** la landing y el dashboard salen del mismo artefacto estático de `frontend/`; nginx los enruta por dominio. Sin sesión, `impacta.*` solo muestra la landing.
+> **Un solo dominio usuario-facing:** landing, login/registro y dashboard conviven en `impacta.pinguinoseguro.cl` (`/` marketing, `/login`·`/register` acceso, `/dashboard/*` la app). Sin sesión solo se ve la landing.
 
 | Servicio | Enlace Directo | Qué es |
 | :--- | :--- | :--- |
-| **🌐 Landing Page** | [impacta.pinguinoseguro.cl](https://impacta.pinguinoseguro.cl) | Marketing público de la ONG — EarthBackground 3D, stats reales, demo modal. Punto de entrada: de aquí se llega al dashboard vía login/registro |
-| **📱 Dashboard App** | [app-impacta.pinguinoseguro.cl](https://app-impacta.pinguinoseguro.cl) | La aplicación (Overview, Members, Donations, Campaigns, Species, Missions). Requiere autenticación |
+| **🌐 Plataforma** | [impacta.pinguinoseguro.cl](https://impacta.pinguinoseguro.cl) | Landing pública (EarthBackground 3D, stats reales, demo modal) + acceso y dashboard |
 | **⚙️ Backend API** | [api-impacta.pinguinoseguro.cl](https://api-impacta.pinguinoseguro.cl) | API NestJS multi-tenant |
+| ~~app-impacta~~ | — | Dominio legado: redirige a `impacta.*`; no agregar funcionalidad ahí |
 
 ---
 
