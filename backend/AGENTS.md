@@ -79,7 +79,7 @@ npm run prisma:seed                # si existe prisma/seed.ts
 
 - El backend corre como servicio systemd **`impacta-backend.service`** (unit file en `/etc/systemd/system/`, user `jnovoas`, WorkingDirectory `~/proyectos/ONG_Impacta/backend`, ejecuta `/usr/bin/node dist/src/main`, puerto 3001, `EnvironmentFile=~/proyectos/ONG_Impacta/.env`).
 - Deploy: `./deploy.sh backend` (build + restart) · Migraciones: `./deploy.sh migrate` · Verificación: `./deploy.sh verify`.
-- Expuesto como `api-impacta.pinguinoseguro.cl` vía nginx (`proxy_pass http://127.0.0.1:3001`; config versionada en [../infra/nginx/](../infra/nginx/)).
+- Expuesto como `impacta.pinguinoseguro.cl/api/` vía nginx (`proxy_pass http://127.0.0.1:3001`; config versionada en [../infra/nginx/](../infra/nginx/)).
 - `backend/Dockerfile` y el compose quedan **solo para desarrollo local** — en producción no hay contenedores.
 
 ## Testing

@@ -91,7 +91,7 @@ verify() {
     printf '  %-28s %s %s\n' "$h.pinguinoseguro.cl" "$code" "$verdict"
   done
 
-  stats=$(curl -s -m 8 https://api-impacta.pinguinoseguro.cl/organizations/public-stats || true)
+  stats=$(curl -s -m 8 https://impacta.pinguinoseguro.cl/api/organizations/public-stats || true)
   if echo "$stats" | grep -q 'speciesCount'; then
     ok "public-stats con datos reales: $stats"
   else

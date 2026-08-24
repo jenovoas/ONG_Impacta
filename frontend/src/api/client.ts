@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '../store/auth.store';
 
 // El backend vive detrás del proxy /api/ de nginx (que strippea el prefijo).
-// VITE_API_URL permite apuntar a otro origen (ej: api-impacta directo en dev).
+// VITE_API_URL permite apuntar a otro origen en dev.
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 const client = axios.create({
