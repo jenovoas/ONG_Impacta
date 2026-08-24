@@ -1,6 +1,6 @@
 # Backend — guía para agentes
 
-API REST multi-tenant para Impacta+. Expuesta solo internamente (sin dominio público) hasta la fase C del [../PLAN.md](../PLAN.md).
+API REST multi-tenant para Impacta+. Expuesta como `https://api-impacta.pinguinoseguro.cl` vía nginx (`proxy_pass http://127.0.0.1:3001`) y como `https://impacta.pinguinoseguro.cl/api/` (proxy same-origin). Ver [../AGENTS.md](../AGENTS.md) regla #1 — UN SOLO SISTEMA: `impacta.*` sirve landing + front + panel, `app-impacta.*` es solo `301`, la API va aparte.
 
 ## Stack
 

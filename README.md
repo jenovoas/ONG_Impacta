@@ -39,9 +39,9 @@
 
 ```text
 ├── backend/        # API RESTful, lógica de negocio y tenants
-├── frontend/       # React 19 — landing pública + dashboard (un build, dos dominios)
-├── landing/        # Next.js de referencia, NO desplegado (Path A revocado)
-├── infra/nginx/    # Copia versionada de la config nginx activa
+├── frontend/       # React 19 — UN SOLO SISTEMA: landing + front auth + panel de control (un build)
+├── landing/        # Next.js de referencia, NO desplegado (Path A revocado — solo tokens @theme)
+├── infra/nginx/    # Copia versionada de la config nginx activa (un solo dominio + redirect legado)
 └── deploy.sh       # Deploy de frontend/backend en fenix
 ```
 

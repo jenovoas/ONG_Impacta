@@ -2,19 +2,19 @@
 
 Plataforma SaaS multi-tenant para ONGs, gestación temprana. Antes de cualquier trabajo no trivial **lee [PLAN.md](PLAN.md)** (fases A→D con criterios de aceptación) y [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md) para el modelo de dominio.
 
-## ⚠️ UN SOLO DOMINIO (regla #1 — consolidado 2026-08-24)
+## ⚠️ UN SOLO SISTEMA — UN SOLO DOMINIO (regla #1 — consolidado 2026-08-24)
 
-Todo lo usuario-facing vive en **`https://impacta.pinguinoseguro.cl`**:
+**Impacta+ es UN SOLO SISTEMA con 3 capas en un mismo build:** Landing + Front (auth) + Panel de Control de Usuarios. Todo lo usuario-facing vive en **`https://impacta.pinguinoseguro.cl`**:
 
 | Ruta | Qué es |
 |---|---|
 | `/` | 🌐 **Landing pública** (marketing) — EarthBackground 3D, logo.png, navbar, cards "Ver módulo en acción", demo modal, stats reales |
 | `/login`, `/register` | 🔐 Acceso — requiere credenciales |
-| `/dashboard/*` | 📊 **La app** — Overview, Members, Donations, Campaigns, Species, Missions, Profile |
+| `/dashboard/*` | 📊 **Panel de Control de Usuarios** — Overview, Members, Donations, Campaigns, Species, Missions, Profile |
 
 Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` → entra a `/dashboard`. Sin sesión, solo landing.
 
-- **`app-impacta.pinguinoseguro.cl` está DEPRECADO**: quedó del diseño anterior de dos dominios y ahora existe solo como legado — el SPA redirige todo su tráfico a `impacta.*` (`LegacyDomainRedirect` en `frontend/src/App.tsx`). No agregues funcionalidad ahí; la sesión vive en el localStorage de un único dominio a propósito.
+- **`app-impacta.pinguinoseguro.cl` está DEPRECADO y NO es un segundo sistema**: quedó del diseño anterior de dos dominios. Hoy **no sirve contenido** — nginx hace `return 301 https://impacta.pinguinoseguro.cl$request_uri` (el `LegacyDomainRedirect` en `frontend/src/App.tsx` queda solo como respaldo en JS). No agregues funcionalidad ahí; la sesión vive en el localStorage de un único dominio a propósito. Es un solo sistema, no dos.
 - **Desambiguación obligatoria:** **LandingPage** = componente React en [`frontend/src/pages/LandingPage.tsx`](frontend/src/pages/LandingPage.tsx) (parte del build de `frontend/`). **`landing/`** = proyecto Next.js separado, NO desplegado, conservado como referencia. Nunca uses "landing" y "dashboard" como sinónimos ni mezcles sus responsabilidades — esa confusión causó el desastre del 13-ago (ver más abajo).
 - La API sí va aparte: `api-impacta.pinguinoseguro.cl` (nginx proxy `/api/` también funciona same-origin desde `impacta.*`).
 
@@ -22,7 +22,7 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 
 - [backend/](backend/) — NestJS 11 + Prisma 5 + Postgres. Ver [backend/AGENTS.md](backend/AGENTS.md).
 - [landing/](landing/) — Next.js 16 + Tailwind v4. **NO desplegado en producción** (Path A revocado el 16-ago-2026). Conservado solo como referencia de diseño (tokens `@theme` en `app/globals.css`) y wiring real (`DemoRequest`, `public-stats`).
-- [frontend/](frontend/) — Vite + React 19 + TanStack Query. **Sirve LOS DOS SITIOS** (ver regla #1): LandingPage para `impacta.*` y el dashboard (Login, Overview, Members, Donations, Campaigns, Species, Missions, Profile) para `app-impacta.*`. Un build → `/var/www/impacta.pinguinoseguro.cl/`.
+- [frontend/](frontend/) — Vite + React 19 + TanStack Query. **Sirve UN SOLO SISTEMA** (ver regla #1): Landing (`LandingPage.tsx` en `/`) + Front auth (`/login`, `/register`) + Panel de Control de Usuarios (`/dashboard/*`: Overview, Members, Donations, Campaigns, Species, Missions, Profile). Un build → `/var/www/impacta.pinguinoseguro.cl/`.
 - [infra/nginx/](infra/nginx/) — copia versionada de la config nginx activa en el server.
 - [Impacta+PRD.md](Impacta+PRD.md), [DISENO_IDENTIDAD_VISUAL.md](DISENO_IDENTIDAD_VISUAL.md) — producto y marca.
 - [docker-compose.yml](docker-compose.yml) — **solo desarrollo local** (postgres 5435 + redis 6381 + backend). En producción NADA corre en contenedores.
@@ -45,7 +45,7 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
   - PostgreSQL 16 nativo — servicio systemd `postgresql`, escucha `127.0.0.1:5432`, DB `impacta`
   - Redis nativo — servicio systemd `redis-server`, escucha `127.0.0.1:6379`
   - Backend NestJS — servicio systemd **`impacta-backend.service`** (unit file en `/etc/systemd/system/`, user `jnovoas`, WorkingDirectory `~/proyectos/ONG_Impacta/backend`, `EnvironmentFile=~/proyectos/ONG_Impacta/.env`), puerto 3001
-  - Frontends — estáticos servidos por nginx desde `/var/www/impacta.pinguinoseguro.cl/`; nginx hace `proxy_pass http://127.0.0.1:3001` para `/api/`
+  - Frontend — **un solo sistema** servido por nginx desde `/var/www/impacta.pinguinoseguro.cl/` (landing + dashboard); `app-impacta.*` no sirve contenido — solo `301` a `impacta.*`. Nginx hace `proxy_pass http://127.0.0.1:3001` para `/api/`
 - Configuración nginx activa: `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf` (copia versionada en [infra/nginx/](infra/nginx/)).
 
 ## Comandos base
@@ -64,18 +64,19 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 Verificación manual rápida:
 ```bash
 systemctl status impacta-backend.service
-for h in impacta api-impacta app-impacta; do
+for h in impacta api-impacta; do
   curl -s -o /dev/null -w "$h.pinguinoseguro.cl: %{http_code}\n" -m 5 https://$h.pinguinoseguro.cl/
 done
+curl -s -o /dev/null -w "app-impacta.pinguinoseguro.cl: %{http_code} (debe ser 301 → impacta.*)\n" -m 5 https://app-impacta.pinguinoseguro.cl/
 curl -s https://api-impacta.pinguinoseguro.cl/organizations/public-stats | jq .
 ```
 
-## Estado actual (2026-08-24)
+## Estado actual (2026-08-24 — single system)
 
-- `https://impacta.pinguinoseguro.cl` — **landing pública** (LandingPage.tsx de `frontend/`) con EarthBackground Three.js, stats reales vía `/api/organizations/public-stats`.
-- `https://app-impacta.pinguinoseguro.cl` — **dashboard** (mismo build estático), login + 8 pantallas.
+- `https://impacta.pinguinoseguro.cl` — **UN SOLO SISTEMA**: landing pública (`LandingPage.tsx` con EarthBackground Three.js, stats reales vía `/api/organizations/public-stats`) + Front auth (`/login`, `/register`) + Panel de Control de Usuarios (`/dashboard/*`: Overview, Members, Donations, Campaigns, Species, Missions, Profile). Un build → `/var/www/impacta.pinguinoseguro.cl/`.
+- `https://app-impacta.pinguinoseguro.cl` — **no sirve contenido**, solo `301 → https://impacta.pinguinoseguro.cl` (legado para bookmarks/DNS viejos). No agregar funcionalidad ahí — es un solo sistema, no dos.
 - `https://api-impacta.pinguinoseguro.cl` — backend NestJS 11 corriendo como `impacta-backend.service`. Nota: `/health` responde 404 actualmente (endpoint no existe en el código pese a menciones históricas).
-- Producción quedó sincronizada con `origin/main` durante la migración del 23-ago-2026 (verificado: bundle desplegado = build de main).
+- Producción quedó sincronizada con `origin/main` durante la migración del 23-ago-2026 y consolidación a dominio único del 24-ago-2026 (verificado: `301` para app-impacta, bundle desplegado = build de main).
 
 ## Convenciones de commits
 
