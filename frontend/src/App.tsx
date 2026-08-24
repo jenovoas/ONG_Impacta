@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LoginPage } from './pages/Login';
+import { RegisterPage } from './pages/Register';
 import { LandingPage } from './pages/LandingPage';
 import { Overview } from './pages/Overview';
 import { Species } from './pages/Species';
@@ -15,7 +16,7 @@ import { useAuthStore } from './store/auth.store';
 const queryClient = new QueryClient();
 
 function App() {
-  const token = useAuthStore((state) => state.token);
+  const accessToken = useAuthStore((state) => state.accessToken);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -25,12 +26,17 @@ function App() {
 
           <Route 
             path="/login" 
-            element={token ? <Navigate to="/dashboard/overview" /> : <LoginPage />} 
+            element={accessToken ? <Navigate to="/dashboard/overview" /> : <LoginPage />} 
           />
           
+
+          <Route
+            path="/register"
+            element={accessToken ? <Navigate to="/dashboard/overview" /> : <RegisterPage />}
+          />
           <Route 
             path="/dashboard" 
-            element={token ? <DashboardLayout /> : <Navigate to="/login" />}
+            element={accessToken ? <DashboardLayout /> : <Navigate to="/login" />}
           >
             <Route index element={<Navigate to="overview" />} />
             <Route path="overview" element={<Overview />} />

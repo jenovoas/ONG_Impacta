@@ -40,8 +40,11 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
+      # JWT secret y OAuth config se cargan desde .env (Docker Compose env_file)
       DATABASE_URL: postgresql://impacta:impacta_pass@postgres:5432/impacta?schema=public
       REDIS_URL: redis://redis:6379/0
+    env_file:
+      - .env
     ports:
       - "3001:3001"
     depends_on:

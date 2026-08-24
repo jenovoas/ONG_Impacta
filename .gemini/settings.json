@@ -6,7 +6,7 @@
         "code-review-graph",
         "serve"
       ],
-      "cwd": "/home/jnovoas/Proyectos/ONG_Impacta"
+      "cwd": "/home/jnovoas/proyectos/ONG_Impacta"
     }
   },
   "hooks": {

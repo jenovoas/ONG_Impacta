@@ -101,9 +101,11 @@ export const LandingPage: React.FC = () => {
             {/* Navigation Links */}
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#bec7d3]">
               <a href="#hero" className="hover:text-[#00a8ff] transition-colors">Inicio</a>
-              <a href="#modules" className="hover:text-[#00a8ff] transition-colors">Módulos</a>
-              <a href="#impact" className="hover:text-[#00a8ff] transition-colors">Impacto Vivo</a>
-            </nav>
+              <a href="#modules" className="hover:text-[#00a8ff] transition-colors">Plataforma</a>
+              <a href="#how-it-works" className="hover:text-[#00a8ff] transition-colors">Cómo funciona</a>
+              <a href="#why-us" className="hover:text-[#00a8ff] transition-colors">Por qué Impacta+</a>
+              <a href="#impact" className="hover:text-[#00a8ff] transition-colors">Impacto</a>
+</nav>
 
             {/* Actions */}
             <div className="flex items-center gap-4">
@@ -117,7 +119,7 @@ export const LandingPage: React.FC = () => {
                 onClick={() => setShowDemoModal(true)}
                 className="text-sm font-semibold px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] hover:opacity-90 transition-opacity shadow-md shadow-[#00a8ff]/20 flex items-center gap-2"
               >
-                <span>Acceso ONG</span>
+                <span>Acceso Impacta</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -149,7 +151,7 @@ export const LandingPage: React.FC = () => {
                 onClick={() => setShowDemoModal(true)}
                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] font-bold text-base hover:opacity-95 transition-all shadow-xl shadow-[#00a8ff]/25 flex items-center justify-center gap-3"
               >
-                <span>Solicitar Demostración</span>
+                <span>Demo</span>
                 <Rocket className="w-5 h-5" />
               </button>
               <a
@@ -192,7 +194,51 @@ export const LandingPage: React.FC = () => {
         </section>
 
         {/* Product Modules Section */}
-        <section id="modules" className="py-24 bg-[#131313]/60 backdrop-blur-md border-b border-[#2a2a2a]/40">
+                {/* Cómo funciona */}
+        <section id="how-it-works" className="relative overflow-hidden py-24 md:py-32 border-b border-[#2a2a2a]/40">
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <div className="text-center mb-16">
+              <span className="inline-block px-3 py-1 rounded-full bg-[#00a8ff]/10 text-[#00a8ff] text-xs font-bold tracking-widest uppercase mb-4">Flujo</span>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 font-headline">
+                De la <span className="impacta-gradient-text">oficina a la nube</span> en 3 pasos
+              </h2>
+              <p className="text-[#bec7d3] text-lg max-w-2xl mx-auto">
+                No migrás planillas. Abrís Impacta+, configurás tu organización y empezás a coordinar misiones la misma semana.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8 relative">
+              {/* Connector line on md+ */}
+              <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-[#00a8ff]/40 to-transparent" />
+
+              <div className="relative bg-[#161616]/70 backdrop-blur border border-[#2a2a2a] rounded-2xl p-8">
+                <div className="absolute -top-5 left-8 w-10 h-10 rounded-xl bg-gradient-to-br from-[#00a8ff] to-[#00d4aa] flex items-center justify-center text-[#003352] font-black text-lg shadow-lg shadow-[#00a8ff]/20">1</div>
+                <h3 className="text-xl font-bold mt-2 mb-3">Crea tu organización</h3>
+                <p className="text-[#bec7d3] text-sm leading-relaxed">
+                  Registra tu ONG, invita al equipo y define los módulos que vas a usar. Tu slug aparece de inmediato en <span className="font-mono text-[#00d4aa]">app-impacta.pinguinoseguro.cl</span>.
+                </p>
+              </div>
+
+              <div className="relative bg-[#161616]/70 backdrop-blur border border-[#2a2a2a] rounded-2xl p-8">
+                <div className="absolute -top-5 left-8 w-10 h-10 rounded-xl bg-gradient-to-br from-[#00a8ff] to-[#00d4aa] flex items-center justify-center text-[#003352] font-black text-lg shadow-lg shadow-[#00a8ff]/20">2</div>
+                <h3 className="text-xl font-bold mt-2 mb-3">Conecta tus datos</h3>
+                <p className="text-[#bec7d3] text-sm leading-relaxed">
+                  Campañas, donaciones, inventario biológico, misiones de campo, padrón de miembros. Importás CSV o entras manualmente — lo que prefieras.
+                </p>
+              </div>
+
+              <div className="relative bg-[#161616]/70 backdrop-blur border border-[#2a2a2a] rounded-2xl p-8">
+                <div className="absolute -top-5 left-8 w-10 h-10 rounded-xl bg-gradient-to-br from-[#00a8ff] to-[#00d4aa] flex items-center justify-center text-[#003352] font-black text-lg shadow-lg shadow-[#00a8ff]/20">3</div>
+                <h3 className="text-xl font-bold mt-2 mb-3">Coordina y reporta</h3>
+                <p className="text-[#bec7d3] text-sm leading-relaxed">
+                  Tu equipo ve el mismo tablero. Socios ven impacto agregado. Donantes reciben recibos automáticos. Tú dejas de hacer Excel a las 2am.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+<section id="modules" className="py-24 bg-[#131313]/60 backdrop-blur-md border-b border-[#2a2a2a]/40">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-16">
               <h2 className="text-xs uppercase font-bold tracking-widest text-[#00d4aa] mb-3">Módulos Integrados</h2>
@@ -286,7 +332,64 @@ export const LandingPage: React.FC = () => {
         </section>
 
         {/* Live Impact Feature Highlight */}
-        <section id="impact" className="py-24 bg-transparent border-b border-[#2a2a2a]/40">
+                {/* Por qué Impacta+ */}
+        <section id="why-us" className="relative overflow-hidden py-24 md:py-32 border-b border-[#2a2a2a]/40">
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <div className="text-center mb-16">
+              <span className="inline-block px-3 py-1 rounded-full bg-[#00d4aa]/10 text-[#00d4aa] text-xs font-bold tracking-widest uppercase mb-4">Diferencia</span>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 font-headline">
+                Construido <span className="impacta-gradient-text">para la conservación</span>, no adaptada después
+              </h2>
+              <p className="text-[#bec7d3] text-lg max-w-2xl mx-auto">
+                Otros SaaS genéricos funcionan para retailers y fintech. Para ONGs hay problemas específicos: transparencia de fondos, coordinación en terreno, padrón de voluntarios, reporting a donantes. Eso es lo que resolvemos.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-[#161616]/70 border border-[#2a2a2a] rounded-2xl p-8 hover:border-[#00a8ff]/40 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-[#00a8ff]/10 flex items-center justify-center mb-4">
+                  <ShieldCheck className="w-6 h-6 text-[#00a8ff]" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Multi-tenant estricto</h3>
+                <p className="text-[#bec7d3] text-sm leading-relaxed">
+                  Cada ONG ve SOLO lo suyo. El middleware verifica el <code className="font-mono text-[#00d4aa]">orgSlug</code> en cada request. Imposible que un usuario lea datos de otra organización, por URL, por token, o por bug.
+                </p>
+              </div>
+
+              <div className="bg-[#161616]/70 border border-[#2a2a2a] rounded-2xl p-8 hover:border-[#00a8ff]/40 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-[#00d4aa]/10 flex items-center justify-center mb-4">
+                  <Compass className="w-6 h-6 text-[#00d4aa]" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Diseñado para terreno</h3>
+                <p className="text-[#bec7d3] text-sm leading-relaxed">
+                  Misiones de campo con tareas asignadas, estados (pendiente → en curso → completada) y bitácora por miembro. Pensado para que funcione desde el celular con conexión intermitente.
+                </p>
+              </div>
+
+              <div className="bg-[#161616]/70 border border-[#2a2a2a] rounded-2xl p-8 hover:border-[#00a8ff]/40 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-[#00a8ff]/10 flex items-center justify-center mb-4">
+                  <DollarSign className="w-6 h-6 text-[#00a8ff]" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Donaciones con trazabilidad</h3>
+                <p className="text-[#bec7d3] text-sm leading-relaxed">
+                  Cada peso donado queda asociado a una campaña, una organización, un donante y un timestamp. Listo para reportar a tu directorio o a la entidad reguladora sin planilla adicional.
+                </p>
+              </div>
+
+              <div className="bg-[#161616]/70 border border-[#2a2a2a] rounded-2xl p-8 hover:border-[#00a8ff]/40 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-[#00d4aa]/10 flex items-center justify-center mb-4">
+                  <Users className="w-6 h-6 text-[#00d4aa]" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Padrón de miembros y voluntarios</h3>
+                <p className="text-[#bec7d3] text-sm leading-relaxed">
+                  No mezclamos "socios que pagan" con "voluntarios que donan tiempo". Los tratamos como lo que son. Roles y permisos granulares desde el día uno.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+<section id="impact" className="py-24 bg-transparent border-b border-[#2a2a2a]/40">
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#00d4aa]/10 text-[#00d4aa] text-xs font-bold mb-4 border border-[#00d4aa]/20">

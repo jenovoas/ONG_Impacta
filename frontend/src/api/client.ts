@@ -2,24 +2,57 @@ import axios from 'axios';
 import { useAuthStore } from '../store/auth.store';
 
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001',
+  baseURL: import.meta.env.VITE_API_URL || '',
 });
 
 client.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
+  const token = useAuthStore.getState().accessToken;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
+// Refresh-on-401: cuando un request falla con 401 y tenemos refresh_token,
+// intentamos /auth/refresh UNA vez. Si falla, limpiamos todo y mandamos al /login.
+let refreshing: Promise<string | null> | null = null;
+
 client.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
+  async (error) => {
+    const original = error.config;
+    if (error.response?.status !== 401 || original._retried) {
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
+    const refreshToken = useAuthStore.getState().refreshToken;
+    if (!refreshToken) {
+      useAuthStore.getState().clearAuth();
+      return Promise.reject(error);
+    }
+    try {
+      if (!refreshing) {
+        refreshing = axios
+          .post((import.meta.env.VITE_API_URL || '') + '/auth/refresh',
+            { refreshToken }, { headers: { 'Content-Type': 'application/json' } })
+          .then((r) => {
+            const { access_token, refresh_token } = r.data;
+            useAuthStore.getState().updateTokens(access_token, refresh_token);
+            return access_token;
+          })
+          .finally(() => { refreshing = null; });
+      }
+      const newAccess = await refreshing;
+      if (!newAccess) {
+        useAuthStore.getState().clearAuth();
+        return Promise.reject(error);
+      }
+      original._retried = true;
+      original.headers.Authorization = `Bearer ${newAccess}`;
+      return client(original);
+    } catch {
+      useAuthStore.getState().clearAuth();
+      return Promise.reject(error);
+    }
   }
 );
 
