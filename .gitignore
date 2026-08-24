@@ -32,3 +32,7 @@ build
 .code-review-graph/
 .codegraph/
 
+# Herramientas alucinadas — nunca usadas en este repo (no restaurar)
+.cursorrules
+.windsurfrules
+
