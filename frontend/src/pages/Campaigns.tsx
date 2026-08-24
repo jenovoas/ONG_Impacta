@@ -4,7 +4,6 @@ import {
   Target, 
   Plus, 
   Calendar, 
-  TrendingUp, 
   X, 
   Check, 
   Loader2
@@ -200,10 +199,6 @@ const CampaignCard = ({ campaign }: { campaign: any }) => {
               <span className="text-xs font-bold text-gray-400">
                 {campaign.endDate ? `Hasta ${new Date(campaign.endDate).toLocaleDateString()}` : 'Sin fecha límite'}
               </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-gray-500" />
-              <span className="text-xs font-bold text-gray-400">Trend: +12% hoy</span>
             </div>
           </div>
         </div>

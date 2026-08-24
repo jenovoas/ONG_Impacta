@@ -57,6 +57,24 @@ export const Donations: React.FC = () => {
     return matchesSearch && matchesFilter;
   });
 
+  const handleExportCsv = () => {
+    const rows = filteredDonations.map((d: any) => {
+      const donor = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Donante Anónimo';
+      const email = d.member?.email || '';
+      const campaign = d.campaign?.name || 'Aporte General';
+      return [d.id, donor, email, Number(d.amount).toString(), d.status, new Date(d.createdAt).toISOString(), campaign].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+    });
+    const header = ['id','donante','email','monto','estado','fecha','campaña'].join(',');
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `donaciones-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-8">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -67,7 +85,7 @@ export const Donations: React.FC = () => {
           <p className="text-gray-500 font-medium mt-2">Seguimiento de aportes y transacciones financieras.</p>
         </div>
 
-        <button className="bg-white/5 text-white px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors border border-white/5">
+        <button onClick={handleExportCsv} className="bg-white/5 text-white px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors border border-white/5">
           <Download className="w-5 h-5" />
           Exportar CSV
         </button>
@@ -182,11 +200,6 @@ export const Donations: React.FC = () => {
 
       <footer className="flex items-center justify-between text-gray-600 text-xs font-bold uppercase tracking-widest">
         <p>Total registros: {filteredDonations.length}</p>
-        <div className="flex gap-4">
-          <button className="hover:text-white transition-colors">Anterior</button>
-          <button className="text-white">1</button>
-          <button className="hover:text-white transition-colors">Siguiente</button>
-        </div>
       </footer>
     </div>
   );

@@ -12,12 +12,6 @@ import {
   ChevronDown,
   Building2,
   Activity,
-  Globe,
-  Settings,
-  HelpCircle,
-  BarChart3,
-  ClipboardList,
-  MapPinned,
 } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import { clsx, type ClassValue } from 'clsx';
@@ -47,7 +41,6 @@ const navGroups: NavGroup[] = [
     icon: LayoutDashboard,
     items: [
       { to: '/dashboard/overview', label: 'Panel general', icon: Activity },
-      { to: '/dashboard/reports', label: 'Reportes', icon: BarChart3 },
     ],
   },
   {
@@ -66,7 +59,6 @@ const navGroups: NavGroup[] = [
     items: [
       { to: '/dashboard/species', label: 'Especies', icon: Leaf },
       { to: '/dashboard/missions', label: 'Misiones', icon: LifeBuoy },
-      { to: '/dashboard/locations', label: 'Geolocalización', icon: MapPinned },
     ],
   },
   {
@@ -75,8 +67,6 @@ const navGroups: NavGroup[] = [
     icon: Users,
     items: [
       { to: '/dashboard/members', label: 'Miembros', icon: Users },
-      { to: '/dashboard/volunteers', label: 'Voluntarios', icon: ClipboardList },
-      { to: '/dashboard/network', label: 'Red de ONGs', icon: Globe },
     ],
   },
   {
@@ -85,14 +75,11 @@ const navGroups: NavGroup[] = [
     icon: Building2,
     items: [
       { to: '/dashboard/organization', label: 'Perfil', icon: Building2 },
-      { to: '/dashboard/settings', label: 'Configuración', icon: Settings },
     ],
   },
 ];
 
-const supportItems: NavItem[] = [
-  { to: '/dashboard/help', label: 'Ayuda', icon: HelpCircle },
-];
+const supportItems: NavItem[] = [];
 
 // Slug paths that belong to a group (so we auto-open that group when active)
 const groupsByPath: Record<string, string> = {};

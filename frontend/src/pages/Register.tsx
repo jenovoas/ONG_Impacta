@@ -110,7 +110,7 @@ export const RegisterPage: React.FC = () => {
                 className="w-full pl-10 pr-3 py-2.5 bg-black/40 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-primary transition font-mono text-sm"
               />
             </div>
-            <p className="text-[11px] text-gray-500 mt-1">app-impacta.pinguinoseguro.cl/dashboard?org={orgSlug || 'tu-org'}</p>
+            <p className="text-[11px] text-gray-500 mt-1">impacta.pinguinoseguro.cl/dashboard?org={orgSlug || 'tu-org'}</p>
           </div>
 
           <div>

@@ -215,7 +215,7 @@ export const LandingPage: React.FC = () => {
                 <div className="absolute -top-5 left-8 w-10 h-10 rounded-xl bg-gradient-to-br from-[#00a8ff] to-[#00d4aa] flex items-center justify-center text-[#003352] font-black text-lg shadow-lg shadow-[#00a8ff]/20">1</div>
                 <h3 className="text-xl font-bold mt-2 mb-3">Crea tu organización</h3>
                 <p className="text-[#bec7d3] text-sm leading-relaxed">
-                  Registra tu ONG, invita al equipo y define los módulos que vas a usar. Tu slug aparece de inmediato en <span className="font-mono text-[#00d4aa]">app-impacta.pinguinoseguro.cl</span>.
+                  Registra tu ONG, invita al equipo y define los módulos que vas a usar. Tu slug aparece de inmediato en <span className="font-mono text-[#00d4aa]">impacta.pinguinoseguro.cl/dashboard</span>.
                 </p>
               </div>
 
@@ -426,7 +426,7 @@ export const LandingPage: React.FC = () => {
                   <div className="w-3 h-3 rounded-full bg-[#ffb877]" />
                   <div className="w-3 h-3 rounded-full bg-[#00d4aa]" />
                 </div>
-                <span className="text-xs font-mono text-[#bec7d3]">demo.impacta.cl/dashboard</span>
+                <span className="text-xs font-mono text-[#bec7d3]">impacta.pinguinoseguro.cl/dashboard</span>
               </div>
               <div className="space-y-4">
                 <div className="p-4 rounded-xl bg-[#1c1b1b]/80 border border-[#2a2a2a] flex items-center justify-between">

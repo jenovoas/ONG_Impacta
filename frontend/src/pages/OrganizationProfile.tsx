@@ -81,23 +81,23 @@ export const OrganizationProfile: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          <div className="glass-card p-8 rounded-[32px] border border-white/5 bg-primary/5 text-center">
-            <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20 mx-auto mb-4">
-              <Shield className="w-10 h-10 text-primary" />
-            </div>
-            <h3 className="text-white font-black uppercase italic tracking-tighter">Estado: Verificado</h3>
-            <p className="text-gray-500 text-xs mt-2 leading-relaxed">Tu organización cumple con los protocolos del **Steward Identity 2026**.</p>
-          </div>
-
           <div className="glass-card p-6 rounded-[32px] border border-white/5 space-y-4">
-            <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Soporte Técnico</h4>
+            <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Detalles</h4>
             <div className="flex items-center gap-3 text-white">
-              <Mail className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold">ayuda@impacta.cl</span>
+              <Shield className="w-4 h-4 text-primary" />
+              <span className="text-xs font-bold">Plan: {org?.plan || 'FREE'}</span>
             </div>
             <div className="flex items-center gap-3 text-white">
               <CheckCircle className="w-4 h-4 text-secondary" />
-              <span className="text-xs font-bold">SLA: 99.9% Activo</span>
+              <span className="text-xs font-bold">Creada: {org?.createdAt ? new Date(org.createdAt).toLocaleDateString('es-CL') : '—'}</span>
+            </div>
+          </div>
+
+          <div className="glass-card p-6 rounded-[32px] border border-white/5 space-y-4">
+            <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Soporte</h4>
+            <div className="flex items-center gap-3 text-white">
+              <Mail className="w-4 h-4 text-primary" />
+              <span className="text-xs font-bold">soporte@pinguinoseguro.cl</span>
             </div>
           </div>
         </div>
