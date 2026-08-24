@@ -65,6 +65,8 @@ run_migrations() {
   log "Aplicando migraciones Prisma (prisma migrate deploy)..."
   (
     cd "$REPO_ROOT/backend"
+    # El CLI de Prisma no sube a buscar el .env de la raíz — cargarlo explícitamente
+    set -a; source "$REPO_ROOT/.env"; set +a
     npx prisma migrate deploy
   )
   log "Reiniciando backend para cargar cambios de schema..."
