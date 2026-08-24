@@ -102,11 +102,15 @@ Fuente de verdad: **Google Stitch project `4741044715461206908`** ("Interfaz Dis
 
 ## 2. Backlog ordenado
 
-### Fase C — Frontend app (`app-impacta.pinguinoseguro.cl`)
+### Fase C — Frontend app (consolidada en dominio único — 24-ago-2026)
+
+> **Nota:** esta fase fue planificada cuando el diseño era multi-dominio. Desde el
+> 24-ago-2026 rige la regla #1: UN SOLO SISTEMA en `impacta.pinguinoseguro.cl`;
+> `app-impacta.*` solo redirige (301) y la API vive en `api-impacta.*`.
 
 **Pre-requisitos cumplidos:**
 - Backend expuesto en `api-impacta.pinguinoseguro.cl` ✅
-- Frontend desplegado en `app-impacta.pinguinoseguro.cl` ✅
+- Frontend desplegado en `impacta.pinguinoseguro.cl` (landing + auth + dashboard, un build) ✅
 - CORS configurado ✅
 
 **C1. Aplicar diseño al frontend (prioridad alta)**

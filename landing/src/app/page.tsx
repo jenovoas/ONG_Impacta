@@ -13,7 +13,7 @@ async function getPublicStats() {
 import DemoButton from "@/components/DemoButton";
 
 export default async function LandingPage() {
-  const appDashboardUrl = "https://app-impacta.pinguinoseguro.cl";
+  const appDashboardUrl = "https://impacta.pinguinoseguro.cl/dashboard";
   const stats = await getPublicStats();
 
   const speciesCount = stats?.speciesCount ?? 0;
@@ -244,7 +244,7 @@ export default async function LandingPage() {
                 <div className="w-3 h-3 rounded-full bg-[#ffb877]" />
                 <div className="w-3 h-3 rounded-full bg-[#00d4aa]" />
               </div>
-              <span className="text-xs font-mono text-[#bec7d3]">app-impacta.pinguinoseguro.cl</span>
+              <span className="text-xs font-mono text-[#bec7d3]">impacta.pinguinoseguro.cl/dashboard</span>
             </div>
             <div className="space-y-4">
               <div className="p-4 rounded-xl bg-[#1c1b1b] border border-[#2a2a2a] flex items-center justify-between">

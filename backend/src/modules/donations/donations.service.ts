@@ -64,7 +64,8 @@ export class DonationsService {
 
     return {
       ...updatedDonation,
-      paymentUrl: `https://impactapay.pinguinoseguro.cl/pay/${updatedDonation.gatewayRef}`,
+      // Mock hasta integrar pasarela real; dominio único por regla #1 (AGENTS.md).
+      paymentUrl: `${process.env.APP_PUBLIC_URL ?? 'https://impacta.pinguinoseguro.cl'}/pay/${updatedDonation.gatewayRef}`,
     };
   }
 
