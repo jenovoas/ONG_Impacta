@@ -48,9 +48,16 @@ export class MembersService {
       throw new BadRequestException('Invalid RUT');
     }
 
+    const { firstName, lastName, email, phone, rut, status } = data;
+
     return this.prisma.member.create({
       data: {
-        ...data,
+        firstName,
+        lastName,
+        email,
+        phone: phone || null,
+        rut: rut || null,
+        status: status || 'ACTIVE',
         organizationId: orgId,
       },
     });
@@ -61,9 +68,18 @@ export class MembersService {
       throw new BadRequestException('Invalid RUT');
     }
 
+    const { firstName, lastName, email, phone, rut, status } = data;
+    const updatePayload: Record<string, any> = {};
+    if (firstName !== undefined) updatePayload.firstName = firstName;
+    if (lastName !== undefined) updatePayload.lastName = lastName;
+    if (email !== undefined) updatePayload.email = email;
+    if (phone !== undefined) updatePayload.phone = phone || null;
+    if (rut !== undefined) updatePayload.rut = rut || null;
+    if (status !== undefined) updatePayload.status = status;
+
     return this.prisma.member.updateMany({
       where: { id, organizationId: orgId },
-      data,
+      data: updatePayload,
     });
   }
 }
