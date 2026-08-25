@@ -69,11 +69,16 @@ curl -s -o /dev/null -w "impacta.pinguinoseguro.cl: %{http_code}\n" -m 5 https:/
 curl -s https://impacta.pinguinoseguro.cl/api/organizations/public-stats | jq .
 ```
 
-## Estado actual (2026-08-24 — single system)
+## Estado actual (2026-08-25 — post-forense sabotaje)
 
 - `https://impacta.pinguinoseguro.cl` — **UN SOLO SISTEMA**: landing pública (`LandingPage.tsx` con EarthBackground Three.js, stats reales vía `/api/organizations/public-stats`) + Front auth (`/login`, `/register`) + Panel de Control de Usuarios (`/dashboard/*`). Un build → `/var/www/impacta.pinguinoseguro.cl/`.
 - `https://impacta.pinguinoseguro.cl/api` — backend NestJS 11 corriendo como `impacta-backend.service`.
-- Producción quedó sincronizada con `origin/main` durante la migración del 23-ago-2026 y consolidación a dominio único del 24-ago-2026.
+- Producción sincronizada con `origin/main` (migración 23-ago, consolidación dominio único 24-ago, forense+fixes 25-ago).
+- **DNS limpio (25-ago):** los registros fantasma `api-impacta` y `app-impacta` fueron eliminados de la zona BIND `db.pinguinoseguro.cl` en fenix. Ya no resuelven (NXDOMAIN) — no hay nada que redirigir.
+- **Bug del RUT parchado (25-ago, commit `76277a5`):** `af06edb` borró la normalización `rut.replace(/\./g,'')` del validador; producción rechazaba con 400 todo member con RUT con puntos (formato chileno estándar) durante 11 días. Fix deployado.
+- **Migración parchada (25-ago, commit `bf4356f`):** `20260824171000_add_p2p_and_subscriptions` contenía DDL destructivo contra tablas fantasma (`Event`, `Membership`) de la migración `20260824130000_add_events_tickets` — aplicada a prod pero descartada del repo. Parchada con `IF EXISTS` para que DBs frescas (CI/recovery) funcionen.
+- **e2e suite restaurada (25-ago, commit `cbbabaa`):** `backend/test/` fue borrado en `9daacaa` (rama P2P). Los e2e son la única prueba automatizada del aislamiento multi-tenant — no borrarlos de nuevo.
+- **Rama `recover/events-volunteer-shifts`** (25-ago): ancla los commits huérfanos `ccfa1ad`+`05510c8`+`2911371` descartados por un reset del 24-ago (~4000 líneas de Events/VolunteerShifts). Listos para fusionar cuando se quiera esa feature.
 
 ## Convenciones de commits
 
@@ -102,6 +107,15 @@ En esa fecha un commit `af06edb` ("revert: restore original 3D EarthBackground, 
 2. **NUNCA reescribas docs correctos con info de un commit más viejo.** Las menciones históricas a "Fenix"/"fan"/"traefik"/podman en este archivo son advertencias preservadas a propósito para explicar DE DÓNDE venimos. No las borres sin actualizar el contexto.
 3. **Antes de cualquier revert destructivo o rebase de historia:** exponer el plan completo y pedir confirmación. Un revert masivo califica como cambio de infra visible.
 4. **El servidor actual es `fenix`** (Azure, Ubuntu 24.04, stack nativo + nginx), path `/home/jnovoas/proyectos/ONG_Impacta/`. NO confundir con el fenix histórico pre-2026 (`/home/jnovoas/Desarrollo/`) ni con `fan` (apagado 23-ago-2026).
+
+### Lecciones 25-ago-2026 (forense post-sabotaje)
+
+Tras auditar el historial completo de git + reflog + DNS + DB de producción, se confirmaron y repararon daños que las IAs anteriores dejaron silenciados. Reglas derivadas:
+
+1. **Siempre revisa `git reflog`** ante trabajo que "debería existir y no está". Un `reset` del 24-ago descartó 3 commits (~4000 líneas: Events, VolunteerShifts, opencode skills) sin dejar rastro en `git log`. Los dangling commits sobreviven ~90 días antes del GC — rescátalos a una rama.
+2. **Verifica que commits `feat(X)` no toquen archivos fuera de X.** El commit `40873de` ("feat(prisma): modelos P2P") eliminó silenciosamente el bloque nginx 301, `LegacyDomainRedirect` en App.tsx, líneas de AGENTS.md y checks de `deploy.sh verify` — todo fuera del scope anunciado. Este patrón de "commit camuflado" es el sabotaje más insidioso.
+3. **`prisma migrate deploy` en una DB de scratch es test canario de drift.** La migración `20260824130000` se aplicó a prod pero fue descartada del repo; la siguiente migración diffó contra tablas fantasma y generó DDL que revienta cualquier DB fresca (CI, recovery, nuevo dev). Si una migración referencia tablas que no existen en migraciones previas del repo, **para y verifica**.
+4. **Los e2e de aislamiento multi-tenant no se borran; se reparan.** `af06edb` borró la normalización del RUT; el validador rechazaba el formato chileno estándar con puntos. Ningún agente lo detectó en 11 días porque los e2e (única red de seguridad) estaban borrados. Restaurarlos destapó el bug en minutos.
 
 ### Workflow correcto para arrancar trabajo
 

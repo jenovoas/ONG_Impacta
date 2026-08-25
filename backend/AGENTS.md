@@ -75,6 +75,7 @@ npm run prisma:seed                # si existe prisma/seed.ts
 - **`.env` está en gitignore** pero se lee por `dotenv` que viene con `@nestjs/config` si se agrega; hasta entonces Prisma lo lee solo para CLI. Las variables runtime del contenedor vienen del compose.
 - **Prisma 5, no 6/7.** El schema se simplificó en una sesión previa por incompatibilidades con v7. Si se migra a v6/7, revisar [../docker-compose.yml](../docker-compose.yml) y types generados.
 - **`ValidationPipe` global** rechaza propiedades desconocidas con 400. Para campos opcionales, marcar con `@IsOptional()` antes del validador específico.
+- **Drift entre DB de prod y migraciones del repo (25-ago-2026):** la migración `20260824130000_add_events_tickets` se aplicó a producción pero fue descartada del repo por un reset. La siguiente (`20260824171000`) generó DDL destructivo contra esas tablas fantasma que revienta cualquier DB fresca. Si una migración referencia tablas que no existen en migraciones previas del repo, **para y verifica** — puede ser drift contra objetos aplicados a prod pero no commiteados. Test canario: `DATABASE_URL=...impacta_e2e npx prisma migrate deploy` en una DB de scratch antes de pushear.
 
 ## Deploy
 
@@ -86,6 +87,8 @@ npm run prisma:seed                # si existe prisma/seed.ts
 ## Testing
 
 `jest` + `@nestjs/testing` para unit, `supertest` + `test/jest-e2e.json` para e2e. Convención: `.spec.ts` junto al archivo para unit, `test/*.e2e-spec.ts` para e2e.
+
+Los e2e en `test/` (`auth-and-tenant.e2e-spec.ts`, `donations-flow.e2e-spec.ts`) son la **única prueba automatizada del aislamiento multi-tenant** (core del producto). Fueron borrados una vez (`9daacaa`, 24-ago) y restaurados el 25-ago (`cbbabaa`). **No borrarlos; repararlos si quedan desactualizados.** Correr siempre contra DB desechable (`impacta_e2e`), jamás contra `impacta` — `resetDb` hace TRUNCATE.
 
 ## Commits
 
