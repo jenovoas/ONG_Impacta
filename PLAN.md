@@ -2,6 +2,14 @@
 
 Documento autosuficiente: cualquier agente puede recoger este plan sin depender del historial de Claude.
 
+> **Extensión estratégica 25-ago-2026:** la planificación completa de identidad
+> comunitaria, catálogo científico, red de profesionales, oportunidades,
+> mensajería cifrada, periodismo ciudadano, runtime Sentinel y cerebro IA
+> API→Qwen local está en
+> [`docs/PLAN_MAESTRO_CEREBRO_OPERATIVO_REGIONAL.md`](docs/PLAN_MAESTRO_CEREBRO_OPERATIVO_REGIONAL.md).
+> Sus fases y gates complementan este backlog; no autorizan despliegues o cambios
+> de infraestructura sin confirmación.
+
 ---
 
 ## 0. Estado actual (2026-08-24)

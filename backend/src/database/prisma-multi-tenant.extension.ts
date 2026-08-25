@@ -35,7 +35,13 @@ export const multiTenantExtension = Prisma.defineExtension((client) => {
             ) {
               anyArgs.where = { ...anyArgs.where, organizationId: orgId };
             } else if (
-              ['findUnique', 'findUniqueOrThrow', 'update', 'upsert', 'delete'].includes(operation)
+              [
+                'findUnique',
+                'findUniqueOrThrow',
+                'update',
+                'upsert',
+                'delete',
+              ].includes(operation)
             ) {
               anyArgs.where = { ...anyArgs.where, organizationId: orgId };
             } else if (['create', 'createMany'].includes(operation)) {

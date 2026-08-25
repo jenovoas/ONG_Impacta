@@ -46,7 +46,9 @@ export class GoogleStrategy implements OAuthVerifier {
         audience: clientId,
       });
     } catch (err) {
-      this.logger.warn(`Google verifyIdToken failed: ${(err as Error).message}`);
+      this.logger.warn(
+        `Google verifyIdToken failed: ${(err as Error).message}`,
+      );
       throw new UnauthorizedException('Google idToken inválido o expirado');
     }
 

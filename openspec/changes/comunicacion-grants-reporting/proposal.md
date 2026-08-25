@@ -8,13 +8,18 @@ Impacta+ es **UN SOLO SISTEMA** que une gestión ONG chilena (RUT, CLP entero, m
 - **MissionOps** gana por **grants con deadlines** (seguimiento de postulaciones de fondos), **board portal** (directorio y minutas) y **KPIs/reportes** para gobernanza. Impacta+ no modela subvenciones ni reportes de gobernanza.
 - **SERCA** gana por **especies con estado UICN, multimedia, observaciones de campo y mapas/heatmaps**. Impacta+ hoy modela Especies de forma básica (CRUD), sin estado de conservación, evidencia multimedia ni observaciones geo-referenciadas.
 
-Si no integramos estos tres aprendizajes, Impacta+ sigue como “CRM de campañas + conservación básica” sin el eje de comunicación, financiamiento por fondos ni evidencia científica que sí ofrecen Procurios, MissionOps y SERCA. Ahora es el momento: single-system ya estabilizado (301, EarthBackground solo landing, fake data eliminada) y base de datos normalizada lista para añadir estas capacidades sin reintroducir duplicados.
+Si no integramos estos tres aprendizajes, Impacta+ sigue como “CRM de campañas + conservación básica” sin el eje de comunicación, financiamiento por fondos ni evidencia científica que sí ofrecen Procurios, MissionOps y SERCA. Ahora es el momento: sistema y dominio únicos ya estabilizados (EarthBackground solo en la ruta `/`, fake data eliminada) y base de datos normalizada lista para añadir estas capacidades sin reintroducir duplicados.
 
 ## What Changes
 
 - **BREAKING: Ninguno.** Todo es aditivo, detrás de rutas y endpoints nuevos.
 - **Jornadas de comunicación**: modelo `Segment`, `Journey`, `JourneyStep` y plantillas email/SMS con variables; motor que programa envíos con segmentación por rol/perfil/campaña; log de entregas. Backend expone CRUD de segmentos, journeys y plantillas, más endpoint de envío. Frontend añade pantallas de segmentación y construcción de journeys en el panel.
-- **Subvenciones / board**: modelos `Grant` (con `deadline`, financiador, monto postulado/otorgado, documentos adjuntos, estado) y `BoardMember` (miembros del directorio, roles, mandatos). Backend CRUD de grants/board y endpoints de reportes KPI (totales por financiador, pipeline de postulaciones, quórum/renovaciones de board). Frontend añade pantallas de grants, board portal y reportes.
+- **Subvenciones / board**: catálogo global `FundingOpportunity` con fuente,
+  requisitos y versiones; modelo tenant `Grant` para la postulación privada;
+  matching explicable con capacidades y brechas; y `BoardMember` para directorio
+  y gobernanza. Backend CRUD de oportunidades, grants/board y endpoints KPI.
+  Frontend añade radar de oportunidades, estudio de formulación, grants, board
+  portal y reportes.
 - **Especies avanzada**: modelo `SpeciesObservation` (avistamiento con RUT/voluntario, coordenadas, timestamp, estado UICN asociado) y campos multimedia/UICN en `Species`; mapa simple (Leaflet) en frontend. Backend CRUD de observaciones y `GET /species/:id/map`.
 - **No se replica** el componente de satélite / heatmaps tiempo-real de SERCA complejo, ni el CRM enterprise de donantes de Procurios — fuera de scope para ONG chilena de ~$500k/año.
 
@@ -22,7 +27,9 @@ Si no integramos estos tres aprendizajes, Impacta+ sigue como “CRM de campaña
 
 ### New Capabilities
 - `jornadas-comunicacion`: Capacidad de segmentar audiencia, construir journeys de email/SMS con plantillas y programar envíos.
-- `subvenciones-board`: Capacidad de gestionar postulaciones a fondos con deadlines/documentos y el directorio/gobernanza de la organización.
+- `subvenciones-board`: Capacidad de descubrir oportunidades verificadas,
+  gestionar postulaciones privadas con deadlines/documentos, formar
+  colaboraciones consentidas y administrar directorio/gobernanza.
 - `especies-avanzada`: Capacidad de registrar observaciones geo-referenciadas, estado UICN y multimedia de especies con mapa simple.
 
 ### Modified Capabilities
@@ -32,6 +39,9 @@ Si no integramos estos tres aprendizajes, Impacta+ sigue como “CRM de campaña
 
 - **Frontend**: `frontend/src/pages/Jornadas.tsx`, `frontend/src/pages/Subvenciones.tsx`, `frontend/src/pages/BoardPortal.tsx`, `frontend/src/pages/EspeciesAvanzada.tsx` + componentes (editor de journey, editor de plantilla, mapa Leaflet), rutas nuevas en `App.tsx`, extensión de `frontend/src/pages/Especies.tsx`.
 - **Backend**: `backend/src/modules/comunicacion` (Segment, Journey, JourneyStep, plantillas, envío), `backend/src/modules/subvenciones` (Grant, GrantDocument, BoardMember), `backend/src/modules/especies` (SpeciesObservation, multimedia, `GET /species/:id/map`), Prisma models nuevos.
-- **Infra**: Sin cambios — sigue dominio único `impacta.*` (API en `impacta.pinguinoseguro.cl/api`), `impacta.pinguinoseguro.cl` 301. Nativo systemd. Envío email/SMS a través de proveedor transaccional (Resend/Twilio) con API keys en `.env`; sin infra nueva.
+- **Infra**: Sin cambios — todo se sirve en
+  `https://impacta.pinguinoseguro.cl` y la API bajo `/api/`; no se crean
+  subdominios. Stack nativo systemd. Envío email/SMS mediante un proveedor
+  transaccional por seleccionar, con credenciales fuera del repositorio.
 - **Docs**: `README.md`, `openspec/specs/jornadas-comunicacion`, `subvenciones-board`, `especies-avanzada`.
 - **Riesgos**: envío no deseado (spam) requiere consenso/log; soberanía de datos de donantes localizando PII en Postgres nativo y plantillas sin exponer tokens; observaciones geo-referenciadas deben aislarse por tenant.

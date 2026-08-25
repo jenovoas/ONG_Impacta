@@ -36,15 +36,22 @@ export class OrganizationsService {
   }
 
   async getSummary(orgId: string) {
-    const [donationsCount, totalDonations, membersCount, campaignsCount] = await Promise.all([
-      this.prisma.donation.count({ where: { organizationId: orgId, status: 'SUCCEEDED' } }),
-      this.prisma.donation.aggregate({
-        where: { organizationId: orgId, status: 'SUCCEEDED' },
-        _sum: { amount: true },
-      }),
-      this.prisma.member.count({ where: { organizationId: orgId, status: 'ACTIVE' } }),
-      this.prisma.campaign.count({ where: { organizationId: orgId, status: 'ACTIVE' } }),
-    ]);
+    const [donationsCount, totalDonations, membersCount, campaignsCount] =
+      await Promise.all([
+        this.prisma.donation.count({
+          where: { organizationId: orgId, status: 'SUCCEEDED' },
+        }),
+        this.prisma.donation.aggregate({
+          where: { organizationId: orgId, status: 'SUCCEEDED' },
+          _sum: { amount: true },
+        }),
+        this.prisma.member.count({
+          where: { organizationId: orgId, status: 'ACTIVE' },
+        }),
+        this.prisma.campaign.count({
+          where: { organizationId: orgId, status: 'ACTIVE' },
+        }),
+      ]);
 
     return {
       donationsCount,
@@ -55,17 +62,18 @@ export class OrganizationsService {
   }
 
   async getPublicStats() {
-    const [speciesCount, donationsAgg, missionsCount, orgsCount, membersCount] = await Promise.all([
-      this.prisma.species.count(),
-      this.prisma.donation.aggregate({
-        where: { status: 'SUCCEEDED' },
-        _sum: { amount: true },
-        _count: true,
-      }),
-      this.prisma.mission.count(),
-      this.prisma.organization.count(),
-      this.prisma.member.count(),
-    ]);
+    const [speciesCount, donationsAgg, missionsCount, orgsCount, membersCount] =
+      await Promise.all([
+        this.prisma.species.count(),
+        this.prisma.donation.aggregate({
+          where: { status: 'SUCCEEDED' },
+          _sum: { amount: true },
+          _count: true,
+        }),
+        this.prisma.mission.count(),
+        this.prisma.organization.count(),
+        this.prisma.member.count(),
+      ]);
 
     return {
       speciesCount,

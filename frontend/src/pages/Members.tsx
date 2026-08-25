@@ -7,11 +7,31 @@ import {
   ShieldCheck, 
   X, 
   Check, 
-  Loader2,
-  UserPlus
+  Loader2, 
+  UserPlus 
 } from 'lucide-react';
+import axios from 'axios';
 import client from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
+
+interface MemberItem {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  rut?: string;
+  status: string;
+  createdAt: string;
+}
+
+interface NewMemberPayload {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  rut?: string;
+}
 
 export const Members: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,7 +66,7 @@ export const Members: React.FC = () => {
   const members = Array.isArray(membersData) ? membersData : (membersData?.items || []);
 
   const createMutation = useMutation({
-    mutationFn: async (newMember: any) => {
+    mutationFn: async (newMember: NewMemberPayload) => {
       const { data } = await client.post('/members', newMember);
       return data;
     },
@@ -60,13 +80,17 @@ export const Members: React.FC = () => {
       setPhone('');
       setEmail('');
     },
-    onError: (err: any) => {
-      const msg = err.response?.data?.message || 'Error al registrar miembro';
-      setFormError(Array.isArray(msg) ? msg.join(', ') : msg);
+    onError: (err: unknown) => {
+      if (axios.isAxiosError(err)) {
+        const msg = err.response?.data?.message || 'Error al registrar miembro';
+        setFormError(Array.isArray(msg) ? msg.join(', ') : msg);
+      } else {
+        setFormError('Error al registrar miembro');
+      }
     },
   });
 
-  const filteredMembers = members.filter((m: any) => {
+  const filteredMembers = members.filter((m: MemberItem) => {
     const fullName = `${m.firstName || ''} ${m.lastName || ''}`.toLowerCase();
     const matchesSearch = 
       fullName.includes(search.toLowerCase()) ||
@@ -134,7 +158,7 @@ export const Members: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <AnimatePresence>
-            {filteredMembers.map((m: any) => (
+            {filteredMembers.map((m: MemberItem) => (
               <motion.div
                 key={m.id}
                 layout
@@ -232,7 +256,7 @@ export const Members: React.FC = () => {
                 )}
 
                 <form 
-                  onSubmit={(e: any) => {
+                  onSubmit={(e: React.FormEvent) => {
                     e.preventDefault();
                     createMutation.mutate({
                       firstName,

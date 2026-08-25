@@ -35,7 +35,9 @@ export class FacebookStrategy implements OAuthVerifier {
       });
     } catch (err) {
       this.logger.warn(`Facebook /me failed: ${(err as Error).message}`);
-      throw new UnauthorizedException('Facebook accessToken inválido o expirado');
+      throw new UnauthorizedException(
+        'Facebook accessToken inválido o expirado',
+      );
     }
 
     const me = meRes.data;
@@ -50,13 +52,16 @@ export class FacebookStrategy implements OAuthVerifier {
       const appId = process.env.FACEBOOK_APP_ID;
       if (appId && process.env.FACEBOOK_APP_SECRET) {
         try {
-          const debugRes = await axios.get('https://graph.facebook.com/v19.0/debug_token', {
-            params: {
-              input_token: input.accessToken,
-              access_token: `${appId}|${process.env.FACEBOOK_APP_SECRET}`,
+          const debugRes = await axios.get(
+            'https://graph.facebook.com/v19.0/debug_token',
+            {
+              params: {
+                input_token: input.accessToken,
+                access_token: `${appId}|${process.env.FACEBOOK_APP_SECRET}`,
+              },
+              timeout: 10_000,
             },
-            timeout: 10_000,
-          });
+          );
           const data = debugRes.data?.data;
           if (data?.app_id === appId && data?.is_valid) {
             // Facebook marca el email como verificado si el user lo confirmó.
@@ -64,7 +69,9 @@ export class FacebookStrategy implements OAuthVerifier {
             emailVerified = !!data.email_confirmed_at;
           }
         } catch (err) {
-          this.logger.debug(`Facebook debug_token failed (non-fatal): ${(err as Error).message}`);
+          this.logger.debug(
+            `Facebook debug_token failed (non-fatal): ${(err as Error).message}`,
+          );
         }
       }
     }

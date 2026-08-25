@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { validateRut } from '../../common/utils/rut.validator';
 
@@ -6,7 +10,10 @@ import { validateRut } from '../../common/utils/rut.validator';
 export class MembersService {
   constructor(private prisma: DatabaseService) {}
 
-  async findAll(orgId: string, filters: { status?: string; page?: number; pageSize?: number }) {
+  async findAll(
+    orgId: string,
+    filters: { status?: string; page?: number; pageSize?: number },
+  ) {
     const { status, page = 1, pageSize = 20 } = filters;
     const skip = (page - 1) * pageSize;
 

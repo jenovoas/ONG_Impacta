@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsEnum } from 'class-validator';
 
 export class UpdateP2PPageDto {
   @IsEnum(['ACTIVE', 'CANCELLED'])

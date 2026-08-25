@@ -1,6 +1,6 @@
 ## Context
 
-Impacta+ está estabilizado como **UN SOLO SISTEMA** (landing + front + panel en `https://impacta.pinguinoseguro.cl`, `impacta.pinguinoseguro.cl` 301, fake data eliminada). Stack: Vite+React 19 + TanStack Query, NestJS 11 + Prisma 5 + Postgres nativo + Redis, nginx proxy `/api/` → `127.0.0.1:3001`, multi-tenant estricto por `organizationId`. Hoy Especies es CRUD básico, no existen Journey/Segment ni Grant/BoardMember. Investigación muestra que Procurios gana por journeys, Serv.ly por engagement/comunidades, MissionOps por grants+board+KPIs y SERCA por especies con UICN/observaciones/mapas — todo aditivo sin romper dominio único ni multi-tenant.
+Impacta+ está estabilizado como **UN SOLO SISTEMA** (landing + front + panel en `https://impacta.pinguinoseguro.cl`, API bajo `/api/`, fake data eliminada). Stack: Vite+React 19 + TanStack Query, NestJS 11 + Prisma 5 + Postgres nativo + Redis, nginx proxy `/api/` → `127.0.0.1:3001`, multi-tenant estricto por `organizationId`. Hoy Especies es CRUD básico, no existen Journey/Segment ni Grant/BoardMember. Investigación muestra que Procurios gana por journeys, Serv.ly por engagement/comunidades, MissionOps por grants+board+KPIs y SERCA por especies con UICN/observaciones/mapas — todo aditivo sin romper dominio único ni multi-tenant.
 
 ## Goals / Non-Goals
 
@@ -17,6 +17,16 @@ Impacta+ está estabilizado como **UN SOLO SISTEMA** (landing + front + panel en
 ## Decisions
 
 - **Prisma `Grant` (+ `GrantDocument`) y `BoardMember`**: `organizationId` obligatorio en cada fila, `deadline`/`status` enum en Grant (`DRAFT/SUBMITTED/AWARDED/REJECTED`), `termStart/termEnd` en BoardMember. Alternativa tabla genérica "grants" descartada por no capturar deadlines/estados.
+- **Catálogo global de oportunidades**: `FundingSource`, `FundingOpportunity` y
+  `EligibilityRule` no tendrán `organizationId`; conservarán URL oficial,
+  versión, fecha de consulta y estado de revisión. `Grant` seguirá siendo la
+  postulación privada y tenant. Un descubrimiento automático entra como
+  candidato y no se marca verificado sin revisión humana.
+- **Matching y colaboración**: `OpportunityMatch` relacionará una oportunidad
+  con una organización sin exponer el perfil tenant. Las capacidades compartidas
+  usarán perfiles consentidos e invitaciones; nunca se compartirán documentos o
+  borradores entre organizaciones automáticamente. Qwen explicará coincidencias
+  y brechas, pero no postulará ni contactará terceros sin confirmación.
 - **Prisma `SpeciesObservation` y `SpeciesMedia`**: observaciones con `lat/lng + observedAt + observedById`, media con `type/url/caption/credit`; `Species.iucnStatus/iucnYear` con enum UICN global compartido. Mapas vía Leaflet liviano (no Mapbox) para ONGs pequeñas y sin geocodificación compleja.
 - **Prisma `Segment`, `Journey`, `JourneyStep`, `JourneyDelivery`**: `memberId + stepId` único para idempotencia anti-dup; `deliveryStatus` (SENT/FAILED/OPTED_OUT). Motor simple con job (Redis BullMQ) que consulta segmentos y encola envíos al proveedor transaccional; sin workflow engine pesado.
 - **Consentimiento anti-spam**: `Member.communicationOptIn` + `JourneyDelivery` audita, y el motor excluye miembros `OPTED_OUT`/no-consent en cada paso. Decision basada en ley chilena de spam (Ley 19.628) — mitigación de riesgo legal.

@@ -17,7 +17,7 @@ export class CampaignsService {
 
   async findAll(orgId: string, status?: string) {
     return this.prisma.campaign.findMany({
-      where: { 
+      where: {
         organizationId: orgId,
         ...(status ? { status } : {}),
       },
@@ -56,9 +56,16 @@ export class CampaignsService {
     });
   }
 
-  async createP2PPage(orgId: string, campaignId: string, dto: { title: string, memberId: string, personalGoal?: number }) {
+  async createP2PPage(
+    orgId: string,
+    campaignId: string,
+    dto: { title: string; memberId: string; personalGoal?: number },
+  ) {
     // Generate a simple unique slug
-    const baseSlug = dto.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const baseSlug = dto.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
     const uniqueSuffix = Math.random().toString(36).substring(2, 6);
     const slug = `${baseSlug}-${uniqueSuffix}`;
 
@@ -79,8 +86,10 @@ export class CampaignsService {
       where: { id: pageId, campaignId, organizationId: orgId },
       include: {
         member: { select: { firstName: true, lastName: true } },
-        campaign: { select: { name: true, goalAmount: true, currentAmount: true } },
-      }
+        campaign: {
+          select: { name: true, goalAmount: true, currentAmount: true },
+        },
+      },
     });
     if (!page) throw new NotFoundException('P2P Page not found');
     return page;
@@ -100,10 +109,10 @@ export class CampaignsService {
           select: {
             amount: true,
             createdAt: true,
-            member: { select: { firstName: true, lastName: true } }
-          }
-        }
-      }
+            member: { select: { firstName: true, lastName: true } },
+          },
+        },
+      },
     });
 
     if (!page) throw new NotFoundException('Public P2P Page not found');
@@ -111,7 +120,7 @@ export class CampaignsService {
     const raised = Number(page.currentAmount || 0);
     const goal = Number(page.personalGoal) || 1;
     const percentRaised = Math.min(100, Math.round((raised / goal) * 100));
-    
+
     let daysLeft: number | null = null;
     if (page.campaign.endDate) {
       const ms = page.campaign.endDate.getTime() - new Date().getTime();
@@ -121,12 +130,16 @@ export class CampaignsService {
     return {
       ...page,
       percentRaised,
-      daysLeft
+      daysLeft,
     };
   }
 
-
-  async updateP2PPageStatus(orgId: string, campaignId: string, pageId: string, status: 'ACTIVE' | 'CANCELLED' | 'COMPLETED') {
+  async updateP2PPageStatus(
+    orgId: string,
+    campaignId: string,
+    pageId: string,
+    status: 'ACTIVE' | 'CANCELLED' | 'COMPLETED',
+  ) {
     const page = await this.prisma.campaignP2PPage.findFirst({
       where: { id: pageId, campaignId, organizationId: orgId },
     });
@@ -155,7 +168,6 @@ export class CampaignsService {
     ]);
   }
 
-
   async updateCampaign(orgId: string, id: string, dto: any) {
     const campaign = await this.prisma.campaign.findFirst({
       where: { id, organizationId: orgId },
@@ -168,5 +180,4 @@ export class CampaignsService {
       data: dto,
     });
   }
-
 }

@@ -12,6 +12,8 @@ import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { SpeciesModule } from './modules/species/species.module';
 import { MissionsModule } from './modules/missions/missions.module';
 import { DemoRequestsModule } from './modules/demo-requests/demo-requests.module';
+import { CommunityModule } from './modules/community/community.module';
+import { AiSecurityModule } from './modules/ai-security/ai-security.module';
 
 @Module({
   imports: [
@@ -24,15 +26,15 @@ import { DemoRequestsModule } from './modules/demo-requests/demo-requests.module
     CampaignsModule,
     SpeciesModule,
     MissionsModule,
-    DemoRequestsModule
+    DemoRequestsModule,
+    CommunityModule,
+    AiSecurityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(TenantMiddleware)
-      .forRoutes('*');
+    consumer.apply(TenantMiddleware).forRoutes('*');
   }
 }

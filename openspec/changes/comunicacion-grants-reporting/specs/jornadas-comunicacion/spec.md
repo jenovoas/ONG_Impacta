@@ -6,7 +6,7 @@ Permitir a la ONG segmentar su audiencia e impulsar journeys de comunicación (e
 ## ADDED Requirements
 
 ### Requirement: Segmentación de audiencia multi-tenant
-El staff debe agrupar contactos por criterios (rol, RUT, campaña activa, u orgSlug) en segmentos aislados por organización.
+El staff MUST poder agrupar contactos por criterios (rol, RUT, campaña activa, u orgSlug) en segmentos aislados por organización.
 
 #### Scenario: Crear segmento por campaña
 - **WHEN** staff hace `POST /communication/segments` con `{ name, criteria: { campaignId, status: "ACTIVE" }, organizationId }`
@@ -17,7 +17,7 @@ El staff debe agrupar contactos por criterios (rol, RUT, campaña activa, u orgS
 - **THEN** cada uno solo ve y ejecuta sus propios contactos, segregados por `organizationId`
 
 ### Requirement: Journeys con plantillas email/SMS
-El staff debe crear journeys programados con pasos que envían email o SMS usando plantillas con variables, y un log de entregas.
+El staff MUST poder crear journeys programados con pasos que envían email o SMS usando plantillas con variables, y un log de entregas.
 
 #### Scenario: Crear journey con pasos
 - **WHEN** staff hace `POST /communication/journeys` con `{ steps: [{ trigger: "3 días", channel: "EMAIL", templateId }], segmentId }`
@@ -32,7 +32,7 @@ El staff debe crear journeys programados con pasos que envían email o SMS usand
 - **THEN** se persiste un `JourneyDelivery` con `status` (SENT/FAILED/OPTED_OUT), `sentAt` y `channel`, visible en el panel sin reenviar a miembros que opt-out (salvaguarda anti-spam)
 
 ### Requirement: Control de consentimiento (anti-spam)
-El sistema no debe enviar a contactos que hayan optado out ni duplicar envíos en relanzamientos.
+El sistema MUST NOT enviar a contactos que hayan optado out ni duplicar envíos en relanzamientos.
 
 #### Scenario: Respetar opt-out
 - **WHEN** un miembro marca `communicationOptIn: false` o está en `JourneyDelivery.status = "OPTED_OUT"`

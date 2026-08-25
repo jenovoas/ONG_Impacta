@@ -18,5 +18,8 @@ export interface OAuthVerifier {
    * Lanza UnauthorizedException si el token es inválido, expirado, o no es
    * del provider esperado.
    */
-  verify(input: { idToken?: string; accessToken?: string }): Promise<OAuthProfile>;
+  verify(input: {
+    idToken?: string;
+    accessToken?: string;
+  }): Promise<OAuthProfile>;
 }

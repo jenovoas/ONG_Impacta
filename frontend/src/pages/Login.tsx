@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import axios from 'axios';
 import client from '../api/client';
 import { useAuthStore } from '../store/auth.store';
 import type { AuthUser } from '../store/auth.store';
@@ -29,8 +30,12 @@ export const LoginPage: React.FC = () => {
       };
       setAuth(user, data.access_token, data.refresh_token);
       navigate('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al iniciar sesión');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Error al iniciar sesión');
+      } else {
+        setError('Error al iniciar sesión');
+      }
     } finally {
       setLoading(false);
     }

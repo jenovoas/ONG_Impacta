@@ -104,7 +104,7 @@ export const LandingPage: React.FC = () => {
 
             {/* Navigation Links */}
             <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#bec7d3]">
-              <a href="#hero" className="hover:text-[#00a8ff] transition-colors">Inicio</a>
+              <a href="#hero" className="hover:text-[#00a8ff] transition-colors">Nuestro hogar</a>
               
               {/* Dropdown Menu Plataforma */}
               <div 
@@ -219,7 +219,7 @@ export const LandingPage: React.FC = () => {
                 onClick={() => setShowDemoModal(true)}
                 className="text-sm font-semibold px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] hover:opacity-90 transition-opacity shadow-md shadow-[#00a8ff]/20 flex items-center gap-2"
               >
-                <span>Acceso Impacta</span>
+                <span>Hablemos de tu causa</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -235,15 +235,15 @@ export const LandingPage: React.FC = () => {
             {/* Pill Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1c1b1b]/80 border border-[#2a2a2a] mb-8 text-xs font-semibold text-[#00d4aa]">
               <span className="w-2 h-2 rounded-full bg-[#00d4aa] animate-pulse" />
-              <span>SaaS Multi-tenant para Conservación & ONGs Ecológicas</span>
+              <span>Una red para quienes cuidan lo que importa</span>
             </div>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-[1.1] font-headline mb-8">
-              Gestión transparente y coordinada para la <span className="impacta-gradient-text">restauración del planeta</span>
+              El planeta es nuestro hogar. <span className="impacta-gradient-text">Cuidarlo es una tarea compartida.</span>
             </h1>
 
             <p className="text-lg md:text-xl text-[#bec7d3] max-w-2xl mx-auto mb-10 leading-relaxed">
-              Unifica tus socios, campañas de recaudación, inventarios de biodiversidad y misiones de campo en una sola plataforma diseñada para maximizar el impacto de tu ONG.
+              Impacta+ ayuda a organizaciones, comunidades y voluntarios a convertir la preocupación por nuestro entorno en acciones coordinadas, visibles y capaces de dejar una huella positiva.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -251,14 +251,14 @@ export const LandingPage: React.FC = () => {
                 onClick={() => setShowDemoModal(true)}
                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] font-bold text-base hover:opacity-95 transition-all shadow-xl shadow-[#00a8ff]/25 flex items-center justify-center gap-3"
               >
-                <span>Demo</span>
+                <span>Conversemos sobre tu causa</span>
                 <Rocket className="w-5 h-5" />
               </button>
               <a
                 href="#modules"
                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#1c1b1b]/80 border border-[#2a2a2a] text-[#e5e2e1] font-semibold text-base hover:bg-[#20201f] transition-all flex items-center justify-center gap-2"
               >
-                <span>Explorar Módulos</span>
+                <span>Descubrir cómo actuar</span>
                 <ChevronDown className="w-5 h-5" />
               </a>
             </div>
@@ -269,27 +269,30 @@ export const LandingPage: React.FC = () => {
                 <div className="text-3xl font-extrabold text-white font-headline">
                   {statsLoading ? '…' : stats.speciesCount}
                 </div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">Especies Monitoreadas</div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">Especies acompañadas</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
                 <div className="text-3xl font-extrabold text-[#00a8ff] font-headline">
                   {statsLoading ? '…' : formatCLP(stats.totalDonated)}
                 </div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">Recaudado en la red</div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">Aportes movilizados</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
                 <div className="text-3xl font-extrabold text-[#00d4aa] font-headline">
                   {statsLoading ? '…' : stats.missionsCount}
                 </div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">Misiones de Campo</div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">Acciones en terreno</div>
               </div>
               <div className="p-4 text-center border-l border-[#2a2a2a]/60">
                 <div className="text-3xl font-extrabold text-[#ffb877] font-headline">
                   {statsLoading ? '…' : stats.orgsCount}
                 </div>
-                <div className="text-xs font-medium text-[#bec7d3] mt-1">ONGs Activas</div>
+                <div className="text-xs font-medium text-[#bec7d3] mt-1">Organizaciones activas</div>
               </div>
             </div>
+            <p className="mt-6 text-xs font-medium tracking-wide text-[#bec7d3]/70">
+              Cada cifra representa personas que decidieron hacer algo por el lugar que habitan.
+            </p>
           </div>
         </section>
 
@@ -300,10 +303,10 @@ export const LandingPage: React.FC = () => {
             <div className="text-center mb-16">
               <span className="inline-block px-3 py-1 rounded-full bg-[#00a8ff]/10 text-[#00a8ff] text-xs font-bold tracking-widest uppercase mb-4">Flujo</span>
               <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 font-headline">
-                De la <span className="impacta-gradient-text">oficina a la nube</span> en 3 pasos
+                De una preocupación a una <span className="impacta-gradient-text">acción compartida</span>
               </h2>
               <p className="text-[#bec7d3] text-lg max-w-2xl mx-auto">
-                No migrás planillas. Abrís Impacta+, configurás tu organización y empezás a coordinar misiones la misma semana.
+                Cada causa tiene un lugar, una historia y personas dispuestas a ayudar. Impacta+ convierte esa energía en un camino concreto.
               </p>
             </div>
 
@@ -313,25 +316,25 @@ export const LandingPage: React.FC = () => {
 
               <div className="relative bg-[#161616]/70 backdrop-blur border border-[#2a2a2a] rounded-2xl p-8">
                 <div className="absolute -top-5 left-8 w-10 h-10 rounded-xl bg-gradient-to-br from-[#00a8ff] to-[#00d4aa] flex items-center justify-center text-[#003352] font-black text-lg shadow-lg shadow-[#00a8ff]/20">1</div>
-                <h3 className="text-xl font-bold mt-2 mb-3">Crea tu organización</h3>
+                <h3 className="text-xl font-bold mt-2 mb-3">Reúne a quienes quieren ayudar</h3>
                 <p className="text-[#bec7d3] text-sm leading-relaxed">
-                  Registra tu ONG, invita al equipo y define los módulos que vas a usar. Tu slug aparece de inmediato en <span className="font-mono text-[#00d4aa]">impacta.pinguinoseguro.cl/dashboard</span>.
+                  Registra tu organización, invita a tu equipo y comparte una causa que todos puedan reconocer como propia.
                 </p>
               </div>
 
               <div className="relative bg-[#161616]/70 backdrop-blur border border-[#2a2a2a] rounded-2xl p-8">
                 <div className="absolute -top-5 left-8 w-10 h-10 rounded-xl bg-gradient-to-br from-[#00a8ff] to-[#00d4aa] flex items-center justify-center text-[#003352] font-black text-lg shadow-lg shadow-[#00a8ff]/20">2</div>
-                <h3 className="text-xl font-bold mt-2 mb-3">Conecta tus datos</h3>
+                <h3 className="text-xl font-bold mt-2 mb-3">Da forma al propósito</h3>
                 <p className="text-[#bec7d3] text-sm leading-relaxed">
-                  Campañas, donaciones, inventario biológico, misiones de campo, padrón de miembros. Importás CSV o entras manualmente — lo que prefieras.
+                  Ordena campañas, donaciones, especies y misiones para que la intención se transforme en tareas que puedan comenzar hoy.
                 </p>
               </div>
 
               <div className="relative bg-[#161616]/70 backdrop-blur border border-[#2a2a2a] rounded-2xl p-8">
                 <div className="absolute -top-5 left-8 w-10 h-10 rounded-xl bg-gradient-to-br from-[#00a8ff] to-[#00d4aa] flex items-center justify-center text-[#003352] font-black text-lg shadow-lg shadow-[#00a8ff]/20">3</div>
-                <h3 className="text-xl font-bold mt-2 mb-3">Coordina y reporta</h3>
+                <h3 className="text-xl font-bold mt-2 mb-3">Haz visible cada avance</h3>
                 <p className="text-[#bec7d3] text-sm leading-relaxed">
-                  Tu equipo ve el mismo tablero. Socios ven impacto agregado. Donantes reciben recibos automáticos. Tú dejas de hacer Excel a las 2am.
+                  Coordina el trabajo en terreno, comparte resultados con tu comunidad y demuestra que cada aporte dejó una huella.
                 </p>
               </div>
             </div>
@@ -732,27 +735,27 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#00d4aa]/10 text-[#00d4aa] text-xs font-bold mb-4 border border-[#00d4aa]/20">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Aislamiento por Organización (Multi-Tenant)</span>
+                <Heart className="w-4 h-4" />
+                <span>El impacto que podemos ver</span>
               </div>
               <h3 className="text-3xl md:text-5xl font-extrabold text-white font-headline mb-6 leading-tight">
-                Seguridad total para los datos de tu organización
+                Cuando el esfuerzo se organiza, <span className="impacta-gradient-text">el cambio se vuelve visible.</span>
               </h3>
               <p className="text-[#bec7d3] text-base leading-relaxed mb-6">
-                Cada ONG cuenta con una partición de datos completamente aislada a nivel de base de datos gracias a nuestro motor de middleware tenant.
+                El trabajo de una ONG ocurre en muchos lugares y con muchas manos. Impacta+ conecta esas pequeñas acciones para que tu equipo pueda ver el camino recorrido y tu comunidad pueda confiar en el siguiente paso.
               </p>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-[#00d4aa] shrink-0 mt-0.5" />
-                  <span className="text-sm text-[#e5e2e1]">Aislamiento estricto de base de datos por tenant</span>
+                  <span className="text-sm text-[#e5e2e1]">Cada persona sabe qué puede hacer y cómo sumarse</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-[#00d4aa] shrink-0 mt-0.5" />
-                  <span className="text-sm text-[#e5e2e1]">Roles diferenciados (SuperAdmin, Admin, Operator, Viewer)</span>
+                  <span className="text-sm text-[#e5e2e1]">Cada misión tiene un próximo paso concreto</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-[#00d4aa] shrink-0 mt-0.5" />
-                  <span className="text-sm text-[#e5e2e1]">Exportación de datos e informes de impacto para donantes</span>
+                  <span className="text-sm text-[#e5e2e1]">Cada aporte puede convertirse en una historia de impacto</span>
                 </li>
               </ul>
             </div>
@@ -765,20 +768,20 @@ export const LandingPage: React.FC = () => {
                   <div className="w-3 h-3 rounded-full bg-[#ffb877]" />
                   <div className="w-3 h-3 rounded-full bg-[#00d4aa]" />
                 </div>
-                <span className="text-xs font-mono text-[#bec7d3]">impacta.pinguinoseguro.cl/dashboard</span>
+                <span className="text-xs font-mono text-[#bec7d3]">impacta+ · impacto en movimiento</span>
               </div>
               <div className="space-y-4">
                 <div className="p-4 rounded-xl bg-[#1c1b1b]/80 border border-[#2a2a2a] flex items-center justify-between">
                   <div>
-                    <div className="text-xs text-[#bec7d3]">Campaña Activa</div>
-                    <div className="text-sm font-bold text-white font-headline">Reforestación Bosque Nactivo 2026</div>
+                    <div className="text-xs text-[#bec7d3]">Una causa tomando fuerza</div>
+                    <div className="text-sm font-bold text-white font-headline">Restauración del Humedal 2026</div>
                   </div>
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#00d4aa]/15 text-[#00d4aa]">78% Completado</span>
                 </div>
                 <div className="p-4 rounded-xl bg-[#1c1b1b]/80 border border-[#2a2a2a] flex items-center justify-between">
                   <div>
-                    <div className="text-xs text-[#bec7d3]">Última Donación Integrada</div>
-                    <div className="text-sm font-bold text-white font-headline">$150,000 CLP via ImpactaPay</div>
+                    <div className="text-xs text-[#bec7d3]">Una nueva persona se sumó</div>
+                    <div className="text-sm font-bold text-white font-headline">$150.000 CLP para recuperar el humedal</div>
                   </div>
                   <span className="text-xs font-semibold text-[#00a8ff]">Hace 5 min</span>
                 </div>

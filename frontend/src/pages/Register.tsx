@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Building2, Tag, ArrowRight, Loader2 } from 'lucide-react';
+import axios from 'axios';
 import client from '../api/client';
 import { useAuthStore } from '../store/auth.store';
 import type { AuthUser } from '../store/auth.store';
@@ -53,9 +54,13 @@ export const RegisterPage: React.FC = () => {
       };
       setAuth(user, data.access_token, data.refresh_token);
       navigate('/dashboard/overview');
-    } catch (err: any) {
-      const msg = err.response?.data?.message;
-      setError(Array.isArray(msg) ? msg.join(', ') : msg || 'Error al crear la cuenta.');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const msg = err.response?.data?.message;
+        setError(Array.isArray(msg) ? msg.join(', ') : msg || 'Error al crear la cuenta.');
+      } else {
+        setError('Error al crear la cuenta.');
+      }
     } finally {
       setLoading(false);
     }

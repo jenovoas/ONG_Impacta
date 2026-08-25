@@ -108,71 +108,78 @@ export class DonationsService {
     return donation;
   }
 
-  
-  async confirmDonation(reference: { gatewayRef?: string; captureId?: string }, status: 'SUCCEEDED' | 'FAILED') {
+  async confirmDonation(
+    reference: { gatewayRef?: string; captureId?: string },
+    status: 'SUCCEEDED' | 'FAILED',
+  ) {
     const refWhere = reference.captureId
       ? { captureId: reference.captureId }
       : reference.gatewayRef
-      ? { gatewayRef: reference.gatewayRef }
-      : null;
+        ? { gatewayRef: reference.gatewayRef }
+        : null;
 
     if (!refWhere) {
       throw new NotFoundException('Payment reference not provided');
     }
 
-    const result = await this.prisma.$transaction(async (tx) => {
-      const existing = await tx.donation.findFirst({
-        where: refWhere,
-        include: { p2pPage: { select: { id: true, campaignId: true } } },
-      });
+    const result = await this.prisma.$transaction(
+      async (tx) => {
+        const existing = await tx.donation.findFirst({
+          where: refWhere,
+          include: { p2pPage: { select: { id: true, campaignId: true } } },
+        });
 
-      if (!existing) {
-        throw new NotFoundException('Donation not found for this reference');
-      }
-
-      // Idempotencia: si ya fue exitosa, no duplicar
-      if (existing.status === 'SUCCEEDED') {
-        return existing;
-      }
-
-      const updated = await tx.donation.update({
-        where: { id: existing.id },
-        data: {
-          status,
-          ...(reference.captureId ? { captureId: reference.captureId } : {}),
-          ...(reference.gatewayRef ? { gatewayRef: reference.gatewayRef } : {}),
-        },
-      });
-
-      if (status === 'SUCCEEDED') {
-        const amountToAdd = updated.amount;
-
-        if (updated.p2pPageId && existing.p2pPage?.campaignId) {
-          await tx.campaignP2PPage.update({
-            where: { id: updated.p2pPageId },
-            data: {
-              currentAmount: { increment: amountToAdd },
-            },
-          });
-
-          await tx.campaign.update({
-            where: { id: existing.p2pPage.campaignId },
-            data: {
-              currentAmount: { increment: amountToAdd },
-            },
-          });
-        } else if (updated.campaignId) {
-          await tx.campaign.update({
-            where: { id: updated.campaignId },
-            data: {
-              currentAmount: { increment: amountToAdd },
-            },
-          });
+        if (!existing) {
+          throw new NotFoundException('Donation not found for this reference');
         }
-      }
 
-      return updated;
-    }, { isolationLevel: 'Serializable' });
+        // Idempotencia: si ya fue exitosa, no duplicar
+        if (existing.status === 'SUCCEEDED') {
+          return existing;
+        }
+
+        const updated = await tx.donation.update({
+          where: { id: existing.id },
+          data: {
+            status,
+            ...(reference.captureId ? { captureId: reference.captureId } : {}),
+            ...(reference.gatewayRef
+              ? { gatewayRef: reference.gatewayRef }
+              : {}),
+          },
+        });
+
+        if (status === 'SUCCEEDED') {
+          const amountToAdd = updated.amount;
+
+          if (updated.p2pPageId && existing.p2pPage?.campaignId) {
+            await tx.campaignP2PPage.update({
+              where: { id: updated.p2pPageId },
+              data: {
+                currentAmount: { increment: amountToAdd },
+              },
+            });
+
+            await tx.campaign.update({
+              where: { id: existing.p2pPage.campaignId },
+              data: {
+                currentAmount: { increment: amountToAdd },
+              },
+            });
+          } else if (updated.campaignId) {
+            await tx.campaign.update({
+              where: { id: updated.campaignId },
+              data: {
+                currentAmount: { increment: amountToAdd },
+              },
+            });
+          }
+        }
+
+        return updated;
+      },
+      { isolationLevel: 'Serializable' },
+    );
 
     return result;
   }
@@ -180,7 +187,6 @@ export class DonationsService {
   async handleCallback(gatewayRef: string, status: 'SUCCEEDED' | 'FAILED') {
     return this.confirmDonation({ gatewayRef }, status);
   }
-
 
   // --- Endpoints para Portal Donante ---
 
@@ -227,10 +233,16 @@ export class DonationsService {
     });
   }
 
-  async generateReceiptPdf(orgId: string, user: AuthUser, donationId: string): Promise<Buffer> {
+  async generateReceiptPdf(
+    orgId: string,
+    user: AuthUser,
+    donationId: string,
+  ): Promise<Buffer> {
     const member = await this.findMemberForUser(orgId, user);
     if (!member) {
-      this.logger.warn(`denied_attempt: No member found for user ${user?.email} in org ${orgId}`);
+      this.logger.warn(
+        `denied_attempt: No member found for user ${user?.email} in org ${orgId}`,
+      );
       throw new NotFoundException('Donation not found');
     }
 
@@ -243,7 +255,11 @@ export class DonationsService {
       },
     });
 
-    if (!donation || donation.organizationId !== orgId || donation.memberId !== member.id) {
+    if (
+      !donation ||
+      donation.organizationId !== orgId ||
+      donation.memberId !== member.id
+    ) {
       this.logger.warn(
         `denied_attempt: donation ${donationId} ownership verification failed for member ${member.id} in org ${orgId}`,
       );
@@ -298,8 +314,20 @@ export class DonationsService {
     const lineSpacing = 24;
 
     const drawRow = (label: string, value: string) => {
-      page.drawText(sanitizePdfText(label), { x: margin, y, size: 11, font: boldFont, color: darkText });
-      page.drawText(sanitizePdfText(value), { x: margin + 160, y, size: 11, font, color: darkText });
+      page.drawText(sanitizePdfText(label), {
+        x: margin,
+        y,
+        size: 11,
+        font: boldFont,
+        color: darkText,
+      });
+      page.drawText(sanitizePdfText(value), {
+        x: margin + 160,
+        y,
+        size: 11,
+        font,
+        color: darkText,
+      });
       y -= lineSpacing;
     };
 
@@ -317,7 +345,9 @@ export class DonationsService {
     }
 
     page.drawText(
-      sanitizePdfText('Este documento es un comprobante de donacion emitido por Impacta+.'),
+      sanitizePdfText(
+        'Este documento es un comprobante de donacion emitido por Impacta+.',
+      ),
       {
         x: margin,
         y: margin + 20,
@@ -339,7 +369,9 @@ export class DonationsService {
   ) {
     const member = await this.findMemberForUser(orgId, user);
     if (!member) {
-      this.logger.warn(`denied_attempt: No member found for user ${user?.email} in org ${orgId}`);
+      this.logger.warn(
+        `denied_attempt: No member found for user ${user?.email} in org ${orgId}`,
+      );
       throw new NotFoundException('Donation not found');
     }
 

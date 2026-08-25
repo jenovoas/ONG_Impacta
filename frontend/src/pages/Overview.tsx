@@ -12,7 +12,29 @@ import {
 import client from '../api/client';
 import { motion } from 'framer-motion';
 
-const StatCard = ({ title, value, icon: Icon, color, delay }: any) => (
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  delay: number;
+}
+
+interface RecentDonation {
+  id: string;
+  amount: number | string;
+  status: string;
+  createdAt: string;
+  member?: {
+    firstName: string;
+    lastName: string;
+  };
+  campaign?: {
+    name: string;
+  };
+}
+
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, color, delay }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -104,7 +126,7 @@ export const Overview: React.FC = () => {
           ) : recentDonations.length === 0 ? (
             <p className="text-gray-500 text-sm">Sin actividad reciente — las donaciones aparecerán aquí.</p>
           ) : (
-            recentDonations.map((d: any) => {
+            recentDonations.map((d: RecentDonation) => {
               const donor = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Donante Anónimo';
               const amount = Number(d.amount).toLocaleString('es-CL');
               const date = new Date(d.createdAt).toLocaleDateString('es-CL');

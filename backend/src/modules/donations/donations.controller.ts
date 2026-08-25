@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Patch,
-  Res,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { DonationsService } from './donations.service';
 import { CreateDonationDto } from './dto/create-donation.dto';
@@ -36,10 +26,7 @@ export class DonationsController {
   }
 
   @Get('me')
-  findMy(
-    @CurrentTenant() orgId: string,
-    @CurrentUser() user: AuthUser,
-  ) {
+  findMy(@CurrentTenant() orgId: string, @CurrentUser() user: AuthUser) {
     return this.donationsService.findMyDonations(orgId, user);
   }
 
@@ -70,7 +57,12 @@ export class DonationsController {
     @Param('id') id: string,
     @Body() dto: UpdateRecurringDonationDto,
   ) {
-    return this.donationsService.updateRecurringStatus(orgId, user, id, dto.status);
+    return this.donationsService.updateRecurringStatus(
+      orgId,
+      user,
+      id,
+      dto.status,
+    );
   }
 
   @Public()

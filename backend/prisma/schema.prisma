@@ -11,30 +11,31 @@ datasource db {
 }
 
 model Organization {
-  id          String   @id @default(uuid())
-  name        String
-  slug        String   @unique
-  logo        String?
-  config      Json?
-  plan        String   @default("FREE")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  users       User[]
-  members     Member[]
-  donations   Donation[]
-  campaigns   Campaign[]
-  p2pPages    CampaignP2PPage[]
-  subscriptions RecurringSubscription[]
-  species     Species[]
-  missions    Mission[]
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  logo      String?
+  config    Json?
+  plan      String   @default("FREE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users           User[]
+  members         Member[]
+  donations       Donation[]
+  campaigns       Campaign[]
+  p2pPages        CampaignP2PPage[]
+  subscriptions   RecurringSubscription[]
+  species         Species[]
+  missions        Mission[]
+  roleAssignments RoleAssignment[]
 }
 
 model User {
   id             String   @id @default(uuid())
   organizationId String
   email          String
-  passwordHash   String?  // null cuando el user es solo OAuth (sin password local)
+  passwordHash   String? // null cuando el user es solo OAuth (sin password local)
   role           String   @default("VIEWER")
   isActive       Boolean  @default(true)
   emailVerified  Boolean  @default(false)
@@ -42,9 +43,15 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  organization   Organization     @relation(fields: [organizationId], references: [id])
-  oauthAccounts  OAuthAccount[]
-  refreshTokens  RefreshToken[]
+  organization           Organization             @relation(fields: [organizationId], references: [id])
+  oauthAccounts          OAuthAccount[]
+  refreshTokens          RefreshToken[]
+  personProfile          PersonProfile?
+  credentials            ProfessionalCredential[] @relation("CredentialOwner")
+  verifiedCredentials    ProfessionalCredential[] @relation("CredentialVerifier")
+  collectiveMemberships  CollectiveMembership[]
+  roleAssignments        RoleAssignment[]         @relation("AssignedRole")
+  grantedRoleAssignments RoleAssignment[]         @relation("GrantedRole")
 
   @@unique([organizationId, email])
   @@index([email])
@@ -53,18 +60,18 @@ model User {
 model Member {
   id             String   @id @default(uuid())
   organizationId String
-  rut            String?  // RUT chileno
+  rut            String? // RUT chileno
   firstName      String
   lastName       String
   email          String
   phone          String?
   status         String   @default("ACTIVE")
   createdAt      DateTime @default(now())
-  
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  donations      Donation[]
-  p2pPages       CampaignP2PPage[]
-  subscriptions  RecurringSubscription[]
+
+  organization  Organization            @relation(fields: [organizationId], references: [id])
+  donations     Donation[]
+  p2pPages      CampaignP2PPage[]
+  subscriptions RecurringSubscription[]
 
   @@unique([organizationId, rut])
 }
@@ -77,151 +84,256 @@ model Donation {
   amount          Decimal  @db.Decimal(15, 2)
   currency        String   @default("CLP")
   status          String   @default("PENDING") // PENDING, SUCCEEDED, FAILED
-  recurringStatus String?  // ACTIVE, PAUSED, CANCELLED
+  recurringStatus String? // ACTIVE, PAUSED, CANCELLED
   gatewayRef      String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-    sourceType      String?  // DIRECT, P2P, SUBSCRIPTION
-  sourceId        String?  // Id of P2P Page or Subscription
-  captureId       String?  @unique // Ref única real de la pasarela para este cobro puntual
-  chargeReference String?  @unique // Idempotencia de job de cobro
+  sourceType      String? // DIRECT, P2P, SUBSCRIPTION
+  sourceId        String? // Id of P2P Page or Subscription
+  captureId       String? @unique // Ref única real de la pasarela para este cobro puntual
+  chargeReference String? @unique // Idempotencia de job de cobro
   p2pPageId       String?
   subscriptionId  String?
 
-  organization    Organization @relation(fields: [organizationId], references: [id])
-  member          Member?      @relation(fields: [memberId], references: [id])
-  campaign        Campaign?    @relation(fields: [campaignId], references: [id])
-  p2pPage         CampaignP2PPage? @relation(fields: [p2pPageId], references: [id])
-  subscription    RecurringSubscription? @relation(fields: [subscriptionId], references: [id])
+  organization Organization           @relation(fields: [organizationId], references: [id])
+  member       Member?                @relation(fields: [memberId], references: [id])
+  campaign     Campaign?              @relation(fields: [campaignId], references: [id])
+  p2pPage      CampaignP2PPage?       @relation(fields: [p2pPageId], references: [id])
+  subscription RecurringSubscription? @relation(fields: [subscriptionId], references: [id])
 }
 
 model Campaign {
-  id              String   @id @default(uuid())
-  organizationId  String
-  name            String
-  description     String?
-  goalAmount      Decimal  @db.Decimal(15, 2)
-  currentAmount   Decimal  @default(0) @db.Decimal(15, 2)
-  startDate       DateTime @default(now())
-  endDate         DateTime?
-  status          String   @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String    @id @default(uuid())
+  organizationId String
+  name           String
+  description    String?
+  goalAmount     Decimal   @db.Decimal(15, 2)
+  currentAmount  Decimal   @default(0) @db.Decimal(15, 2)
+  startDate      DateTime  @default(now())
+  endDate        DateTime?
+  status         String    @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  organization    Organization @relation(fields: [organizationId], references: [id])
-  donations       Donation[]
-  p2pPages        CampaignP2PPage[]
-  subscriptions   RecurringSubscription[]
+  organization  Organization            @relation(fields: [organizationId], references: [id])
+  donations     Donation[]
+  p2pPages      CampaignP2PPage[]
+  subscriptions RecurringSubscription[]
 }
 
 model CampaignP2PPage {
-  id              String   @id @default(uuid())
-  organizationId  String
-  campaignId      String
-  memberId        String
-  slug            String
-  title           String
-  personalGoal    Decimal? @db.Decimal(15, 2)
-  currentAmount   Decimal  @default(0) @db.Decimal(15, 2)
-  status          String   @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(uuid())
+  organizationId String
+  campaignId     String
+  memberId       String
+  slug           String
+  title          String
+  personalGoal   Decimal? @db.Decimal(15, 2)
+  currentAmount  Decimal  @default(0) @db.Decimal(15, 2)
+  status         String   @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  organization    Organization @relation(fields: [organizationId], references: [id])
-  campaign        Campaign     @relation(fields: [campaignId], references: [id])
-  member          Member       @relation(fields: [memberId], references: [id])
-  donations       Donation[]
+  organization Organization @relation(fields: [organizationId], references: [id])
+  campaign     Campaign     @relation(fields: [campaignId], references: [id])
+  member       Member       @relation(fields: [memberId], references: [id])
+  donations    Donation[]
 
   @@unique([organizationId, slug])
 }
 
 model RecurringSubscription {
-  id              String   @id @default(uuid())
-  organizationId  String
-  memberId        String
-  campaignId      String?
-  frequency       String   // MONTHLY, QUARTERLY, ANNUAL
-  amount          Decimal  @db.Decimal(15, 2)
-  nextChargeAt    DateTime
-  status          String   @default("ACTIVE") // ACTIVE, PAUSED, CANCELLED
-  captureId       String?  @unique // Referencia al token/mandato en la pasarela (Webpay/Flow)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(uuid())
+  organizationId String
+  memberId       String
+  campaignId     String?
+  frequency      String // MONTHLY, QUARTERLY, ANNUAL
+  amount         Decimal  @db.Decimal(15, 2)
+  nextChargeAt   DateTime
+  status         String   @default("ACTIVE") // ACTIVE, PAUSED, CANCELLED
+  captureId      String?  @unique // Referencia al token/mandato en la pasarela (Webpay/Flow)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  organization    Organization @relation(fields: [organizationId], references: [id])
-  member          Member       @relation(fields: [memberId], references: [id])
-  campaign        Campaign?    @relation(fields: [campaignId], references: [id])
-  donations       Donation[]
+  organization Organization @relation(fields: [organizationId], references: [id])
+  member       Member       @relation(fields: [memberId], references: [id])
+  campaign     Campaign?    @relation(fields: [campaignId], references: [id])
+  donations    Donation[]
 }
 
-
 model Species {
-  id              String   @id @default(uuid())
-  organizationId  String
-  commonName      String
-  scientificName  String?
-  description     String?
-  imageUrl        String?
-  status          String   @default("ACTIVE") // ACTIVE, THREATENED, etc.
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(uuid())
+  organizationId String
+  commonName     String
+  scientificName String?
+  description    String?
+  imageUrl       String?
+  status         String   @default("ACTIVE") // ACTIVE, THREATENED, etc.
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  organization    Organization @relation(fields: [organizationId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
 }
 
 model Mission {
-  id              String   @id @default(uuid())
-  organizationId  String
-  title           String
-  description     String?
-  location        String?
-  status          String   @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED, CANCELLED
-  startDate       DateTime @default(now())
-  endDate         DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String    @id @default(uuid())
+  organizationId String
+  title          String
+  description    String?
+  location       String?
+  status         String    @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED, CANCELLED
+  startDate      DateTime  @default(now())
+  endDate        DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  organization    Organization @relation(fields: [organizationId], references: [id])
-  tasks           MissionTask[]
+  organization Organization  @relation(fields: [organizationId], references: [id])
+  tasks        MissionTask[]
 }
 
 model MissionTask {
-  id              String   @id @default(uuid())
-  missionId       String
-  title           String
-  description     String?
-  isCompleted     Boolean  @default(false)
-  assignedTo      String?  // Puede ser un Member ID o nombre
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id          String   @id @default(uuid())
+  missionId   String
+  title       String
+  description String?
+  isCompleted Boolean  @default(false)
+  assignedTo  String? // Puede ser un Member ID o nombre
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  mission         Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
 }
 
 model DemoRequest {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  org       String // Nombre de la ONG/organización del lead
+  phone     String?
+  message   String?
+  status    String   @default("NEW") // NEW, CONTACTED, QUALIFIED, ARCHIVED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PersonProfile {
   id          String   @id @default(uuid())
-  name        String
-  email       String
-  org         String   // Nombre de la ONG/organización del lead
-  phone       String?
-  message     String?
-  status      String   @default("NEW") // NEW, CONTACTED, QUALIFIED, ARCHIVED
+  userId      String   @unique
+  firstName   String?
+  lastName    String?
+  displayName String?
+  bio         String?
+  region      String?
+  commune     String?
+  website     String?
+  visibility  String   @default("PRIVATE")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Discipline {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  credentials ProfessionalCredential[]
+}
+
+model ProfessionalCredential {
+  id            String    @id @default(uuid())
+  userId        String
+  disciplineId  String
+  issuer        String?
+  credentialRef String?
+  evidenceUrl   String?
+  status        String    @default("PENDING")
+  issuedAt      DateTime?
+  expiresAt     DateTime?
+  verifiedAt    DateTime?
+  verifiedById  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user       User       @relation("CredentialOwner", fields: [userId], references: [id], onDelete: Cascade)
+  discipline Discipline @relation(fields: [disciplineId], references: [id])
+  verifiedBy User?      @relation("CredentialVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([disciplineId, status])
+}
+
+model TerritorialCollective {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  region      String
+  commune     String?
+  description String?
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships     CollectiveMembership[]
+  roleAssignments RoleAssignment[]
+}
+
+model CollectiveMembership {
+  id           String   @id @default(uuid())
+  collectiveId String
+  userId       String
+  role         String   @default("PARTICIPANT")
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  collective TerritorialCollective @relation(fields: [collectiveId], references: [id], onDelete: Cascade)
+  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([collectiveId, userId])
+  @@index([userId, status])
+}
+
+model RoleAssignment {
+  id             String    @id @default(uuid())
+  userId         String
+  organizationId String
+  collectiveId   String?
+  role           String
+  scope          String?
+  status         String    @default("ACTIVE")
+  grantedById    String?
+  startsAt       DateTime  @default(now())
+  endsAt         DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user         User                   @relation("AssignedRole", fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  collective   TerritorialCollective? @relation(fields: [collectiveId], references: [id], onDelete: SetNull)
+  grantedBy    User?                  @relation("GrantedRole", fields: [grantedById], references: [id], onDelete: SetNull)
+
+  @@unique([userId, organizationId, role, collectiveId])
+  @@index([organizationId, status])
+  @@index([collectiveId, status])
 }
 
 // Vincula un User con su identidad en un provider externo (Google, Facebook, GitHub).
 // Un User puede tener varias OAuthAccount (multi-provider linking).
 model OAuthAccount {
-  id              String   @id @default(uuid())
-  userId          String
-  provider        String   // 'google' | 'facebook' | 'github'
-  providerUserId  String   // ID estable que entrega el provider para este user
-  providerEmail   String?  // Email que el provider devolvió al momento del link
-  createdAt       DateTime @default(now())
+  id             String   @id @default(uuid())
+  userId         String
+  provider       String // 'google' | 'facebook' | 'github'
+  providerUserId String // ID estable que entrega el provider para este user
+  providerEmail  String? // Email que el provider devolvió al momento del link
+  createdAt      DateTime @default(now())
 
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerUserId])
   @@index([userId])
@@ -231,18 +343,17 @@ model OAuthAccount {
 // Refresh tokens persistidos (db-backed para permitir revocación en logout).
 // El client recibe el token plano; acá guardamos solo el hash SHA-256.
 model RefreshToken {
-  id          String   @id @default(uuid())
-  userId      String
-  tokenHash   String   @unique
-  expiresAt   DateTime
-  revokedAt   DateTime?
-  createdAt   DateTime @default(now())
-  userAgent   String?
-  ipAddress   String?
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  userAgent String?
+  ipAddress String?
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
 }
-

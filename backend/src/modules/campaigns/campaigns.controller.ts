@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { CampaignsService } from './campaigns.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { CreateP2PPageDto } from './dto/p2p-page.dto';
@@ -21,10 +29,7 @@ export class CampaignsController {
   }
 
   @Get()
-  findAll(
-    @CurrentTenant() orgId: string,
-    @Query('status') status?: string,
-  ) {
+  findAll(@CurrentTenant() orgId: string, @Query('status') status?: string) {
     return this.campaignsService.findAll(orgId, status);
   }
 
@@ -40,7 +45,11 @@ export class CampaignsController {
     @Param('id') campaignId: string,
     @Body() createP2PPageDto: CreateP2PPageDto,
   ) {
-    return this.campaignsService.createP2PPage(orgId, campaignId, createP2PPageDto);
+    return this.campaignsService.createP2PPage(
+      orgId,
+      campaignId,
+      createP2PPageDto,
+    );
   }
 
   @Get(':id/p2p/:pageId')
@@ -52,7 +61,6 @@ export class CampaignsController {
     return this.campaignsService.getP2PPageById(orgId, campaignId, pageId);
   }
 
-
   @Patch(':id/p2p/:pageId')
   updateP2PPage(
     @CurrentTenant() orgId: string,
@@ -60,7 +68,12 @@ export class CampaignsController {
     @Param('pageId') pageId: string,
     @Body() dto: UpdateP2PPageDto,
   ) {
-    return this.campaignsService.updateP2PPageStatus(orgId, campaignId, pageId, dto.status);
+    return this.campaignsService.updateP2PPageStatus(
+      orgId,
+      campaignId,
+      pageId,
+      dto.status,
+    );
   }
 
   @Patch(':id')
@@ -75,5 +88,4 @@ export class CampaignsController {
     }
     return this.campaignsService.updateCampaign(orgId, id, dto);
   }
-
 }

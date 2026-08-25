@@ -13,6 +13,20 @@ import {
 import client from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 
+interface SpeciesItem {
+  id: string;
+  commonName: string;
+  scientificName?: string;
+  status: string;
+  description?: string;
+  imageUrl?: string;
+}
+
+interface SpeciesFormProps {
+  onSubmit: (formData: FormData) => void;
+  loading: boolean;
+}
+
 export const Species: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -41,7 +55,7 @@ export const Species: React.FC = () => {
     },
   });
 
-  const filteredSpecies = species.filter((s: any) => 
+  const filteredSpecies = species.filter((s: SpeciesItem) => 
     s.commonName.toLowerCase().includes(search.toLowerCase()) ||
     s.scientificName?.toLowerCase().includes(search.toLowerCase())
   );
@@ -83,7 +97,7 @@ export const Species: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <AnimatePresence>
-            {filteredSpecies.map((s: any) => (
+            {filteredSpecies.map((s: SpeciesItem) => (
               <motion.div
                 key={s.id}
                 layout
@@ -160,7 +174,7 @@ export const Species: React.FC = () => {
   );
 };
 
-const SpeciesForm = ({ onSubmit, loading }: any) => {
+const SpeciesForm: React.FC<SpeciesFormProps> = ({ onSubmit, loading }) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [commonName, setCommonName] = useState('');

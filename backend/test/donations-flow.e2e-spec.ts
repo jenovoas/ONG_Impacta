@@ -13,21 +13,49 @@ describe('Donations Flow (e2e)', () => {
   let memberId: string;
 
   beforeAll(async () => {
-    const mod = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    const mod = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
     app = mod.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
     await app.init();
     db = mod.get(DatabaseService);
     await resetDb(db);
 
     const passwordHash = await bcrypt.hash('pw123456', 10);
-    const org = await db.organization.create({
-      data: { name: 'Demo Org', slug: 'demo', plan: 'FREE',
-        users: { create: { email: 'admin@demo.cl', passwordHash, role: 'ADMIN' } } } });
+    await db.organization.create({
+      data: {
+        name: 'Demo Org',
+        slug: 'demo',
+        plan: 'FREE',
+        users: {
+          create: { email: 'admin@demo.cl', passwordHash, role: 'ADMIN' },
+        },
+      },
+    });
 
-    token = (await request(app.getHttpServer()).post('/auth/login').send({ email: 'admin@demo.cl', password: 'pw123456', orgSlug: 'demo' })).body.access_token;
+    token = (
+      await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: 'admin@demo.cl', password: 'pw123456', orgSlug: 'demo' })
+    ).body.access_token;
 
-    const mem = await request(app.getHttpServer()).post('/members').set('Authorization', `Bearer ${token}`).send({ firstName: 'Juan', lastName: 'Perez', email: 'juan@demo.cl', rut: '1-9', status: 'ACTIVE' });
+    const mem = await request(app.getHttpServer())
+      .post('/members')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        firstName: 'Juan',
+        lastName: 'Perez',
+        email: 'juan@demo.cl',
+        rut: '1-9',
+        status: 'ACTIVE',
+      });
     memberId = mem.body.id;
   });
   afterAll(async () => await app.close());

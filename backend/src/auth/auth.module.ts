@@ -19,15 +19,17 @@ import { DatabaseModule } from '../database/database.module';
     ThrottlerModule.forRoot([
       {
         name: 'default',
-        ttl: 60_000,  // 60s window
-        limit: 30,    // 30 req/min por IP (overridable con @Throttle en endpoints sensibles)
+        ttl: 60_000, // 60s window
+        limit: 30, // 30 req/min por IP (overridable con @Throttle en endpoints sensibles)
       },
     ]),
     JwtModule.registerAsync({
       useFactory: () => ({
         // En producción JWT_SECRET debe venir de env; si NODE_ENV=production
         // y no hay secret, AuthService.validateStrictSecret() en main.ts aborta el boot.
-        secret: process.env.JWT_SECRET || 'super-secret-key-123-change-me-in-production',
+        secret:
+          process.env.JWT_SECRET ||
+          'super-secret-key-123-change-me-in-production',
         signOptions: { expiresIn: '15m' },
       }),
     }),

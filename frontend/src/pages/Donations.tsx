@@ -3,21 +3,55 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Search, 
   Download, 
-  ExternalLink,
-  CheckCircle2,
-  Clock,
-  XCircle,
-  Loader2,
-  Calendar,
-  Plus,
-  X,
-  Check
+  ExternalLink, 
+  CheckCircle2, 
+  Clock, 
+  XCircle, 
+  Loader2, 
+  Calendar, 
+  Plus, 
+  X, 
+  Check 
 } from 'lucide-react';
 import client from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 
+interface DonationMember {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+interface DonationCampaign {
+  id: string;
+  name: string;
+}
+
+interface DonationItem {
+  id: string;
+  amount: number | string;
+  status: string;
+  createdAt: string;
+  member?: DonationMember;
+  campaign?: DonationCampaign;
+  gatewayRef?: string;
+}
+
+interface CampaignOption {
+  id: string;
+  name: string;
+}
+
+interface MemberOption {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 const StatusBadge = ({ status }: { status: string }) => {
-  const configs: any = {
+  const configs: Record<string, { icon: React.ComponentType<{ className?: string }>; text: string; class: string }> = {
     SUCCEEDED: { icon: CheckCircle2, text: 'Completado', class: 'bg-secondary/10 text-secondary' },
     PENDING: { icon: Clock, text: 'Pendiente', class: 'bg-tertiary/10 text-tertiary' },
     FAILED: { icon: XCircle, text: 'Fallido', class: 'bg-error/10 text-error' },
@@ -107,7 +141,7 @@ export const Donations: React.FC = () => {
     },
   });
 
-  const filteredDonations = donations.filter((d: any) => {
+  const filteredDonations = donations.filter((d: DonationItem) => {
     const donorName = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Donante Anónimo';
     const donorEmail = d.member?.email || '';
 
@@ -122,7 +156,7 @@ export const Donations: React.FC = () => {
   });
 
   const handleExportCsv = () => {
-    const rows = filteredDonations.map((d: any) => {
+    const rows = filteredDonations.map((d: DonationItem) => {
       const donor = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Donante Anónimo';
       const email = d.member?.email || '';
       const campaign = d.campaign?.name || 'Aporte General';
@@ -218,7 +252,7 @@ export const Donations: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredDonations.map((d: any) => {
+                filteredDonations.map((d: DonationItem) => {
                   const name = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Donante Anónimo';
                   const email = d.member?.email || 'N/A';
                   return (
@@ -314,7 +348,7 @@ export const Donations: React.FC = () => {
                 </div>
 
                 <form 
-                  onSubmit={(e: any) => {
+                  onSubmit={(e: React.FormEvent) => {
                     e.preventDefault();
                     createDonationMutation.mutate({
                       amount: Number(amount),
@@ -349,7 +383,7 @@ export const Donations: React.FC = () => {
                       className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
                     >
                       <option value="" className="bg-[#1c1b1b]">Aporte General (Sin campaña específica)</option>
-                      {campaigns.map((c: any) => (
+                      {campaigns.map((c: CampaignOption) => (
                         <option key={c.id} value={c.id} className="bg-[#1c1b1b]">{c.name}</option>
                       ))}
                     </select>
@@ -364,7 +398,7 @@ export const Donations: React.FC = () => {
                       className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
                     >
                       <option value="" className="bg-[#1c1b1b]">Donante Anónimo / Externo</option>
-                      {membersData.map((m: any) => (
+                      {membersData.map((m: MemberOption) => (
                         <option key={m.id} value={m.id} className="bg-[#1c1b1b]">{m.firstName} {m.lastName} ({m.email})</option>
                       ))}
                     </select>

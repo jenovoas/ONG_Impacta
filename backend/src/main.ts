@@ -10,17 +10,20 @@ function validateRequiredEnv(): void {
   // JWT_SECRET: en producción es OBLIGATORIO (no hay fallback).
   // En dev usamos el fallback hardcodeado para no romper tests locales.
   const jwtSecret = process.env.JWT_SECRET;
-  if (isProd && (!jwtSecret || jwtSecret === 'super-secret-key-123-change-me-in-production')) {
+  if (
+    isProd &&
+    (!jwtSecret || jwtSecret === 'super-secret-key-123-change-me-in-production')
+  ) {
     logger.error(
       'JWT_SECRET no configurado o usa el valor por omisión. Refuse to boot en producción. ' +
-      'Set process.env.JWT_SECRET antes de iniciar.',
+        'Set process.env.JWT_SECRET antes de iniciar.',
     );
     process.exit(1);
   }
   if (!jwtSecret) {
     logger.warn(
       'JWT_SECRET no está configurado; usando fallback hardcodeado (SOLO DEV). ' +
-      'En producción esto aborta el boot.',
+        'En producción esto aborta el boot.',
     );
   }
 
@@ -49,7 +52,9 @@ async function bootstrap(): Promise<void> {
   );
   const port = process.env.PORT ?? 3001;
   await app.listen(port);
-  logger.log(`Impacta+ backend listening on :${port} (NODE_ENV=${process.env.NODE_ENV ?? 'development'})`);
+  logger.log(
+    `Impacta+ backend listening on :${port} (NODE_ENV=${process.env.NODE_ENV ?? 'development'})`,
+  );
 }
 
-bootstrap();
+void bootstrap();

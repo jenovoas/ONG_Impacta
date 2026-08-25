@@ -38,6 +38,14 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 
 **VM Azure `fenix`, Ubuntu 24.04 LTS. Serving edge: nginx directo. Este stack NO usa contenedores en producción.**
 
+> 🛡️ **Requisito Sentinel (25-ago-2026):** toda instancia productiva de
+> Impacta+ debe ejecutarse sobre un nodo administrado por Sentinel. `fenix` es
+> el nodo de referencia y tiene activos Cortex, setup eBPF, Verifier y agentes
+> Sentinel. Sentinel protege el host; Impacta+ conserva autorización tenant,
+> privacidad y decisiones de negocio. Un deploy normal de Impacta+ **NO debe
+> actualizar, reiniciar ni reconfigurar Sentinel**. Ver
+> [`docs/ARQUITECTURA_DESPLIEGUE_SOBRE_SENTINEL.md`](docs/ARQUITECTURA_DESPLIEGUE_SOBRE_SENTINEL.md).
+
 > ⚠️ **Nota de nombres:** hubo un server antiguo también llamado "Fenix" (pre-2026, ruta `/home/jnovoas/Desarrollo/`) y uno llamado **`fan`** (Rocky/podman, **apagado el 23-ago-2026**, ruta `/home/jnovoas/ONG_Impacta/`). El server ACTUAL es esta VM Azure llamada `fenix`, path `/home/jnovoas/proyectos/ONG_Impacta/`. Cualquier doc que hable de podman rootless, puertos host 5435/6381/3080 o volúmenes SELinux `:z` describe el server fan RETIRADO — ya no aplica.
 
 - Host compartido con **múltiples proyectos en producción** (pinguinoseguro, laespiguita, lotaindomito, micelia, portfolio, transcript). **Regla dura: NO tocar infra existente de otros proyectos.** Solo agregar servicios.

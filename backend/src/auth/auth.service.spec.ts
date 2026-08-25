@@ -25,7 +25,10 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         { provide: DatabaseService, useValue: mockDatabase },
-        { provide: JwtService, useValue: { signAsync: jest.fn(), verifyAsync: jest.fn() } },
+        {
+          provide: JwtService,
+          useValue: { signAsync: jest.fn(), verifyAsync: jest.fn() },
+        },
         { provide: OAuthService, useValue: { verify: jest.fn() } },
       ],
     }).compile();

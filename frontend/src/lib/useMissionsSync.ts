@@ -106,13 +106,18 @@ export function useMissionsSync() {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Initial check & count
-    updatePendingCount();
-    if (navigator.onLine) {
-      syncPending();
-    }
+    let isMounted = true;
+    const init = async () => {
+      if (!isMounted) return;
+      await updatePendingCount();
+      if (navigator.onLine && isMounted) {
+        await syncPending();
+      }
+    };
+    void init();
 
     return () => {
+      isMounted = false;
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };

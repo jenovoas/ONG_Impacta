@@ -6,9 +6,17 @@
 
 ## 2. Subvenciones / board — backend
 
+- [ ] 2.0 Catálogo global: añadir `FundingSource`, `FundingOpportunity`,
+  `EligibilityRule` y versionado de bases con procedencia y revisión humana.
 - [ ] 2.1 Prisma: añadir `Grant` (deadline, `status`, monto postulado/otorgado, financiador), `GrantDocument`, `BoardMember` (rol, termStart/termEnd) con `organizationId` fijo; migración
 - [ ] 2.2 Backend `GET/POST/PATCH /grants`, `POST /grants/:id/documents` (rol ADMIN/OPERATOR del tenant) y CRUD `GET/POST /board/members`
 - [ ] 2.3 Endpoints de reporte: `GET /grants/report` (sum otorgado por financiador + pipeline por status) y `GET /board/report` (roles activos, termEnd próximos 90 días)
+- [ ] 2.4 Implementar `OpportunityMatch` con requisitos satisfechos, brechas,
+  incertidumbre y explicación auditable.
+- [ ] 2.5 Crear perfiles de colaboración consentidos e invitaciones confirmadas,
+  sin exponer documentos tenant.
+- [ ] 2.6 Crear estudio de formulación con versiones, checklist, presupuesto y
+  aportes humanos/IA siempre en estado borrador.
 
 ## 3. Especies avanzada — backend
 
@@ -25,4 +33,8 @@
 
 - [ ] 5.1 Tests backend: anti-dup de jornadas (mismo `memberId + stepId` re-ejecutado no reenvía), aislamiento de grants/observaciones entre dos tenants, validación lat/lng y `iucnStatus` enum
 - [ ] 5.2 Docs: `README.md` con nuevas rutas `/jornadas`, `/subvenciones`, `/board`; nota de consentimiento y soberanía de datos en `AGENTS.md`/guía de comunicación
-- [ ] 5.3 Verificación: `npm run build` frontend y backend, `npm test` backend verde, `./deploy.sh frontend`, `./deploy.sh verify` (impacta 200, impacta.pinguinoseguro.cl 301, api 401, public-stats real) y navegación manual de las 4 pantallas nuevas
+- [ ] 5.3 Verificación: `npm run build` frontend y backend, `npm test` backend
+  verde y, después de obtener aprobación para desplegar, `./deploy.sh frontend`
+  más `./deploy.sh verify` (`/` 200, endpoint protegido bajo `/api/` 401 sin
+  sesión y `public-stats` con datos reales); navegación manual de las pantallas
+  nuevas en el único dominio.
