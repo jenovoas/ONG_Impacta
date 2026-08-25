@@ -36,13 +36,16 @@ Documento autosuficiente: cualquier agente puede recoger este plan sin depender 
 - ✅ `organizations` — CRUD completo + `findBySlug` + `getSummary` + `publicStats`
 - ✅ `users` — CRUD de usuarios con roles (`SUPERADMIN`, `ADMIN`, `OPERATOR`, `VIEWER`)
 - ✅ `members` — CRUD de socios/voluntarios con validación RUT chileno
-- ✅ `donations` — Gestión de donaciones (PENDING → SUCCEEDED por callback)
-- ✅ `campaigns` — Campañas de recaudación con meta y progreso
+- ✅ `donations` — Gestión de donaciones (PENDING → SUCCEEDED por callback, suscripciones recurrentes)
+- ✅ `campaigns` — Campañas de recaudación con meta, progreso y recaudación P2P
 - ✅ `species` — Biblioteca de especies con upload a MinIO
-- ✅ `missions` — Misiones de campo con subtasks (`MissionTask`)
-- ✅ `auth` — JWT + bcrypt, login por email + orgSlug, refresh token
+- ✅ `missions` — Misiones de campo con subtasks (`MissionTask`) y sincronización offline
+- ✅ `auth` — JWT + bcrypt, login por email + orgSlug, refresh token, OAuth2
 - ✅ `storage` — Servicio MinIO con `getFileStream`
 - ✅ `demo-requests` — Lead form público del landing (sin tenant, sin auth). Endpoint `POST /api/demo-requests` con dedup de 5 min por email. Endpoint `GET /demo-requests` protegido por `@Roles`. Schema dedicado: `DemoRequest { id, name, email, org, phone?, message?, status: NEW|CONTACTED|REJECTED, createdAt }` con índice en `(email, createdAt)`.
+- ✅ `community` — Gestión de identidades, perfiles comunitarios y credenciales verificables
+- ✅ `ai-security` — Ingress guard, privacy sanitizer y telemetría segura
+- ✅ `ai-gateway` — Orquestador AI local con soporte OmniRoute y fallbacks seguros
 
 **Módulos backend NO implementados (si existen):** revisar `ls src/modules/`
 
