@@ -1,35 +1,21 @@
--- DropForeignKey
-ALTER TABLE "Event" DROP CONSTRAINT "Event_organizationId_fkey";
+-- Limpieza de tablas fantasma: la migración 20260824130000_add_events_tickets se
+-- aplicó físicamente a producción pero fue descartada del repo (reset 24-ago-2026).
+-- IF EXISTS hace este paso seguro tanto en prod (objetos existían) como en DBs
+-- frescas provisionadas solo desde git (nunca los tuvieron).
+DROP TABLE IF EXISTS "VolunteerShiftAssignment" CASCADE;
+DROP TABLE IF EXISTS "Ticket" CASCADE;
+DROP TABLE IF EXISTS "Membership" CASCADE;
+DROP TABLE IF EXISTS "Event" CASCADE;
+DROP TABLE IF EXISTS "VolunteerShift" CASCADE;
 
--- DropForeignKey
-ALTER TABLE "Membership" DROP CONSTRAINT "Membership_memberId_fkey";
+DROP TYPE IF EXISTS "MembershipInterval";
+DROP TYPE IF EXISTS "MembershipStatus";
+DROP TYPE IF EXISTS "MembershipTier";
 
--- DropForeignKey
-ALTER TABLE "Membership" DROP CONSTRAINT "Membership_organizationId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Ticket" DROP CONSTRAINT "Ticket_eventId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Ticket" DROP CONSTRAINT "Ticket_memberId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Ticket" DROP CONSTRAINT "Ticket_organizationId_fkey";
-
--- DropForeignKey
-ALTER TABLE "VolunteerShift" DROP CONSTRAINT "VolunteerShift_missionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "VolunteerShift" DROP CONSTRAINT "VolunteerShift_organizationId_fkey";
-
--- DropForeignKey
-ALTER TABLE "VolunteerShiftAssignment" DROP CONSTRAINT "VolunteerShiftAssignment_memberId_fkey";
-
--- DropForeignKey
-ALTER TABLE "VolunteerShiftAssignment" DROP CONSTRAINT "VolunteerShiftAssignment_organizationId_fkey";
-
--- DropForeignKey
-ALTER TABLE "VolunteerShiftAssignment" DROP CONSTRAINT "VolunteerShiftAssignment_shiftId_fkey";
+ALTER TABLE "Member" DROP COLUMN IF EXISTS "membershipExpiresAt";
+ALTER TABLE "Member" DROP COLUMN IF EXISTS "membershipStatus";
+ALTER TABLE "Member" DROP COLUMN IF EXISTS "membershipTier";
+ALTER TABLE "Member" DROP COLUMN IF EXISTS "publishToDirectory";
 
 -- AlterTable
 ALTER TABLE "Donation" ADD COLUMN     "captureId" TEXT,
@@ -38,36 +24,6 @@ ADD COLUMN     "p2pPageId" TEXT,
 ADD COLUMN     "sourceId" TEXT,
 ADD COLUMN     "sourceType" TEXT,
 ADD COLUMN     "subscriptionId" TEXT;
-
--- AlterTable
-ALTER TABLE "Member" DROP COLUMN "membershipExpiresAt",
-DROP COLUMN "membershipStatus",
-DROP COLUMN "membershipTier",
-DROP COLUMN "publishToDirectory";
-
--- DropTable
-DROP TABLE "Event";
-
--- DropTable
-DROP TABLE "Membership";
-
--- DropTable
-DROP TABLE "Ticket";
-
--- DropTable
-DROP TABLE "VolunteerShift";
-
--- DropTable
-DROP TABLE "VolunteerShiftAssignment";
-
--- DropEnum
-DROP TYPE "MembershipInterval";
-
--- DropEnum
-DROP TYPE "MembershipStatus";
-
--- DropEnum
-DROP TYPE "MembershipTier";
 
 -- CreateTable
 CREATE TABLE "CampaignP2PPage" (
