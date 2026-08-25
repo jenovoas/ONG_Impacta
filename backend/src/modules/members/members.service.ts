@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { validateRut } from '../../common/utils/rut.validator';
 
@@ -34,9 +34,13 @@ export class MembersService {
   }
 
   async findOne(orgId: string, id: string) {
-    return this.prisma.member.findFirst({
+    const member = await this.prisma.member.findFirst({
       where: { id, organizationId: orgId },
     });
+    if (!member) {
+      throw new NotFoundException('Member not found');
+    }
+    return member;
   }
 
   async create(orgId: string, data: any) {
