@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AiSecurityModule } from '../ai-security/ai-security.module';
+import { KnowledgeModule } from '../knowledge/knowledge.module';
+import { KnowledgeService } from '../knowledge/knowledge.service';
 import { ContentIngressGuard } from '../ai-security/content-ingress-guard';
 import { AiGatewayController } from './ai-gateway.controller';
 import { AiOrchestratorService } from './ai-orchestrator.service';
@@ -9,7 +11,7 @@ import { OmniRouteProvider } from './omniroute.provider';
 export const AI_PROVIDER = Symbol('AI_PROVIDER');
 
 @Module({
-  imports: [AiSecurityModule],
+  imports: [AiSecurityModule, KnowledgeModule],
   controllers: [AiGatewayController],
   providers: [
     {
@@ -28,8 +30,9 @@ export const AI_PROVIDER = Symbol('AI_PROVIDER');
       useFactory: (
         provider: AiGatewayClient,
         ingressGuard: ContentIngressGuard,
-      ) => new AiOrchestratorService(provider, ingressGuard),
-      inject: [AI_PROVIDER, ContentIngressGuard],
+        knowledge: KnowledgeService,
+      ) => new AiOrchestratorService(provider, ingressGuard, knowledge),
+      inject: [AI_PROVIDER, ContentIngressGuard, KnowledgeService],
     },
   ],
   exports: [AI_PROVIDER, AiOrchestratorService],

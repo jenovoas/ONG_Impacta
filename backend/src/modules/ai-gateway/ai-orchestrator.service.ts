@@ -4,6 +4,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ContentIngressGuard } from '../ai-security/content-ingress-guard';
+import { KnowledgeService } from '../knowledge/knowledge.service';
 import type { AiGatewayClient } from './ai-provider';
 import { PublicAssistantDto } from './dto/public-assistant.dto';
 
@@ -12,6 +13,7 @@ export class AiOrchestratorService {
   constructor(
     private readonly provider: AiGatewayClient,
     private readonly ingressGuard: ContentIngressGuard,
+    private readonly knowledge: KnowledgeService,
   ) {}
 
   async answerPublic(dto: PublicAssistantDto) {
@@ -27,13 +29,19 @@ export class AiOrchestratorService {
     }
 
     try {
+      const knowledgeContext = await this.knowledge.buildPublicContext(
+        decision.sanitizedText,
+      );
+
       const result = await this.provider.complete({
         model: dto.model,
         messages: [
           {
             role: 'system',
-            content:
-              'Eres el asistente público de Impacta+. Responde en español, usa lenguaje claro, reconoce incertidumbre y no inventes datos. No puedes publicar, firmar ni ejecutar acciones.',
+            content: `Eres el asistente público de Impacta+. Responde en español, usa lenguaje claro y reconoce incertidumbre. No inventes datos ni fuentes. Usa exclusivamente el contexto público recuperado cuando exista; si no basta, dilo claramente. No puedes publicar, firmar ni ejecutar acciones.
+
+Fuentes públicas recuperadas:
+${knowledgeContext.text || '(No se encontraron fuentes públicas relevantes.)'}`,
           },
           { role: 'user', content: decision.sanitizedText },
         ],
@@ -44,6 +52,7 @@ export class AiOrchestratorService {
         provider: result.provider,
         model: result.model,
         usage: result.usage,
+        citations: knowledgeContext.citations,
         assisted: true,
       };
     } catch (error) {

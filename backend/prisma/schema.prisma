@@ -29,6 +29,7 @@ model Organization {
   species         Species[]
   missions        Mission[]
   roleAssignments RoleAssignment[]
+  knowledgeDocs   KnowledgeDocument[]
 }
 
 model User {
@@ -356,4 +357,43 @@ model RefreshToken {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model KnowledgeDocument {
+  id             String    @id @default(uuid())
+  organizationId String?
+  title          String
+  description    String?
+  sourceUrl      String?
+  publisher      String?
+  citation       String?
+  sourceType     String    @default("ARTICLE")
+  visibility     String    @default("PUBLIC")
+  status         String    @default("DRAFT")
+  publishedAt    DateTime?
+  consultedAt    DateTime?
+  contentHash    String    @unique
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  chunks       KnowledgeChunk[]
+
+  @@index([visibility, status])
+  @@index([organizationId, visibility, status])
+}
+
+model KnowledgeChunk {
+  id         String   @id @default(uuid())
+  documentId String
+  ordinal    Int
+  content    String
+  embedding  Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  document KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, ordinal])
+  @@index([documentId])
 }
