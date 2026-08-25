@@ -10,6 +10,30 @@ Esto permite comenzar con una API, migrar a Qwen local y adoptar futuros modelos
 sin reconstruir la experiencia, perder memoria institucional ni cambiar las
 reglas de seguridad.
 
+## OmniRoute como gateway inicial
+
+En la operación actual, OmniRoute es el gateway de IA del entorno: las IAs
+operativas pasan por él y OmniRoute decide la combinación o modelo final. Por
+eso Impacta+ no debe tratarlo como un modelo ni llamar directamente a cada
+proveedor.
+
+```text
+Impacta+ backend
+  → PrivacySanitizer + DataPolicyEngine
+  → AiGatewayClient (OmniRoute)
+  → modelo/combinación aprobada por OmniRoute
+```
+
+Codex queda fuera de este circuito: es un agente de desarrollo, no una
+dependencia runtime de la plataforma. La respuesta debe conservar la identidad
+del modelo o combinación seleccionada por OmniRoute, pero las políticas de
+privacidad, permisos, herramientas, citas y publicación siguen perteneciendo a
+Impacta+.
+
+Una ruta de OmniRoute no se considera local o segura por nombre: cada
+combinación debe declarar ubicación, retención, entrenamiento, capacidades y
+clases de datos autorizadas.
+
 ## Qué compone la inteligencia de Impacta+
 
 - Modelo de identidad, roles y permisos.

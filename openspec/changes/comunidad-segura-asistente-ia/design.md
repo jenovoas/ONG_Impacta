@@ -84,7 +84,9 @@ caso no se enviará al modelo. El diseño completo está en
 
 ### Asistente de IA
 
-La primera etapa consumirá un modelo por API detrás de un contrato `AiProvider`.
+La primera etapa consumirá OmniRoute como gateway detrás de los contratos
+`AiGatewayClient` y `AiProvider`; el modelo o combinación final será decidido
+por el gateway y quedará registrado en la respuesta canónica.
 Qwen3.8-27B es el candidato para la etapa local. El conocimiento vigente se
 suministrará por RAG; LoRA/QLoRA se reservará para tono, formatos, uso de citas,
 abstención y flujos. El backend aplicará permisos antes de la recuperación y de

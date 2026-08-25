@@ -17,7 +17,8 @@ despliegues ni publicación de capacidades sensibles.
 3. Identidad, participación, credenciales y permisos son conceptos separados.
 4. La IA propone, explica y prepara borradores; nunca publica, firma o adjudica.
 5. La inteligencia pertenece a Impacta+, no al proveedor o modelo.
-6. API externa primero para contenido público; Qwen local para datos sensibles.
+6. OmniRoute como gateway inicial; solo rutas explícitamente autorizadas pueden
+   procesar contenido público o sensible.
 7. Mensajes, denuncias y expedientes no forman datasets por defecto.
 8. Catálogo global separado de observaciones tenant y aportes comunitarios.
 9. Cifrado y anonimato se describen con garantías reales, no como invulnerables.
@@ -144,7 +145,8 @@ tenant o adquirir GPU.
 
 ### Componentes
 
-- Contrato `AiProvider`.
+- Contratos `AiGatewayClient` y `AiProvider`; OmniRoute es el gateway inicial y
+  el modelo/combinación final permanece intercambiable.
 - `ModelRegistry` y router por capacidades.
 - Prompt Registry versionado.
 - RAG público con citas.
@@ -298,7 +300,8 @@ Ofrecer salas y paquetes que ni el servidor pueda descifrar.
 
 ### Objetivo
 
-Reemplazar gradualmente el proveedor API sin cambiar experiencia ni permisos.
+Cambiar gradualmente la ruta OmniRoute o sustituirla por inferencia local sin
+cambiar experiencia ni permisos.
 
 ### Infraestructura planificada
 
@@ -450,7 +453,8 @@ Las rutas finales se validarán con navegación y Stitch antes de implementar UI
 
 ## Decisiones que requieren personas responsables
 
-- Proveedor API inicial y condiciones de retención/no entrenamiento.
+- Ruta OmniRoute inicial, combinación de modelos y condiciones de
+  retención/no entrenamiento.
 - Política de datos y tiempos de retención.
 - Instituciones y profesionales del piloto.
 - Revisor científico y editor responsable.

@@ -14,6 +14,7 @@ import { MissionsModule } from './modules/missions/missions.module';
 import { DemoRequestsModule } from './modules/demo-requests/demo-requests.module';
 import { CommunityModule } from './modules/community/community.module';
 import { AiSecurityModule } from './modules/ai-security/ai-security.module';
+import { AiGatewayModule } from './modules/ai-gateway/ai-gateway.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AiSecurityModule } from './modules/ai-security/ai-security.module';
     DemoRequestsModule,
     CommunityModule,
     AiSecurityModule,
+    AiGatewayModule,
   ],
   controllers: [AppController],
   providers: [AppService],

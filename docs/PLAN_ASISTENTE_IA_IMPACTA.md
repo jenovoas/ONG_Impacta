@@ -2,7 +2,7 @@
 
 ## Decisión inicial
 
-Impacta+ comenzará con un **modelo consumido por API**. Esto permite validar la
+Impacta+ comenzará con **OmniRoute como gateway de IA**. Esto permite validar la
 recepción, recuperación, herramientas y experiencia antes de invertir en GPU y
 entrenamiento. El candidato para la etapa local definitiva es
 **Qwen3.8-27B**, modelo abierto multimodal con licencia Apache 2.0. La elección
@@ -33,17 +33,17 @@ Sentinel y se adapta en
 
 ## Transición de cerebro API a Qwen local
 
-La aplicación utilizará un contrato interno `AiProvider`; el frontend nunca
-llamará directamente a un proveedor externo.
+La aplicación utilizará los contratos internos `AiGatewayClient` y `AiProvider`;
+el frontend nunca llamará directamente a OmniRoute ni al modelo final.
 
 ```text
 Frontend
    ↓ /api/assistant
 Backend Impacta+ — permisos, RAG, herramientas, auditoría
-   ↓ AiProvider
-Modelo por API al inicio ───────────────┐
-                                       ├─ misma interfaz y evaluaciones
-Qwen local/autohospedado después ──────┘
+   ↓ AiGatewayClient
+OmniRoute ───→ combinación/modelo aprobado ───→ respuesta canónica
+   │
+   └── futura ruta Qwen local cuando esté evaluada y autorizada
 ```
 
 El contrato debe cubrir generación, streaming, salida estructurada, uso de
@@ -51,9 +51,10 @@ herramientas, embeddings, salud, límites y metadatos de modelo. Prompts,
 documentos recuperados, permisos, sesiones, evaluaciones y feedback pertenecen
 a Impacta+ y permanecen desacoplados del proveedor.
 
-Un registro de modelos declarará capacidades y clases de datos autorizadas. El
-router elegirá por tarea, privacidad, calidad, latencia y costo; nunca por un
-nombre de modelo codificado en las pantallas o reglas de negocio.
+Un registro de rutas declarará gateway, combinación/modelo final, capacidades y
+clases de datos autorizadas. El router elegirá por tarea, privacidad, calidad,
+latencia y costo; nunca por un nombre de modelo codificado en las pantallas o
+reglas de negocio.
 
 ### Reglas para la etapa API
 
@@ -73,7 +74,8 @@ nombre de modelo codificado en las pantallas o reglas de negocio.
 
 Qwen local reemplaza al proveedor solo si supera umbrales acordados en la misma
 batería de recepción, ciencia, permisos, herramientas y seguridad. El cambio se
-hará por configuración y despliegue gradual, con rollback al proveedor API. No
+hará por configuración y despliegue gradual, con rollback a una ruta
+OmniRoute autorizada. No
 debe requerir cambiar componentes de frontend ni reglas de negocio.
 
 ## Por qué Qwen3.8-27B
@@ -230,7 +232,7 @@ Orquestador del asistente
    ├── política de contexto: recepción, profesional, editor, voluntario...
    ├── herramientas de solo lectura permitidas
    ├── herramientas de borrador con confirmación y auditoría
-   └── AiProvider: API inicial o Qwen3.8-27B local aislado
+   └── AiGatewayClient/AiProvider: OmniRoute → ruta local Qwen autorizada
             ↓
 Respuesta con citas, incertidumbre y registro seguro
 ```
@@ -322,8 +324,8 @@ Métricas:
 ## Fases y criterio de salida
 
 1. **Gobernanza:** permisos, licencias, privacidad y fuentes estables.
-2. **Abstracción:** implementar `AiProvider` y seleccionar un proveedor API
-   inicial sin acoplar el frontend.
+2. **Abstracción:** implementar `AiGatewayClient`/`AiProvider` y seleccionar una
+   ruta OmniRoute inicial sin acoplar el frontend.
 3. **RAG público:** respuestas de solo lectura sobre contenido publicado.
 4. **Recepción API:** orientación pública con derivación humana y memoria mínima.
 5. **Piloto interno:** copiloto para profesionales y editores, inicialmente de
@@ -332,7 +334,7 @@ Métricas:
    no en entrenamiento automático.
 7. **Qwen baseline:** desplegar el modelo base aislado y compararlo con la API.
 8. **SFT LoRA:** entrenar únicamente si el baseline demuestra una brecha clara.
-9. **Migración local:** cambiar `AiProvider` gradualmente, con rollback.
+9. **Migración local:** cambiar la ruta de OmniRoute gradualmente, con rollback.
 10. **Asistentes especializados:** voluntariado, coordinación y soporte.
 11. **Evaluación continua:** revisión científica, comunitaria y de seguridad.
 
