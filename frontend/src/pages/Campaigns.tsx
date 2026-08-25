@@ -13,6 +13,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export const Campaigns: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [goalAmount, setGoalAmount] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [description, setDescription] = useState('');
   const queryClient = useQueryClient();
 
   const { data: campaigns = [], isLoading } = useQuery({
@@ -23,6 +27,16 @@ export const Campaigns: React.FC = () => {
     },
   });
 
+  const loadSuggestion = () => {
+    setName('Restauración del Humedal Rocuant-Andalién 2026');
+    setGoalAmount('18000000');
+    // Fecha en 6 meses más
+    const d = new Date();
+    d.setMonth(d.getMonth() + 6);
+    setEndDate(d.toISOString().slice(0, 10));
+    setDescription('Campaña comunitaria para erradicación de microbasurales, instalación de miradores ecológicos e inserción de 3.500 especies arbustivas nativas en la cuenca costera.');
+  };
+
   const createMutation = useMutation({
     mutationFn: async (newCampaign: any) => {
       const { data } = await client.post('/campaigns', newCampaign);
@@ -31,6 +45,10 @@ export const Campaigns: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
       setIsModalOpen(false);
+      setName('');
+      setGoalAmount('');
+      setEndDate('');
+      setDescription('');
     },
   });
 
@@ -83,43 +101,83 @@ export const Campaigns: React.FC = () => {
               className="relative w-full max-w-xl glass-card rounded-[40px] border border-white/10 shadow-2xl overflow-hidden"
             >
               <div className="p-8 md:p-12">
-                <div className="flex justify-between items-center mb-10">
-                  <h2 className="text-3xl font-black text-white uppercase italic">Crear <span className="text-tertiary">Campaña</span></h2>
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h2 className="text-3xl font-black text-white uppercase italic">Crear <span className="text-tertiary">Campaña</span></h2>
+                    <p className="text-gray-400 text-xs mt-1">Configura una nueva meta de recaudación.</p>
+                  </div>
                   <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-white/5 rounded-full transition-colors text-gray-500">
                     <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="mb-6 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={loadSuggestion}
+                    className="text-[11px] font-bold text-tertiary bg-tertiary/10 hover:bg-tertiary/20 border border-tertiary/30 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5"
+                  >
+                    <span>⚡ Cargar sugerencia real</span>
                   </button>
                 </div>
 
                 <form 
                   onSubmit={(e: any) => {
                     e.preventDefault();
-                    const formData = new FormData(e.target);
                     createMutation.mutate({
-                      name: formData.get('name'),
-                      description: formData.get('description'),
-                      goalAmount: Number(formData.get('goalAmount')),
-                      endDate: formData.get('endDate') ? new Date(formData.get('endDate') as string).toISOString() : undefined,
+                      name,
+                      description,
+                      goalAmount: Number(goalAmount),
+                      endDate: endDate ? new Date(endDate).toISOString() : undefined,
                     });
                   }} 
                   className="space-y-6"
                 >
                   <div>
                     <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest font-sans">Nombre de la Campaña</label>
-                    <input name="name" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" placeholder="Ej: Reforestación Parque Central" />
+                    <input 
+                      name="name" 
+                      required 
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" 
+                      placeholder="Ej: Reforestación Bosque Nativo" 
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest font-sans">Meta ($ CLP)</label>
-                      <input name="goalAmount" type="number" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" placeholder="1.000.000" />
+                      <input 
+                        name="goalAmount" 
+                        type="number" 
+                        required 
+                        value={goalAmount}
+                        onChange={(e) => setGoalAmount(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" 
+                        placeholder="18.000.000" 
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest font-sans">Fecha Límite</label>
-                      <input name="endDate" type="date" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" />
+                      <input 
+                        name="endDate" 
+                        type="date" 
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" 
+                      />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest font-sans">Descripción</label>
-                    <textarea name="description" rows={3} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" />
+                    <textarea 
+                      name="description" 
+                      rows={3} 
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-tertiary/50 transition-colors" 
+                      placeholder="Objetivos de la campaña..."
+                    />
                   </div>
 
                   <button

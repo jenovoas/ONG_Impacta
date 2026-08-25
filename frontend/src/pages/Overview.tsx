@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { 
   TrendingUp, 
   Users, 
@@ -93,9 +94,9 @@ export const Overview: React.FC = () => {
             <Activity className="text-primary w-6 h-6" />
             Actividad Reciente
           </h2>
-          <button className="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
+          <Link to="/dashboard/donations" className="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
             Ver todo <ArrowUpRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
         <div className="space-y-4">
           {isLoadingDonations ? (

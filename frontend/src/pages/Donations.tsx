@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Search, 
   Download, 
@@ -8,10 +8,13 @@ import {
   Clock,
   XCircle,
   Loader2,
-  Calendar
+  Calendar,
+  Plus,
+  X,
+  Check
 } from 'lucide-react';
 import client from '../api/client';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const configs: any = {
@@ -34,12 +37,73 @@ const StatusBadge = ({ status }: { status: string }) => {
 export const Donations: React.FC = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('ALL');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const [amount, setAmount] = useState('75000');
+  const [selectedCampaignId, setSelectedCampaignId] = useState('');
+  const [selectedMemberId, setSelectedMemberId] = useState('');
+  const [confirmImmediately, setConfirmImmediately] = useState(true);
+
+  const queryClient = useQueryClient();
 
   const { data: donations = [], isLoading } = useQuery({
     queryKey: ['donations'],
     queryFn: async () => {
       const { data } = await client.get('/donations');
       return data;
+    },
+  });
+
+  const { data: campaigns = [] } = useQuery({
+    queryKey: ['campaigns'],
+    queryFn: async () => {
+      const { data } = await client.get('/campaigns');
+      return Array.isArray(data) ? data : [];
+    },
+  });
+
+  const { data: membersData = [] } = useQuery({
+    queryKey: ['members'],
+    queryFn: async () => {
+      const { data } = await client.get('/members');
+      return Array.isArray(data) ? data : (data?.items || []);
+    },
+  });
+
+  const loadSuggestion = () => {
+    setAmount('120000');
+    if (campaigns.length > 0) {
+      setSelectedCampaignId(campaigns[0].id);
+    }
+    if (membersData.length > 0) {
+      setSelectedMemberId(membersData[0].id);
+    }
+    setConfirmImmediately(true);
+  };
+
+  const createDonationMutation = useMutation({
+    mutationFn: async (payload: { amount: number; campaignId?: string; memberId?: string; markAsSucceeded?: boolean }) => {
+      const { data } = await client.post('/donations', {
+        amount: payload.amount,
+        campaignId: payload.campaignId || undefined,
+        memberId: payload.memberId || undefined,
+        currency: 'CLP',
+      });
+
+      if (payload.markAsSucceeded && data?.gatewayRef) {
+        await client.post('/donations/callback', {
+          gatewayRef: data.gatewayRef,
+          status: 'SUCCEEDED',
+        });
+      }
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['donations'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      queryClient.invalidateQueries({ queryKey: ['org-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-donations'] });
+      setIsModalOpen(false);
     },
   });
 
@@ -82,13 +146,22 @@ export const Donations: React.FC = () => {
           <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter">
             Gestión de <span className="text-primary">Donaciones</span>
           </h1>
-          <p className="text-gray-500 font-medium mt-2">Seguimiento de aportes y transacciones financieras.</p>
+          <p className="text-gray-500 font-medium mt-2">Seguimiento de aportes y transacciones financieras en tiempo real.</p>
         </div>
 
-        <button onClick={handleExportCsv} className="bg-white/5 text-white px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors border border-white/5">
-          <Download className="w-5 h-5" />
-          Exportar CSV
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={handleExportCsv} className="bg-white/5 text-white px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors border border-white/5">
+            <Download className="w-5 h-5" />
+            Exportar CSV
+          </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="bg-primary text-on-primary px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform shadow-lg shadow-primary/20"
+          >
+            <Plus className="w-5 h-5" />
+            Registrar Donación
+          </button>
+        </div>
       </header>
 
       <div className="flex flex-col lg:flex-row gap-4">
@@ -201,6 +274,133 @@ export const Donations: React.FC = () => {
       <footer className="flex items-center justify-between text-gray-600 text-xs font-bold uppercase tracking-widest">
         <p>Total registros: {filteredDonations.length}</p>
       </footer>
+
+      {/* Modal de Registro de Donación */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-xl glass-card rounded-[40px] border border-white/10 shadow-2xl overflow-hidden"
+            >
+              <div className="p-8 md:p-12">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h2 className="text-3xl font-black text-white uppercase italic">Registrar <span className="text-primary">Donación</span></h2>
+                    <p className="text-gray-400 text-xs mt-1">Ingresa un aporte con trazabilidad de campaña y donante.</p>
+                  </div>
+                  <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-white/5 rounded-full transition-colors text-gray-500">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="mb-6 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={loadSuggestion}
+                    className="text-[11px] font-bold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/30 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5"
+                  >
+                    <span>⚡ Cargar sugerencia real</span>
+                  </button>
+                </div>
+
+                <form 
+                  onSubmit={(e: any) => {
+                    e.preventDefault();
+                    createDonationMutation.mutate({
+                      amount: Number(amount),
+                      campaignId: selectedCampaignId || undefined,
+                      memberId: selectedMemberId || undefined,
+                      markAsSucceeded: confirmImmediately,
+                    });
+                  }} 
+                  className="space-y-6"
+                >
+                  <div>
+                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Monto ($ CLP)</label>
+                    <input 
+                      name="amount" 
+                      type="number" 
+                      required 
+                      min="1000" 
+                      step="500" 
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors text-xl font-bold" 
+                      placeholder="50000" 
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Campaña de Destino</label>
+                    <select 
+                      name="campaignId" 
+                      value={selectedCampaignId}
+                      onChange={(e) => setSelectedCampaignId(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
+                    >
+                      <option value="" className="bg-[#1c1b1b]">Aporte General (Sin campaña específica)</option>
+                      {campaigns.map((c: any) => (
+                        <option key={c.id} value={c.id} className="bg-[#1c1b1b]">{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Donante / Socio (Opcional)</label>
+                    <select 
+                      name="memberId" 
+                      value={selectedMemberId}
+                      onChange={(e) => setSelectedMemberId(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
+                    >
+                      <option value="" className="bg-[#1c1b1b]">Donante Anónimo / Externo</option>
+                      {membersData.map((m: any) => (
+                        <option key={m.id} value={m.id} className="bg-[#1c1b1b]">{m.firstName} {m.lastName} ({m.email})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <input 
+                      type="checkbox" 
+                      id="confirmImmediately" 
+                      name="confirmImmediately" 
+                      checked={confirmImmediately}
+                      onChange={(e) => setConfirmImmediately(e.target.checked)}
+                      className="w-5 h-5 rounded accent-primary cursor-pointer" 
+                    />
+                    <label htmlFor="confirmImmediately" className="text-xs font-bold text-gray-300 cursor-pointer">
+                      Confirmar e incrementar recaudación de inmediato (Completado)
+                    </label>
+                  </div>
+
+                  <button
+                    disabled={createDonationMutation.isPending}
+                    className="w-full bg-primary text-on-primary py-5 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform disabled:opacity-50"
+                  >
+                    {createDonationMutation.isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+                      <>
+                        <Check className="w-6 h-6" />
+                        Registrar Aporte
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

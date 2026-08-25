@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EarthBackground } from '../components/Background/EarthBackground';
 import { 
@@ -10,7 +10,9 @@ import {
   PawPrint, 
   Compass, 
   ShieldCheck, 
-  CheckCircle2
+  CheckCircle2,
+  Heart,
+  Check
 } from 'lucide-react';
 export const LandingPage: React.FC = () => {
   const [showDemoModal, setShowDemoModal] = React.useState(false);
@@ -18,6 +20,8 @@ export const LandingPage: React.FC = () => {
   const [demoSubmitting, setDemoSubmitting] = React.useState(false);
   const [demoError, setDemoError] = React.useState<string | null>(null);
   const [demoForm, setDemoForm] = React.useState({ name: '', email: '', org: '', phone: '' });
+  const [platformMenuOpen, setPlatformMenuOpen] = useState(false);
+  const [selectedModuleTab, setSelectedModuleTab] = useState(0);
 
   // Live stats from backend (replaces hardcoded mock values)
   const [stats, setStats] = React.useState({
@@ -99,13 +103,109 @@ export const LandingPage: React.FC = () => {
             </Link>
 
             {/* Navigation Links */}
-            <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#bec7d3]">
+            <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#bec7d3]">
               <a href="#hero" className="hover:text-[#00a8ff] transition-colors">Inicio</a>
-              <a href="#modules" className="hover:text-[#00a8ff] transition-colors">Plataforma</a>
+              
+              {/* Dropdown Menu Plataforma */}
+              <div 
+                className="relative"
+                onMouseEnter={() => setPlatformMenuOpen(true)}
+                onMouseLeave={() => setPlatformMenuOpen(false)}
+              >
+                <button
+                  onClick={() => setPlatformMenuOpen(!platformMenuOpen)}
+                  className="flex items-center gap-1 hover:text-[#00a8ff] transition-colors py-2 group"
+                >
+                  <span className="font-semibold text-white group-hover:text-[#00a8ff]">Plataforma</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${platformMenuOpen ? 'rotate-180 text-[#00a8ff]' : 'text-gray-400'}`} />
+                </button>
+
+                {platformMenuOpen && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-96 rounded-3xl bg-[#141414]/95 backdrop-blur-2xl border border-white/10 p-4 shadow-2xl shadow-black/80 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="text-[10px] font-black uppercase tracking-widest text-[#00d4aa] px-3 py-1 mb-2">
+                      Módulos del Sistema
+                    </div>
+                    <div className="space-y-1">
+                      <a
+                        href="#modules"
+                        onClick={() => { setSelectedModuleTab(0); setPlatformMenuOpen(false); }}
+                        className="flex items-start gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors group"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-[#00a8ff]/10 border border-[#00a8ff]/20 flex items-center justify-center text-[#00a8ff] shrink-0 group-hover:scale-105 transition-transform">
+                          <DollarSign className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-white text-sm font-bold group-hover:text-[#00a8ff] transition-colors">Recaudación & Donaciones</p>
+                          <p className="text-gray-400 text-xs leading-snug">Pasarelas de pago, aportes recurrentes e informes financieros.</p>
+                        </div>
+                      </a>
+
+                      <a
+                        href="#modules"
+                        onClick={() => { setSelectedModuleTab(1); setPlatformMenuOpen(false); }}
+                        className="flex items-start gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors group"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-[#00d4aa]/10 border border-[#00d4aa]/20 flex items-center justify-center text-[#00d4aa] shrink-0 group-hover:scale-105 transition-transform">
+                          <Users className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-white text-sm font-bold group-hover:text-[#00d4aa] transition-colors">Gestión de Socios</p>
+                          <p className="text-gray-400 text-xs leading-snug">Directorio de voluntarios, socios con validación de RUT chileno.</p>
+                        </div>
+                      </a>
+
+                      <a
+                        href="#modules"
+                        onClick={() => { setSelectedModuleTab(2); setPlatformMenuOpen(false); }}
+                        className="flex items-start gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors group"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-[#ffb877]/10 border border-[#ffb877]/20 flex items-center justify-center text-[#ffb877] shrink-0 group-hover:scale-105 transition-transform">
+                          <PawPrint className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-white text-sm font-bold group-hover:text-[#ffb877] transition-colors">Biblioteca de Especies</p>
+                          <p className="text-gray-400 text-xs leading-snug">Catálogo biológico, fichas UICN y fotografías de biodiversidad.</p>
+                        </div>
+                      </a>
+
+                      <a
+                        href="#modules"
+                        onClick={() => { setSelectedModuleTab(3); setPlatformMenuOpen(false); }}
+                        className="flex items-start gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors group"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-[#00a8ff]/10 border border-[#00a8ff]/20 flex items-center justify-center text-[#00a8ff] shrink-0 group-hover:scale-105 transition-transform">
+                          <Compass className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-white text-sm font-bold group-hover:text-[#00a8ff] transition-colors">Misiones de Campo</p>
+                          <p className="text-gray-400 text-xs leading-snug">Coordinación de cuadrillas con sincronización offline en terreno.</p>
+                        </div>
+                      </a>
+
+                      <Link
+                        to="/portal"
+                        onClick={() => setPlatformMenuOpen(false)}
+                        className="flex items-start gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors group border-t border-white/5 mt-1"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 shrink-0 group-hover:scale-105 transition-transform">
+                          <Heart className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-white text-sm font-bold group-hover:text-pink-400 transition-colors flex items-center gap-1.5">
+                            Portal Donante <span className="text-[9px] bg-pink-500/20 text-pink-300 px-1.5 py-0.5 rounded font-black uppercase">Exclusivo</span>
+                          </p>
+                          <p className="text-gray-400 text-xs leading-snug">Descarga de certificados PDF y gestión de suscripciones.</p>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <a href="#how-it-works" className="hover:text-[#00a8ff] transition-colors">Cómo funciona</a>
               <a href="#why-us" className="hover:text-[#00a8ff] transition-colors">Por qué Impacta+</a>
               <a href="#impact" className="hover:text-[#00a8ff] transition-colors">Impacto</a>
-</nav>
+            </nav>
 
             {/* Actions */}
             <div className="flex items-center gap-4">
@@ -241,12 +341,251 @@ export const LandingPage: React.FC = () => {
 <section id="modules" className="py-24 bg-[#131313]/60 backdrop-blur-md border-b border-[#2a2a2a]/40">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-16">
-              <h2 className="text-xs uppercase font-bold tracking-widest text-[#00d4aa] mb-3">Módulos Integrados</h2>
-              <h3 className="text-3xl md:text-4xl font-bold text-white font-headline">
-                Todo lo que tu ONG necesita en un solo lugar
+              <h2 className="text-xs uppercase font-bold tracking-widest text-[#00d4aa] mb-3">Plataforma Modular</h2>
+              <h3 className="text-3xl md:text-5xl font-extrabold text-white font-headline">
+                Todo lo que tu ONG necesita en un solo ecosistema
               </h3>
+              <p className="text-[#bec7d3] text-base mt-4">
+                Explora cada módulo diseñado con estándares de trazabilidad, coordinación en terreno y rigor multi-tenant.
+              </p>
             </div>
 
+            {/* Module Selector Tabs */}
+            <div className="flex flex-wrap justify-center gap-2 mb-12 p-1.5 rounded-2xl bg-[#1c1b1b]/80 border border-[#2a2a2a] max-w-4xl mx-auto">
+              {[
+                { id: 0, label: 'Recaudación & Donaciones', icon: DollarSign, color: 'text-[#00a8ff]' },
+                { id: 1, label: 'Gestión de Socios', icon: Users, color: 'text-[#00d4aa]' },
+                { id: 2, label: 'Biblioteca de Especies', icon: PawPrint, color: 'text-[#ffb877]' },
+                { id: 3, label: 'Misiones de Campo', icon: Compass, color: 'text-[#00a8ff]' },
+                { id: 4, label: 'Portal del Donante', icon: Heart, color: 'text-pink-400' },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const active = selectedModuleTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSelectedModuleTab(tab.id)}
+                    className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs font-bold transition-all ${
+                      active 
+                        ? 'bg-white/10 text-white shadow-lg border border-white/15' 
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${tab.color}`} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Interactive Module Highlight Box */}
+            <div className="bg-[#1c1b1b]/90 border border-[#2a2a2a] rounded-3xl p-8 md:p-12 mb-16 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#00a8ff]/10 via-[#00d4aa]/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+              {selectedModuleTab === 0 && (
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div className="space-y-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00a8ff]/10 text-[#00a8ff] text-xs font-bold uppercase tracking-wider border border-[#00a8ff]/20">
+                      <DollarSign className="w-3.5 h-3.5" />
+                      Módulo Financiero & Pasarelas
+                    </div>
+                    <h4 className="text-3xl font-bold text-white font-headline">Recaudación y Aportes Idempotentes</h4>
+                    <p className="text-[#bec7d3] text-sm leading-relaxed">
+                      Control total de ingresos con trazabilidad peso a peso. Permite donaciones directas, campañas con metas en tiempo real, suscripciones recurrentes y emisión de recibos en PDF.
+                    </p>
+                    <ul className="space-y-2.5 text-xs text-gray-300 font-medium">
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#00d4aa]" /> Integración con Webpay Plus y Flow</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#00d4aa]" /> Transacciones con confirmación atómica e idempotencia</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#00d4aa]" /> Exportación de libros contables en CSV con 1 clic</li>
+                    </ul>
+                    <div className="pt-4 flex gap-4">
+                      <Link to="/login" className="px-6 py-3 rounded-xl bg-[#00a8ff] text-[#003352] font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-2">
+                        <span>Ver en Panel</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="bg-[#0e0e0e] border border-white/10 rounded-2xl p-6 space-y-4 font-mono text-xs shadow-inner">
+                    <div className="flex justify-between items-center text-gray-400 border-b border-white/5 pb-3">
+                      <span>Transacción #tx_mp_998123</span>
+                      <span className="text-[#00d4aa] font-bold bg-[#00d4aa]/10 px-2 py-0.5 rounded">COMPLETADO</span>
+                    </div>
+                    <div className="flex justify-between text-white text-base font-bold font-sans">
+                      <span>Reforestación Bosque Nativo</span>
+                      <span className="text-[#00d4aa] font-mono">+$250.000 CLP</span>
+                    </div>
+                    <p className="text-gray-500 font-sans text-xs">Donante: Camila Valenzuela · Rut: 18.452.391-K</p>
+                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] w-3/4" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedModuleTab === 1 && (
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div className="space-y-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00d4aa]/10 text-[#00d4aa] text-xs font-bold uppercase tracking-wider border border-[#00d4aa]/20">
+                      <Users className="w-3.5 h-3.5" />
+                      Padrón & Voluntariado
+                    </div>
+                    <h4 className="text-3xl font-bold text-white font-headline">Directorio de Miembros con RUT</h4>
+                    <p className="text-[#bec7d3] text-sm leading-relaxed">
+                      Gestión unificada de socios y cuadrillas voluntarias. Validación automática de RUT con algoritmo Módulo 11 chileno, historial de aportes y participación en terreno.
+                    </p>
+                    <ul className="space-y-2.5 text-xs text-gray-300 font-medium">
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#00d4aa]" /> Validación estricta de formato RUT (con y sin puntos)</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#00d4aa]" /> Control de estado activo/inactivo y roles por tenant</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#00d4aa]" /> Búsqueda y filtrado instantáneo por nombre o email</li>
+                    </ul>
+                    <div className="pt-4 flex gap-4">
+                      <Link to="/login" className="px-6 py-3 rounded-xl bg-[#00d4aa] text-[#003352] font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-2">
+                        <span>Explorar Directorio</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="bg-[#0e0e0e] border border-white/10 rounded-2xl p-6 space-y-3 shadow-inner">
+                    <div className="flex items-center gap-4 p-3 rounded-xl bg-white/5 border border-white/5">
+                      <div className="w-10 h-10 rounded-xl bg-[#00d4aa]/20 flex items-center justify-center text-[#00d4aa] font-bold text-sm">CV</div>
+                      <div className="flex-1">
+                        <p className="text-white font-bold text-sm">Camila Valenzuela</p>
+                        <p className="text-gray-400 text-xs font-mono">18.452.391-K · camila@outdoors.cl</p>
+                      </div>
+                      <span className="text-[10px] bg-[#00d4aa]/15 text-[#00d4aa] px-2 py-0.5 rounded font-bold">ACTIVO</span>
+                    </div>
+                    <div className="flex items-center gap-4 p-3 rounded-xl bg-white/5 border border-white/5">
+                      <div className="w-10 h-10 rounded-xl bg-[#00a8ff]/20 flex items-center justify-center text-[#00a8ff] font-bold text-sm">GP</div>
+                      <div className="flex-1">
+                        <p className="text-white font-bold text-sm">Gonzalo Pérez</p>
+                        <p className="text-gray-400 text-xs font-mono">15.223.109-4 · gonzalo@impacta.cl</p>
+                      </div>
+                      <span className="text-[10px] bg-[#00a8ff]/15 text-[#00a8ff] px-2 py-0.5 rounded font-bold">SOCIO</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedModuleTab === 2 && (
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div className="space-y-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ffb877]/10 text-[#ffb877] text-xs font-bold uppercase tracking-wider border border-[#ffb877]/20">
+                      <PawPrint className="w-3.5 h-3.5" />
+                      Inventario Ecológico
+                    </div>
+                    <h4 className="text-3xl font-bold text-white font-headline">Biblioteca de Especies y Biodiversidad</h4>
+                    <p className="text-[#bec7d3] text-sm leading-relaxed">
+                      Catálogo centralizado de flora y fauna protegida. Fichas taxonómicas con nombre científico, estado de amenaza UICN y registro fotográfico en alta resolución.
+                    </p>
+                    <ul className="space-y-2.5 text-xs text-gray-300 font-medium">
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#ffb877]" /> Clasificación UICN: Amenazada, En Peligro, Activa</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#ffb877]" /> Subida y almacenamiento seguro de imágenes de campo</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#ffb877]" /> Asociación directa a campañas y áreas protegidas</li>
+                    </ul>
+                    <div className="pt-4 flex gap-4">
+                      <Link to="/login" className="px-6 py-3 rounded-xl bg-[#ffb877] text-[#003352] font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-2">
+                        <span>Ver Especies</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="bg-[#0e0e0e] border border-white/10 rounded-2xl p-6 space-y-4 shadow-inner">
+                    <div className="flex justify-between items-center">
+                      <span className="text-white font-bold text-base">Zorro de Darwin (Chilote)</span>
+                      <span className="text-[10px] bg-red-500/20 text-red-400 font-bold px-2 py-0.5 rounded uppercase">En Peligro</span>
+                    </div>
+                    <p className="text-gray-400 text-xs italic">Lycalopex fulvipes · Cánido endémico del sur de Chile</p>
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/5 text-xs text-gray-300">
+                      Monitoreo fotográfico activo en 12 cuadrículas de la serranía costera.
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedModuleTab === 3 && (
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div className="space-y-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00a8ff]/10 text-[#00a8ff] text-xs font-bold uppercase tracking-wider border border-[#00a8ff]/20">
+                      <Compass className="w-3.5 h-3.5" />
+                      Operaciones en Terreno
+                    </div>
+                    <h4 className="text-3xl font-bold text-white font-headline">Misiones de Campo Offline-First</h4>
+                    <p className="text-[#bec7d3] text-sm leading-relaxed">
+                      Planificación logística diseñada para zonas sin conectividad. El equipo actualiza tareas en terreno guardando en IndexedDB y se sincroniza automáticamente al recuperar señal.
+                    </p>
+                    <ul className="space-y-2.5 text-xs text-gray-300 font-medium">
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#00d4aa]" /> Base de datos local en navegador (IndexedDB)</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#00d4aa]" /> Detección de conectividad y cola de sincronización</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-[#00d4aa]" /> Checklists operativos y asignación a miembros</li>
+                    </ul>
+                    <div className="pt-4 flex gap-4">
+                      <Link to="/login" className="px-6 py-3 rounded-xl bg-[#00a8ff] text-[#003352] font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-2">
+                        <span>Ver Misiones</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="bg-[#0e0e0e] border border-white/10 rounded-2xl p-6 space-y-3 shadow-inner">
+                    <div className="flex justify-between items-center pb-2 border-b border-white/5">
+                      <span className="text-white font-bold text-sm">Reforestación Cuenca Biobío</span>
+                      <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-bold">Offline Ready</span>
+                    </div>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center gap-2 text-green-400">
+                        <Check className="w-4 h-4" /> <span>Preparación de compost y sustrato (3/3)</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-green-400">
+                        <Check className="w-4 h-4" /> <span>Plantación de 200 quillayes</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <div className="w-4 h-4 rounded border border-gray-600" /> <span>Cierre perimetral y riego por goteo</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedModuleTab === 4 && (
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div className="space-y-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 text-pink-400 text-xs font-bold uppercase tracking-wider border border-pink-500/20">
+                      <Heart className="w-3.5 h-3.5" />
+                      Experiencia del Donante
+                    </div>
+                    <h4 className="text-3xl font-bold text-white font-headline">Portal Autogestionable para Donantes</h4>
+                    <p className="text-[#bec7d3] text-sm leading-relaxed">
+                      Espacio dedicado para que los aportantes revisen su historial, descarguen certificados y recibos tributarios en PDF y gestionen la recurrencia de sus suscripciones de forma autónoma.
+                    </p>
+                    <ul className="space-y-2.5 text-xs text-gray-300 font-medium">
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-pink-400" /> Generación de recibos PDF oficiales en tiempo real</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-pink-400" /> Pausar o cancelar recurrencia sin fricciones</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-pink-400" /> Vista transparente del impacto directo en cada campaña</li>
+                    </ul>
+                    <div className="pt-4 flex gap-4">
+                      <Link to="/portal" className="px-6 py-3 rounded-xl bg-pink-500 text-white font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-2">
+                        <span>Ir al Portal Donante</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="bg-[#0e0e0e] border border-white/10 rounded-2xl p-6 space-y-4 shadow-inner">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-white font-bold">Certificado de Donación #REC-2026-08</span>
+                      <span className="text-xs text-pink-400 font-bold">PDF Listo</span>
+                    </div>
+                    <div className="p-4 rounded-xl bg-pink-500/5 border border-pink-500/20 flex justify-between items-center">
+                      <div>
+                        <p className="text-white text-sm font-bold">$150.000 CLP</p>
+                        <p className="text-gray-400 text-xs">Protección del Zorro Chilote</p>
+                      </div>
+                      <span className="text-xs font-bold text-pink-300 bg-pink-500/20 px-3 py-1.5 rounded-lg">Descargar</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Grid 4 Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Card 1 */}
               <div className="p-8 rounded-2xl bg-[#1c1b1b]/80 backdrop-blur-md border border-[#2a2a2a] hover:border-[#00a8ff]/50 transition-all group flex flex-col justify-between">
@@ -256,14 +595,14 @@ export const LandingPage: React.FC = () => {
                   </div>
                   <h4 className="text-xl font-bold text-white mb-3 font-headline">Recaudación & Donaciones</h4>
                   <p className="text-sm text-[#bec7d3] leading-relaxed">
-                    Integración con pasarelas de pago (ImpactaPay), seguimiento en tiempo real de aportes únicos y recurrentes.
+                    Integración con pasarelas de pago, seguimiento en tiempo real de aportes únicos y recurrentes.
                   </p>
                 </div>
                 <button
-                  onClick={() => setShowDemoModal(true)}
+                  onClick={() => setSelectedModuleTab(0)}
                   className="mt-8 pt-4 border-t border-[#2a2a2a]/50 text-xs font-semibold text-[#00a8ff] flex items-center gap-1 hover:underline text-left"
                 >
-                  <span>Ver módulo en acción</span>
+                  <span>Explorar módulo</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -280,10 +619,10 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => setShowDemoModal(true)}
+                  onClick={() => setSelectedModuleTab(1)}
                   className="mt-8 pt-4 border-t border-[#2a2a2a]/50 text-xs font-semibold text-[#00d4aa] flex items-center gap-1 hover:underline text-left"
                 >
-                  <span>Ver módulo en acción</span>
+                  <span>Explorar módulo</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -300,10 +639,10 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => setShowDemoModal(true)}
+                  onClick={() => setSelectedModuleTab(2)}
                   className="mt-8 pt-4 border-t border-[#2a2a2a]/50 text-xs font-semibold text-[#ffb877] flex items-center gap-1 hover:underline text-left"
                 >
-                  <span>Ver módulo en acción</span>
+                  <span>Explorar módulo</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -320,10 +659,10 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => setShowDemoModal(true)}
+                  onClick={() => setSelectedModuleTab(3)}
                   className="mt-8 pt-4 border-t border-[#2a2a2a]/50 text-xs font-semibold text-[#00a8ff] flex items-center gap-1 hover:underline text-left"
                 >
-                  <span>Ver módulo en acción</span>
+                  <span>Explorar módulo</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -507,12 +846,28 @@ export const LandingPage: React.FC = () => {
               </div>
             ) : (
               <div>
-                <div className="flex items-center gap-3 mb-6">
-                  <img src="/logo.png" alt="Impacta+" className="w-8 h-8 object-contain" />
-                  <h3 className="text-2xl font-bold text-white font-headline">Solicitar Demo</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <img src="/logo.png" alt="Impacta+" className="w-8 h-8 object-contain" />
+                    <h3 className="text-2xl font-bold text-white font-headline">Solicitar Demo</h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDemoForm({
+                        name: 'Rodrigo Henríquez Valdés',
+                        org: 'Fundación Conservación Cordillera de la Costa',
+                        email: 'rodrigo.henriquez@cordilleracosta.cl',
+                        phone: '+56 9 9876 5432'
+                      });
+                    }}
+                    className="text-[10px] font-bold text-[#00d4aa] bg-[#00d4aa]/10 hover:bg-[#00d4aa]/20 border border-[#00d4aa]/30 px-2.5 py-1 rounded-lg transition-colors"
+                  >
+                    ⚡ Llenar caso sugerido
+                  </button>
                 </div>
                 <p className="text-xs text-[#bec7d3] mb-6">
-                  Completa tus datos para agendar una demostración personalizada del sistema para tu ONG.
+                  Completa tus datos o usa el caso sugerido para agendar una demostración personalizada del sistema para tu ONG.
                 </p>
 
                 <form onSubmit={handleDemoSubmit} className="space-y-4">
@@ -569,13 +924,24 @@ export const LandingPage: React.FC = () => {
                     </div>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={demoSubmitting}
-                    className="w-full py-4 mt-2 rounded-xl bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {demoSubmitting ? 'Enviando…' : 'Enviar Solicitud'}
-                  </button>
+                  <div className="pt-2 space-y-3">
+                    <button
+                      type="submit"
+                      disabled={demoSubmitting}
+                      className="w-full py-4 rounded-xl bg-gradient-to-r from-[#00a8ff] to-[#00d4aa] text-[#003352] font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {demoSubmitting ? 'Enviando…' : 'Enviar Solicitud de Demostración'}
+                    </button>
+
+                    <Link
+                      to="/login"
+                      onClick={() => setShowDemoModal(false)}
+                      className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-xs hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <span>O ingresar directo al Entorno Demo (demo / admin123)</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-[#00d4aa]" />
+                    </Link>
+                  </div>
                 </form>
               </div>
             )}

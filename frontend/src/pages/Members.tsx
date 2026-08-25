@@ -17,15 +17,33 @@ export const Members: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
+  const [formError, setFormError] = useState<string | null>(null);
+  
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [rut, setRut] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+
   const queryClient = useQueryClient();
 
-  const { data: members = [], isLoading } = useQuery({
+  const loadSuggestion = () => {
+    setFirstName('Ignacio');
+    setLastName('Tapia Bravo');
+    setRut('16.743.892-5');
+    setPhone('+56 9 7432 1098');
+    setEmail('ignacio.tapia@conservacion.cl');
+  };
+
+  const { data: membersData = [], isLoading } = useQuery({
     queryKey: ['members'],
     queryFn: async () => {
       const { data } = await client.get('/members');
       return data;
     },
   });
+
+  const members = Array.isArray(membersData) ? membersData : (membersData?.items || []);
 
   const createMutation = useMutation({
     mutationFn: async (newMember: any) => {
@@ -35,14 +53,26 @@ export const Members: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
       setIsModalOpen(false);
+      setFormError(null);
+      setFirstName('');
+      setLastName('');
+      setRut('');
+      setPhone('');
+      setEmail('');
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || 'Error al registrar miembro';
+      setFormError(Array.isArray(msg) ? msg.join(', ') : msg);
     },
   });
 
   const filteredMembers = members.filter((m: any) => {
+    const fullName = `${m.firstName || ''} ${m.lastName || ''}`.toLowerCase();
     const matchesSearch = 
-      `${m.firstName} ${m.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
-      m.email.toLowerCase().includes(search.toLowerCase());
-    const matchesType = typeFilter === 'ALL' || m.type === typeFilter;
+      fullName.includes(search.toLowerCase()) ||
+      (m.email && m.email.toLowerCase().includes(search.toLowerCase())) ||
+      (m.rut && m.rut.toLowerCase().includes(search.toLowerCase()));
+    const matchesType = typeFilter === 'ALL' || (m.status === typeFilter);
     return matchesSearch && matchesType;
   });
 
@@ -78,7 +108,7 @@ export const Members: React.FC = () => {
         </div>
 
         <div className="flex gap-2 p-1 bg-surface-container-low border border-white/5 rounded-2xl">
-          {['ALL', 'VOLUNTEER', 'PARTNER'].map((t) => (
+          {['ALL', 'ACTIVE', 'INACTIVE'].map((t) => (
             <button
               key={t}
               onClick={() => setTypeFilter(t)}
@@ -86,7 +116,7 @@ export const Members: React.FC = () => {
                 typeFilter === t ? 'bg-secondary text-on-secondary shadow-lg shadow-secondary/20' : 'text-gray-500 hover:text-white'
               }`}
             >
-              {t === 'ALL' ? 'Todos' : t === 'VOLUNTEER' ? 'Voluntarios' : 'Socios'}
+              {t === 'ALL' ? 'Todos' : t === 'ACTIVE' ? 'Activos' : 'Inactivos'}
             </button>
           ))}
         </div>
@@ -95,6 +125,11 @@ export const Members: React.FC = () => {
       {isLoading ? (
         <div className="flex justify-center p-20">
           <Loader2 className="w-10 h-10 animate-spin text-secondary" />
+        </div>
+      ) : members.length === 0 ? (
+        <div className="glass-card rounded-3xl p-12 text-center border border-white/5 space-y-3">
+          <p className="text-gray-400 font-bold">No hay miembros registrados aún.</p>
+          <p className="text-gray-500 text-sm">Registra tu primer socio o voluntario con el botón superior.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -115,14 +150,15 @@ export const Members: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-bold text-white truncate">{m.firstName} {m.lastName}</h3>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${
-                      m.type === 'VOLUNTEER' ? 'bg-primary/10 text-primary' : 'bg-tertiary/10 text-tertiary'
-                    }`}>
-                      {m.type === 'VOLUNTEER' ? 'Voluntario' : 'Socio'}
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter bg-secondary/10 text-secondary">
+                      {m.status === 'ACTIVE' ? 'Activo' : m.status}
                     </span>
                   </div>
 
                   <div className="space-y-1.5">
+                    {m.rut && (
+                      <p className="text-xs font-mono text-gray-400">RUT: {m.rut}</p>
+                    )}
                     <div className="flex items-center gap-2 text-gray-500">
                       <Mail className="w-3.5 h-3.5" />
                       <span className="text-xs truncate">{m.email}</span>
@@ -138,9 +174,11 @@ export const Members: React.FC = () => {
                   <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
                     <div className="flex items-center gap-1.5 text-[10px] font-black text-gray-600 uppercase">
                       <ShieldCheck className="w-3 h-3 text-secondary" />
-                      Activo
+                      Verificado
                     </div>
-                    <button className="text-[10px] font-black text-primary uppercase hover:underline">Ver Perfil</button>
+                    <span className="text-[10px] font-bold text-gray-500">
+                      {new Date(m.createdAt).toLocaleDateString('es-CL')}
+                    </span>
                   </div>
                 </div>
               </motion.div>
@@ -157,7 +195,7 @@ export const Members: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => { setIsModalOpen(false); setFormError(null); }}
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             />
             <motion.div
@@ -167,23 +205,41 @@ export const Members: React.FC = () => {
               className="relative w-full max-w-xl glass-card rounded-[40px] border border-white/10 shadow-2xl overflow-hidden"
             >
               <div className="p-8 md:p-12">
-                <div className="flex justify-between items-center mb-10">
-                  <h2 className="text-3xl font-black text-white uppercase italic">Registrar <span className="text-secondary">Miembro</span></h2>
-                  <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-white/5 rounded-full transition-colors text-gray-500">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h2 className="text-3xl font-black text-white uppercase italic">Registrar <span className="text-secondary">Miembro</span></h2>
+                    <p className="text-gray-400 text-xs mt-1">Incorpora un nuevo voluntario o socio al padrón.</p>
+                  </div>
+                  <button onClick={() => { setIsModalOpen(false); setFormError(null); }} className="p-3 hover:bg-white/5 rounded-full transition-colors text-gray-500">
                     <X className="w-6 h-6" />
                   </button>
                 </div>
 
+                <div className="mb-6 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={loadSuggestion}
+                    className="text-[11px] font-bold text-secondary bg-secondary/10 hover:bg-secondary/20 border border-secondary/30 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5"
+                  >
+                    <span>⚡ Cargar sugerencia real</span>
+                  </button>
+                </div>
+
+                {formError && (
+                  <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                    {formError}
+                  </div>
+                )}
+
                 <form 
                   onSubmit={(e: any) => {
                     e.preventDefault();
-                    const formData = new FormData(e.target);
                     createMutation.mutate({
-                      firstName: formData.get('firstName'),
-                      lastName: formData.get('lastName'),
-                      email: formData.get('email'),
-                      phone: formData.get('phone'),
-                      type: formData.get('type'),
+                      firstName,
+                      lastName,
+                      email,
+                      phone: phone || undefined,
+                      rut: rut ? rut.trim() : undefined,
                     });
                   }} 
                   className="space-y-6"
@@ -191,29 +247,60 @@ export const Members: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Nombres</label>
-                      <input name="firstName" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
+                      <input 
+                        name="firstName" 
+                        required 
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" 
+                        placeholder="Ej: Ignacio" 
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Apellidos</label>
-                      <input name="lastName" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
+                      <input 
+                        name="lastName" 
+                        required 
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" 
+                        placeholder="Ej: Tapia Bravo" 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">RUT (Opcional)</label>
+                      <input 
+                        name="rut" 
+                        value={rut}
+                        onChange={(e) => setRut(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors font-mono text-sm" 
+                        placeholder="16.743.892-5" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Teléfono</label>
+                      <input 
+                        name="phone" 
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" 
+                        placeholder="+56 9 7432 1098" 
+                      />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Email</label>
-                    <input name="email" type="email" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Teléfono</label>
-                      <input name="phone" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Tipo</label>
-                      <select name="type" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 appearance-none">
-                        <option value="VOLUNTEER" className="bg-surface">Voluntario</option>
-                        <option value="PARTNER" className="bg-surface">Socio</option>
-                      </select>
-                    </div>
+                    <input 
+                      name="email" 
+                      type="email" 
+                      required 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" 
+                      placeholder="ignacio.tapia@conservacion.cl" 
+                    />
                   </div>
 
                   <button

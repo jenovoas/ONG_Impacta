@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Building2,
   Activity,
+  Heart,
 } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import { clsx, type ClassValue } from 'clsx';
@@ -78,8 +79,6 @@ const navGroups: NavGroup[] = [
     ],
   },
 ];
-
-const supportItems: NavItem[] = [];
 
 // Slug paths that belong to a group (so we auto-open that group when active)
 const groupsByPath: Record<string, string> = {};
@@ -162,23 +161,21 @@ export const Sidebar: React.FC = () => {
           );
         })}
 
-        {/* Support section */}
+        {/* Portal Donante Direct Link */}
         <div className="mt-4 pt-4 border-t border-white/5">
-          {supportItems.map((it) => (
-            <NavLink
-              key={it.to}
-              to={it.to}
-              className={({ isActive }) => cn(
-                'flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm',
-                isActive
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-gray-500 hover:text-white hover:bg-white/5'
-              )}
-            >
-              <it.icon className="w-4 h-4" />
-              <span className="font-medium">{it.label}</span>
-            </NavLink>
-          ))}
+          <NavLink
+            to="/portal"
+            className={({ isActive }) => cn(
+              'flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm font-bold',
+              isActive
+                ? 'bg-pink-500/15 text-pink-400 border border-pink-500/30'
+                : 'text-gray-400 hover:text-pink-400 hover:bg-pink-500/10'
+            )}
+          >
+            <Heart className="w-4 h-4 text-pink-400" />
+            <span className="flex-1">Portal Donante</span>
+            <span className="text-[9px] bg-pink-500/20 text-pink-300 px-1.5 py-0.5 rounded font-black uppercase">Auto</span>
+          </NavLink>
         </div>
       </nav>
 

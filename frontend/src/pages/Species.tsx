@@ -163,6 +163,17 @@ export const Species: React.FC = () => {
 const SpeciesForm = ({ onSubmit, loading }: any) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [commonName, setCommonName] = useState('');
+  const [scientificName, setScientificName] = useState('');
+  const [status, setStatus] = useState('THREATENED');
+  const [description, setDescription] = useState('');
+
+  const loadSuggestion = () => {
+    setCommonName('Pudú del Sur');
+    setScientificName('Pudu puda');
+    setStatus('THREATENED');
+    setDescription('Cérvido más pequeño del mundo, endémico de los bosques templados australes de Chile. Especie amenazada por la degradación del sotobosque, atropellos y ataque de perros asilvestrados.');
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -174,29 +185,61 @@ const SpeciesForm = ({ onSubmit, loading }: any) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
+    const formData = new FormData();
+    formData.append('commonName', commonName);
+    if (scientificName) formData.append('scientificName', scientificName);
+    formData.append('status', status);
+    if (description) formData.append('description', description);
     if (file) formData.set('image', file);
     onSubmit(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={loadSuggestion}
+          className="text-[11px] font-bold text-secondary bg-secondary/10 hover:bg-secondary/20 border border-secondary/30 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5"
+        >
+          <span>⚡ Cargar sugerencia real</span>
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-6">
           <div>
             <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">Nombre Común</label>
-            <input name="commonName" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
+            <input 
+              name="commonName" 
+              required 
+              value={commonName}
+              onChange={(e) => setCommonName(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" 
+              placeholder="Ej: Pudú del Sur"
+            />
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">Nombre Científico</label>
-            <input name="scientificName" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white italic focus:outline-none focus:border-secondary/50 transition-colors" />
+            <input 
+              name="scientificName" 
+              value={scientificName}
+              onChange={(e) => setScientificName(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white italic focus:outline-none focus:border-secondary/50 transition-colors" 
+              placeholder="Pudu puda"
+            />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">Estado</label>
-            <select name="status" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors appearance-none">
-              <option value="ACTIVE" className="bg-surface">Activa / Saludable</option>
-              <option value="THREATENED" className="bg-surface">Amenazada</option>
-              <option value="ENDANGERED" className="bg-surface">En Peligro</option>
+            <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">Estado UICN</label>
+            <select 
+              name="status" 
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors appearance-none"
+            >
+              <option value="ACTIVE" className="bg-[#1c1b1b]">Activa / Saludable</option>
+              <option value="THREATENED" className="bg-[#1c1b1b]">Amenazada / Vulnerable</option>
+              <option value="ENDANGERED" className="bg-[#1c1b1b]">En Peligro Crítico</option>
             </select>
           </div>
         </div>
@@ -224,7 +267,14 @@ const SpeciesForm = ({ onSubmit, loading }: any) => {
 
       <div className="space-y-2">
         <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">Descripción / Hábitat</label>
-        <textarea name="description" rows={3} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
+        <textarea 
+          name="description" 
+          rows={3} 
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" 
+          placeholder="Detalles ecológicos y amenazas principales..."
+        />
       </div>
 
       <button

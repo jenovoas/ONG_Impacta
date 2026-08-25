@@ -24,6 +24,11 @@ import { useMissionsSync } from '../lib/useMissionsSync';
 
 export const Missions: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
+  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [description, setDescription] = useState('');
+
   const queryClient = useQueryClient();
 
   const { user } = useAuthStore();
@@ -31,6 +36,13 @@ export const Missions: React.FC = () => {
   const userId = user?.id;
 
   const { isOnline, pendingCount, isSyncing, syncPending, refreshPendingCount } = useMissionsSync();
+
+  const loadSuggestion = () => {
+    setTitle('Censo y Limpieza de Hábitat en Santuario Península de Hualpén');
+    setLocation('Hualpén / Biobío, Chile');
+    setStartDate(new Date().toISOString().slice(0, 10));
+    setDescription('Despliegue de cuadrilla para retiro de microbasurales en borde costero, colocación de señalética de anidación e inventario de aves migratorias.');
+  };
 
   const { data: missions = [], isLoading } = useQuery<Mission[]>({
     queryKey: ['missions', orgId, userId],
@@ -67,6 +79,9 @@ export const Missions: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missions', orgId, userId] });
       setIsModalOpen(false);
+      setTitle('');
+      setLocation('');
+      setDescription('');
     },
   });
 
@@ -156,26 +171,33 @@ export const Missions: React.FC = () => {
               className="relative w-full max-w-2xl glass-card rounded-[40px] border border-white/10 shadow-2xl overflow-hidden"
             >
               <div className="p-8 md:p-12">
-                <div className="flex justify-between items-center mb-10">
-                  <h2 className="text-3xl font-black text-white uppercase italic">Nueva <span className="text-primary">Misión</span></h2>
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h2 className="text-3xl font-black text-white uppercase italic">Nueva <span className="text-primary">Misión</span></h2>
+                    <p className="text-gray-400 text-xs mt-1">Coordina un operativo ecológico en terreno.</p>
+                  </div>
                   <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-white/5 rounded-full transition-colors text-gray-500">
                     <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="mb-6 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={loadSuggestion}
+                    className="text-[11px] font-bold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/30 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5"
+                  >
+                    <span>⚡ Cargar sugerencia real</span>
                   </button>
                 </div>
 
                 <form 
                   onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                     e.preventDefault();
-                    const formData = new FormData(e.currentTarget);
-                    const title = formData.get('title') as string;
-                    const location = formData.get('location') as string;
-                    const startDateVal = formData.get('startDate') as string;
-                    const description = formData.get('description') as string;
-
                     createMutation.mutate({
                       title,
                       location: location || undefined,
-                      startDate: startDateVal ? new Date(startDateVal).toISOString() : undefined,
+                      startDate: startDate ? new Date(startDate).toISOString() : undefined,
                       description: description || undefined,
                     });
                   }} 
@@ -184,20 +206,47 @@ export const Missions: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2">
                       <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Título de la Misión</label>
-                      <input name="title" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" />
+                      <input 
+                        name="title" 
+                        required 
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" 
+                        placeholder="Ej: Censo y Limpieza de Hábitat Costero"
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Ubicación</label>
-                      <input name="location" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" />
+                      <input 
+                        name="location" 
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" 
+                        placeholder="Región / Comuna"
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Fecha de Inicio</label>
-                      <input name="startDate" type="date" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" />
+                      <input 
+                        name="startDate" 
+                        type="date" 
+                        required 
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" 
+                      />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Objetivos / Descripción</label>
-                    <textarea name="description" rows={3} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" />
+                    <textarea 
+                      name="description" 
+                      rows={3} 
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" 
+                      placeholder="Instrucciones para cuadrillas y objetivos en terreno..."
+                    />
                   </div>
 
                   <button
