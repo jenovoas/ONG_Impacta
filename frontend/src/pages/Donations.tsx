@@ -1,41 +1,38 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Search, 
-  Download, 
-  ExternalLink,
-  CheckCircle2,
-  Clock,
-  XCircle,
-  Loader2,
-  Calendar
-} from 'lucide-react';
+import { Search, Download, CheckCircle2, Clock, XCircle, Loader2, Calendar } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import client from '../api/client';
-import { motion } from 'framer-motion';
+
+type Donation = {
+  id: string;
+  amount: number | string;
+  createdAt: string;
+  status: string;
+  member?: { firstName: string; lastName: string; email: string } | null;
+  campaign?: { name: string } | null;
+};
+
+const statuses: Record<string, { icon: LucideIcon; label: string; className: string }> = {
+  SUCCEEDED: { icon: CheckCircle2, label: 'Completada', className: 'bg-secondary/10 text-secondary' },
+  PENDING: { icon: Clock, label: 'Pendiente', className: 'bg-tertiary/10 text-tertiary' },
+  FAILED: { icon: XCircle, label: 'Fallida', className: 'bg-error/10 text-error' },
+};
 
 const StatusBadge = ({ status }: { status: string }) => {
-  const configs: any = {
-    SUCCEEDED: { icon: CheckCircle2, text: 'Completado', class: 'bg-secondary/10 text-secondary' },
-    PENDING: { icon: Clock, text: 'Pendiente', class: 'bg-tertiary/10 text-tertiary' },
-    FAILED: { icon: XCircle, text: 'Fallido', class: 'bg-error/10 text-error' },
-  };
-
-  const config = configs[status] || configs.PENDING;
+  const config = statuses[status] ?? statuses.PENDING;
   const Icon = config.icon;
-
-  return (
-    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${config.class}`}>
-      <Icon className="w-3 h-3" />
-      {config.text}
-    </div>
-  );
+  return <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${config.className}`}><Icon aria-hidden="true" className="h-3.5 w-3.5" />{config.label}</span>;
 };
+
+const formatCLP = (amount: number | string) => new Intl.NumberFormat('es-CL', {
+  style: 'currency', currency: 'CLP', maximumFractionDigits: 0,
+}).format(Number(amount));
 
 export const Donations: React.FC = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('ALL');
-
-  const { data: donations = [], isLoading } = useQuery({
+  const { data: donations = [], isLoading, isError } = useQuery<Donation[]>({
     queryKey: ['donations'],
     queryFn: async () => {
       const { data } = await client.get('/donations');
@@ -43,164 +40,102 @@ export const Donations: React.FC = () => {
     },
   });
 
-  const filteredDonations = donations.filter((d: any) => {
-    const donorName = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Donante Anónimo';
-    const donorEmail = d.member?.email || '';
-
-    const matchesSearch = 
-      donorName.toLowerCase().includes(search.toLowerCase()) ||
-      donorEmail.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.includes(search);
-    
-    const matchesFilter = filter === 'ALL' || d.status === filter;
-    
-    return matchesSearch && matchesFilter;
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredDonations = donations.filter((donation) => {
+    const donorName = donation.member ? `${donation.member.firstName} ${donation.member.lastName}` : 'Donante anónimo';
+    const matchesSearch = `${donorName} ${donation.member?.email ?? ''} ${donation.id}`.toLowerCase().includes(normalizedSearch);
+    return matchesSearch && (filter === 'ALL' || donation.status === filter);
   });
 
   const handleExportCsv = () => {
-    const rows = filteredDonations.map((d: any) => {
-      const donor = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Donante Anónimo';
-      const email = d.member?.email || '';
-      const campaign = d.campaign?.name || 'Aporte General';
-      return [d.id, donor, email, Number(d.amount).toString(), d.status, new Date(d.createdAt).toISOString(), campaign].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+    const rows = filteredDonations.map((donation) => {
+      const donor = donation.member ? `${donation.member.firstName} ${donation.member.lastName}` : 'Donante Anónimo';
+      const email = donation.member?.email || '';
+      const campaign = donation.campaign?.name || 'Aporte General';
+      return [donation.id, donor, email, Number(donation.amount).toString(), donation.status, new Date(donation.createdAt).toISOString(), campaign]
+        .map((value) => `"${String(value).replace(/"/g, '""')}"`).join(',');
     });
-    const header = ['id','donante','email','monto','estado','fecha','campaña'].join(',');
-    const csv = [header, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `donaciones-${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
+    const csv = [['id', 'donante', 'email', 'monto', 'estado', 'fecha', 'campaña'].join(','), ...rows].join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `donaciones-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
     URL.revokeObjectURL(url);
   };
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter">
-            Gestión de <span className="text-primary">Donaciones</span>
-          </h1>
-          <p className="text-gray-500 font-medium mt-2">Seguimiento de aportes y transacciones financieras.</p>
+          <p className="mb-3 text-sm font-semibold text-primary-fixed-dim">Operación</p>
+          <h1 className="font-headline text-3xl font-semibold tracking-tight text-white sm:text-4xl">Donaciones</h1>
+          <p className="mt-3 max-w-2xl text-on-surface-variant">Consulta los aportes recibidos y su estado de pago.</p>
         </div>
-
-        <button onClick={handleExportCsv} className="bg-white/5 text-white px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors border border-white/5">
-          <Download className="w-5 h-5" />
-          Exportar CSV
+        <button onClick={handleExportCsv} disabled={!filteredDonations.length} className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-surface-container-high px-5 py-3 font-medium text-white transition-colors hover:bg-surface-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50">
+          <Download aria-hidden="true" className="h-4 w-4" /> Exportar CSV
         </button>
       </header>
 
-      <div className="flex flex-col lg:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Buscar por donante, email o ID..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-surface-container-low border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-primary/50 transition-colors"
-          />
+      <section className="glass-card flex flex-col gap-3 rounded-2xl p-3 lg:flex-row" aria-label="Buscar y filtrar donaciones">
+        <div className="relative min-w-0 flex-1">
+          <Search aria-hidden="true" className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
+          <input type="search" aria-label="Buscar por donante, correo o identificador" placeholder="Buscar por donante, correo o identificador" value={search} onChange={(event) => setSearch(event.target.value)} className="w-full rounded-xl bg-surface-container-high py-3.5 pl-11 pr-4 text-white placeholder:text-on-surface-variant/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
         </div>
-
-        <div className="flex gap-2 p-1 bg-surface-container-low border border-white/5 rounded-2xl">
-          {['ALL', 'SUCCEEDED', 'PENDING', 'FAILED'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                filter === f ? 'bg-primary text-on-primary shadow-lg shadow-primary/20' : 'text-gray-500 hover:text-white'
-              }`}
-            >
-              {f === 'ALL' ? 'Todos' : f === 'SUCCEEDED' ? 'Exitosos' : f === 'PENDING' ? 'Pendientes' : 'Fallidos'}
+        <div className="flex gap-1 overflow-x-auto rounded-xl bg-surface-container-high p-1" role="group" aria-label="Filtrar por estado">
+          {['ALL', 'SUCCEEDED', 'PENDING', 'FAILED'].map((status) => (
+            <button key={status} aria-pressed={filter === status} onClick={() => setFilter(status)} className={`whitespace-nowrap rounded-lg px-3 py-2.5 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${filter === status ? 'bg-surface-bright text-white' : 'text-on-surface-variant hover:text-white'}`}>
+              {status === 'ALL' ? 'Todas' : statuses[status].label}
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      <div className="glass-card rounded-[32px] overflow-hidden border border-white/5">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-white/5 bg-white/5">
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Donante</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Monto</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Estado</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Fecha</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Campaña</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {isLoading ? (
+      <section className="glass-card overflow-hidden rounded-2xl" aria-label="Listado de donaciones">
+        {isLoading ? (
+          <div role="status" className="flex justify-center px-6 py-20"><Loader2 aria-hidden="true" className="h-7 w-7 animate-spin text-primary" /><span className="sr-only">Cargando donaciones</span></div>
+        ) : isError ? (
+          <p role="alert" className="px-6 py-12 text-center text-sm text-error">No pudimos cargar las donaciones. Vuelve a intentarlo.</p>
+        ) : filteredDonations.length === 0 ? (
+          <div className="px-6 py-12 text-center">
+            <p className="font-medium text-white">{donations.length ? 'No encontramos donaciones con esos filtros' : 'Aún no hay donaciones'}</p>
+            <p className="mt-1 text-sm text-on-surface-variant">{donations.length ? 'Prueba otra búsqueda o estado.' : 'Los aportes de tu organización aparecerán aquí.'}</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] text-left">
+              <thead className="bg-surface-container-high text-xs font-medium text-on-surface-variant">
                 <tr>
-                  <td colSpan={6} className="px-8 py-20 text-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
-                  </td>
+                  <th scope="col" className="px-5 py-4 sm:px-6">Donante</th>
+                  <th scope="col" className="px-5 py-4 sm:px-6">Monto</th>
+                  <th scope="col" className="px-5 py-4 sm:px-6">Estado</th>
+                  <th scope="col" className="px-5 py-4 sm:px-6">Fecha</th>
+                  <th scope="col" className="px-5 py-4 sm:px-6">Campaña</th>
                 </tr>
-              ) : filteredDonations.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-8 py-20 text-center text-gray-500 font-medium">
-                    No se encontraron donaciones con los filtros aplicados.
-                  </td>
-                </tr>
-              ) : (
-                filteredDonations.map((d: any) => {
-                  const name = d.member ? `${d.member.firstName} ${d.member.lastName}` : 'Donante Anónimo';
-                  const email = d.member?.email || 'N/A';
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {filteredDonations.map((donation) => {
+                  const name = donation.member ? `${donation.member.firstName} ${donation.member.lastName}` : 'Donante anónimo';
+                  const date = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium' }).format(new Date(donation.createdAt));
                   return (
-                    <motion.tr 
-                      key={d.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="hover:bg-white/[0.02] transition-colors group"
-                    >
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20">
-                            {name[0]}
-                          </div>
-                          <div>
-                            <p className="text-white font-bold text-sm">{name}</p>
-                            <p className="text-gray-500 text-xs">{email}</p>
-                          </div>
-                        </div>
+                    <tr key={donation.id} className="transition-colors hover:bg-surface-container-high/60">
+                      <td className="px-5 py-4 sm:px-6">
+                        <p className="font-medium text-white">{name}</p>
+                        <p className="mt-1 text-xs text-on-surface-variant">{donation.member?.email || 'Sin correo asociado'}</p>
                       </td>
-                      <td className="px-8 py-6">
-                        <p className="text-white font-black text-lg">${Number(d.amount).toLocaleString()}</p>
-                        <p className="text-gray-600 text-[10px] font-bold uppercase tracking-tighter">Pesos Chilenos</p>
-                      </td>
-                      <td className="px-8 py-6">
-                        <StatusBadge status={d.status} />
-                      </td>
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-2 text-gray-400">
-                          <Calendar className="w-4 h-4" />
-                          <span className="text-xs font-medium">{new Date(d.createdAt).toLocaleDateString()}</span>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">
-                          {d.campaign?.name || 'Aporte General'}
-                        </span>
-                      </td>
-                      <td className="px-8 py-6 text-right">
-                        <button className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-500 hover:text-white">
-                          <ExternalLink className="w-5 h-5" />
-                        </button>
-                      </td>
-                    </motion.tr>
+                      <td className="px-5 py-4 font-semibold text-white sm:px-6">{formatCLP(donation.amount)}</td>
+                      <td className="px-5 py-4 sm:px-6"><StatusBadge status={donation.status} /></td>
+                      <td className="px-5 py-4 text-sm text-on-surface-variant sm:px-6"><span className="inline-flex items-center gap-2"><Calendar aria-hidden="true" className="h-4 w-4" />{date}</span></td>
+                      <td className="px-5 py-4 text-sm text-on-surface-variant sm:px-6">{donation.campaign?.name || 'Aporte general'}</td>
+                    </tr>
                   );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <footer className="flex items-center justify-between text-gray-600 text-xs font-bold uppercase tracking-widest">
-        <p>Total registros: {filteredDonations.length}</p>
-      </footer>
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+      <p className="text-sm text-on-surface-variant">{filteredDonations.length} {filteredDonations.length === 1 ? 'donación' : 'donaciones'}</p>
     </div>
   );
 };

@@ -6,6 +6,19 @@ Documento autosuficiente: cualquier agente puede recoger este plan sin depender 
 
 ## 0. Estado actual (2026-08-24)
 
+### Seguimiento retomado (2026-10-10)
+
+El desarrollo se retoma desde `origin/main`; la pausa fue por disponibilidad de pagos del cliente, no porque el plan se considere descartado. El estado vigente de dominios e infraestructura está detallado en [AGENTS.md](AGENTS.md); esta sección conserva contexto histórico y no sustituye esa fuente.
+
+- **C1 — diseño del frontend:** trabajo de pulido aplicado a Login, Register, Overview, Members, Donations, Campaigns, Species, Missions y Organization Profile. Se corrigieron estados de carga/error/vacío, accesibilidad y datos que no correspondían con la API. Falta revisión visual en navegador.
+- **C2 — landing:** estadísticas y mockup conectados a datos reales; se quitaron promesas de funciones aún no implementadas.
+- **D1 — pruebas:** ampliada la cobertura E2E de tenant y módulos principales. Pendiente ejecutar en CI; no ejecutar localmente mientras el setup pueda truncar la base indicada por `DATABASE_URL`.
+- **D2 — CI:** el workflow existente cubre lint/build/tests de backend y builds/lint de frontends.
+- **D3 — observabilidad:** Nest usa `nestjs-pino`, formato legible en desarrollo y JSON en producción; exportación opcional a Loki por variables de entorno, conservando stdout. Pendiente conectar y verificar con un destino Loki disponible; no se agregó infraestructura.
+- **D4 — README:** guía raíz actualizada para el build React y el dominio único. Pendiente una pasada final de coherencia con el despliegue.
+
+Las rutas ahora cargan sus pantallas por separado; el módulo de entrada bajó de ~1.48 MB a ~224 KB sin minificar. El paquete 3D de la landing sigue siendo grande (~914 KB) para conservar EarthBackground. Los builds de backend y frontend pasan en esta rama. No se desplegó ni se modificó infraestructura.
+
 **Infra:** servidor **`fenix`**, VM **Azure** con Ubuntu 24.04 LTS. Serving edge: nginx directo. **Stack 100% nativo — NADA corre en contenedores en producción.** Wildcard `*.pinguinoseguro.cl` (`/etc/letsencrypt/live/pinguinoseguro.cl/`). **NO TOCAR infra existente** de los otros proyectos del server (pinguinoseguro, laespiguita, lotaindomito, micelia, portfolio, transcript). Solo agregar servicios. Ver [AGENTS.md](AGENTS.md) sección Infraestructura para el patrón de serving.
 
 > Historia: el stack vivió antes en un VM llamada `fan` (Rocky + podman rootless), **apagada el 23-ago-2026**. La migración a fenix cambió el runtime: postgres/redis nativos vía systemd, backend como proceso node bajo systemd. Todo lo que mencione podman/compose en producción está obsoleto.
@@ -133,10 +146,10 @@ Fuente de verdad: **Google Stitch project `4741044715461206908`** ("Interfaz Dis
 
 ### Fase D — Pulido (en curso)
 
-- **D1.** Tests: E2E para auth y CRUDs principales (`@nestjs/testing` + supertest)
-- **D2.** CI GitHub Actions: lint + build + test en cada PR
-- **D3.** Observabilidad: logs estructurados con pino, integración Grafana/Loki
-- **D4.** README operativo en raíz
+- **D1.** Tests: E2E para auth y CRUDs principales (`@nestjs/testing` + supertest). Cobertura extendida; pendiente ejecutar en CI con base aislada.
+- **D2.** CI GitHub Actions: lint + build + test en cada PR. Workflow existente; confirmar su ejecución con la cobertura E2E añadida.
+- **D3.** Observabilidad: logs estructurados con pino y exportación opcional a Loki implementadas en código; conexión y verificación de Grafana/Loki pendientes.
+- **D4.** README operativo en raíz actualizado; pendiente revisión final.
 
 ### Bloqueantes futuros
 

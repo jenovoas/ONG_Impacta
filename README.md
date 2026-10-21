@@ -1,7 +1,7 @@
 # Impacta+ — Multi-tenant SaaS for NGOs 🌿
 
-[![Tech Stack](https://img.shields.io/badge/Stack-NestJS%20|%20Next.js%20|%20Prisma-000?style=for-the-badge&logo=nestjs&logoColor=white)](https://impacta.pinguinoseguro.cl)
-[![Status](https://img.shields.io/badge/Status-Beta%20V1.0-green?style=for-the-badge)](https://api-impacta.pinguinoseguro.cl/health)
+[![Tech Stack](https://img.shields.io/badge/Stack-NestJS%20|%20React%20|%20Prisma-000?style=for-the-badge&logo=nestjs&logoColor=white)](https://impacta.pinguinoseguro.cl)
+[![Estado](https://img.shields.io/badge/Estado-Beta%20V1.0-green?style=for-the-badge)](https://impacta.pinguinoseguro.cl)
 
 > **Impacta+** es una solución empresarial diseñada para digitalizar y escalar el impacto de organizaciones sin fines de lucro. Un ecosistema robusto que integra gestión de socios, recaudación de fondos y monitoreo de proyectos de conservación bajo una arquitectura multi-tenant de alto rendimiento.
 
@@ -9,12 +9,12 @@
 
 ## 🚀 Ecosistema Productivo
 
-> **Un solo dominio usuario-facing:** landing, login/registro, portal donante y dashboard conviven en `impacta.pinguinoseguro.cl` (`/` marketing, `/login`·`/register` acceso, `/portal` donante, `/dashboard/*` la app — Missions offline-first con IndexedDB + sync). Sin sesión solo se ve la landing.
+> **Un solo dominio usuario-facing:** landing, login/registro, portal donante y panel conviven en `impacta.pinguinoseguro.cl` (`/`, `/login`, `/register`, `/portal`, `/dashboard/*`). Sin sesión, la raíz muestra la landing.
 
 | Servicio | Enlace Directo | Qué es |
 | :--- | :--- | :--- |
 | **🌐 Plataforma** | [impacta.pinguinoseguro.cl](https://impacta.pinguinoseguro.cl) | Landing pública (EarthBackground 3D, stats reales, demo modal) + acceso, portal donante y dashboard |
-| **⚙️ Backend API** | [api-impacta.pinguinoseguro.cl](https://api-impacta.pinguinoseguro.cl) | API NestJS multi-tenant |
+| **⚙️ Backend API** | `impacta.pinguinoseguro.cl/api/` | API NestJS multi-tenant detrás del proxy del mismo dominio |
 | ~~app-impacta~~ | — | Dominio legado: redirige a `impacta.*`; no agregar funcionalidad ahí |
 
 ---
@@ -23,11 +23,11 @@
 
 ### Core
 - **Backend**: NestJS 11 (Node 20+) con arquitectura modular.
-- **Frontend**: Vite + React 19 — sirve la landing pública Y el dashboard (mismo build).
+- **Frontend**: Vite + React 19 — sirve la landing pública, autenticación, portal donante y panel (mismo build).
 - **ORM**: Prisma 5 con extensiones para Multi-tenancy transparente.
 - **Database**: PostgreSQL 16 + Redis 7 (Caching & BullMQ).
 
-### Infraestructura (Servidor fenix — Azure)
+### Infraestructura (servidor fenix — Azure)
 - **VM**: Azure, Ubuntu 24.04 LTS.
 - **Runtime**: 100% nativo — Postgres 16 y Redis como servicios systemd; backend como servicio systemd (`impacta-backend.service`).
 - **Edge**: Nginx directo, certificados wildcard SSL (`/etc/letsencrypt/live/pinguinoseguro.cl/`).
@@ -58,10 +58,24 @@
 
 ## 🛠️ Desarrollo Local
 
-1. Levantar dependencias: `docker compose up -d postgres redis` (compose = solo desarrollo local; en producción todo es nativo)
-2. Configurar entorno: `cp .env.example .env`
-3. Backend: `cd backend && npm i && npx prisma migrate dev && npm run start:dev`
-4. Dashboard + landing: `cd frontend && npm i && npm run dev`
+1. Levantar dependencias locales: `docker compose up -d postgres redis`. Compose se usa solo en desarrollo; producción corre con servicios nativos.
+2. Configurar el entorno desde `.env.example` y completar las credenciales locales necesarias.
+3. Backend: `cd backend && npm install && npx prisma migrate dev && npm run start:dev`.
+4. Frontend: `cd frontend && npm install && npm run dev`.
+
+### Verificación y despliegue
+
+- Backend: `cd backend && npm run build`.
+- Frontend (landing y panel): `cd frontend && npm run build`.
+- CI: el workflow de GitHub Actions ejecuta lint, build, pruebas unitarias y E2E para backend, además de lint y build de frontend y del proyecto Next.js de referencia.
+- En producción, el despliegue se ejecuta desde el servidor `fenix`: `./deploy.sh frontend`, `./deploy.sh backend` o `./deploy.sh verify`.
+- `/health` no está implementado actualmente; no usar esa ruta como verificación. La verificación de producción se describe en [AGENTS.md](AGENTS.md).
+
+### Logs del backend
+
+- El backend emite logs estructurados JSON a stdout en producción; systemd los recoge en `impacta-backend.service`.
+- Para enviar una copia a Loki, configura `LOKI_HOST` en el entorno del backend. `LOKI_USERNAME` y `LOKI_PASSWORD` son opcionales y deben configurarse juntos. La salida a stdout se mantiene.
+- En desarrollo se usa `pino-pretty`; Loki solo se activa en producción cuando se define `LOKI_HOST`.
 
 > Deploy en producción (server fenix): ver [`deploy.sh`](deploy.sh) y [AGENTS.md](AGENTS.md).
 

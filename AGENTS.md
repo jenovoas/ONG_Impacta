@@ -32,9 +32,11 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 
 ## Design system
 
-"The Digital Steward" — fuente de verdad = **proyecto Google Stitch `4741044715461206908`** (acceso MCP: `mcp__stitch__list_screens`, `get_screen`). ~25 pantallas. Los tokens ya están portados a Tailwind v4 `@theme` en [landing/app/globals.css](landing/app/globals.css) — reutilizarlos tal cual al levantar el frontend.
+"The Digital Steward" — el proyecto de Google Stitch `4741044715461206908` es el prototipo visual inicial, no la fuente permanente de verdad. Para el trabajo posterior, la referencia es el frontend React actual; sus tokens viven en [frontend/src/index.css](frontend/src/index.css). El proyecto Next.js de `landing/` se conserva como referencia de diseño y no está desplegado.
 
-**Antes de crear/modificar UI:** traer la pantalla con `mcp__stitch__get_screen` y portar con los tokens existentes. No improvisar paleta.
+**Antes de crear o modificar la UI:** revisar la pantalla existente y reutilizar los tokens y patrones de interacción del frontend actual. Consultar Stitch como referencia visual cuando aporte valor, sin reemplazar ni degradar el trabajo vigente para imitar el primer prototipo.
+
+**Pulido visual no significa simplificar ni recortar trabajo existente.** Conserva las secciones, el contenido, las interacciones y la riqueza visual que ya tiene cada pantalla; mejora jerarquía, adaptación a tamaños, accesibilidad y consistencia sin reemplazar componentes completos por versiones más pobres. Si una parte contiene datos falsos o una acción que aún no funciona, corrige ese problema de forma explícita y conserva la intención y presencia de la sección cuando sea posible. Antes de retirar una función o sección útil, consulta al usuario.
 
 ## Infraestructura (servidor fenix — Azure)
 

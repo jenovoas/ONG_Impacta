@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Res, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Param, Res, NotFoundException, Logger } from '@nestjs/common';
 import { StorageService } from './storage.service';
 import type { Response } from 'express';
 import { Public } from '../../auth/decorators/public.decorator';
@@ -6,6 +6,7 @@ import { Public } from '../../auth/decorators/public.decorator';
 @Public()
 @Controller('assets')
 export class StorageController {
+  private readonly logger = new Logger(StorageController.name);
   constructor(private readonly storageService: StorageService) {}
 
   @Public()
@@ -18,7 +19,7 @@ export class StorageController {
   @Get('*path')
   async getFile(@Param('path') path: string | string[], @Res() res: Response) {
     const actualPath = Array.isArray(path) ? path.join('/') : path;
-    console.log(`[Storage] Fetching asset: ${actualPath}`);
+    this.logger.debug(`Fetching asset: ${actualPath}`);
     try {
       const stream = await this.storageService.getFileStream(actualPath);
       
@@ -32,7 +33,7 @@ export class StorageController {
       
       stream.pipe(res);
     } catch (error) {
-      console.error('[Storage Error]:', error);
+      this.logger.error('Failed to fetch asset', error);
       throw new NotFoundException('Asset not found');
     }
   }

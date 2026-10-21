@@ -22,6 +22,13 @@ import { useAuthStore } from '../store/auth.store';
 import { getAll, saveMissions, putTask, markTaskSynced, type Mission, type MissionTask } from '../lib/missions-db';
 import { useMissionsSync } from '../lib/useMissionsSync';
 
+const missionStatusLabels: Record<string, string> = {
+  PLANNED: 'Planificada',
+  IN_PROGRESS: 'En curso',
+  COMPLETED: 'Completada',
+  CANCELLED: 'Cancelada',
+};
+
 export const Missions: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -32,7 +39,7 @@ export const Missions: React.FC = () => {
 
   const { isOnline, pendingCount, isSyncing, syncPending, refreshPendingCount } = useMissionsSync();
 
-  const { data: missions = [], isLoading } = useQuery<Mission[]>({
+  const { data: missions = [], isLoading, isError } = useQuery<Mission[]>({
     queryKey: ['missions', orgId, userId],
     queryFn: async () => {
       if (isOnline) {
@@ -72,37 +79,35 @@ export const Missions: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter">
-              Misiones de <span className="text-primary">Rescate</span>
-            </h1>
+            <div><p className="mb-3 text-sm font-semibold text-primary-fixed-dim">Conservación</p><h1 className="font-headline text-3xl font-semibold tracking-tight text-white sm:text-4xl">Misiones</h1></div>
 
             {!isOnline ? (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold">
-                <WifiOff className="w-4 h-4 animate-pulse" />
+              <div className="flex items-center gap-2 rounded-full bg-tertiary/10 px-3 py-1.5 text-xs font-medium text-tertiary">
+                <WifiOff className="h-4 w-4" />
                 <span>Sin conexión — guardado local</span>
               </div>
             ) : pendingCount > 0 ? (
               <button
                 onClick={() => syncPending()}
                 disabled={isSyncing}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold hover:bg-primary/20 transition-colors"
+                className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary-fixed-dim transition-colors hover:bg-primary/20 focus-visible:outline-2 focus-visible:outline-primary"
               >
                 <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
                 <span>{isSyncing ? 'Sincronizando...' : `Guardado local (${pendingCount} pendiente${pendingCount > 1 ? 's' : ''})`}</span>
               </button>
             ) : null}
           </div>
-          <p className="text-gray-500 font-medium mt-2">Coordinación logística y tareas operativas en terreno.</p>
+          <p className="mt-3 max-w-2xl text-on-surface-variant">Coordina el trabajo en terreno y registra el avance de cada actividad.</p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
           disabled={!isOnline}
           title={!isOnline ? 'Crear misiones requiere conexión a internet' : undefined}
-          className="bg-primary text-on-primary px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-semibold text-on-primary transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isOnline ? <Plus className="w-5 h-5" /> : <CloudOff className="w-5 h-5" />}
           Planificar Misión
@@ -110,14 +115,16 @@ export const Missions: React.FC = () => {
       </header>
 
       {isLoading ? (
-        <div className="flex justify-center p-20">
+        <div role="status" className="flex justify-center p-20">
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
         </div>
+      ) : isError ? (
+        <p role="alert" className="rounded-2xl bg-error-container/40 p-5 text-sm text-error">No pudimos cargar las misiones guardadas. Comprueba tu conexión e inténtalo de nuevo.</p>
       ) : missions.length === 0 ? (
-        <div className="glass-card rounded-3xl p-12 text-center border border-white/5 space-y-3">
-          <LifeBuoy className="w-12 h-12 text-gray-600 mx-auto" />
-          <h3 className="text-lg font-bold text-white">No hay misiones disponibles</h3>
-          <p className="text-gray-500 text-sm">
+        <div className="space-y-3 rounded-2xl bg-surface-container px-6 py-12 text-center">
+          <LifeBuoy aria-hidden="true" className="mx-auto h-8 w-8 text-primary" />
+          <h3 className="font-headline text-lg font-semibold text-white">No hay misiones guardadas</h3>
+          <p className="text-sm text-on-surface-variant">
             {!isOnline 
               ? 'No hay misiones almacenadas localmente en este dispositivo.' 
               : 'Crea tu primera misión para comenzar la coordinación.'}
@@ -153,12 +160,12 @@ export const Missions: React.FC = () => {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-2xl glass-card rounded-[40px] border border-white/10 shadow-2xl overflow-hidden"
+              className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-surface-container shadow-2xl"
             >
               <div className="p-8 md:p-12">
-                <div className="flex justify-between items-center mb-10">
-                  <h2 className="text-3xl font-black text-white uppercase italic">Nueva <span className="text-primary">Misión</span></h2>
-                  <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-white/5 rounded-full transition-colors text-gray-500">
+                <div className="mb-8 flex items-center justify-between gap-4">
+                  <div><p className="text-sm font-semibold text-primary-fixed-dim">Conservación</p><h2 className="mt-1 font-headline text-2xl font-semibold text-white">Planificar misión</h2></div>
+                  <button aria-label="Cerrar formulario" onClick={() => setIsModalOpen(false)} className="rounded-xl p-2 text-on-surface-variant transition-colors hover:bg-surface-bright hover:text-white focus-visible:outline-2 focus-visible:outline-primary">
                     <X className="w-6 h-6" />
                   </button>
                 </div>
@@ -181,28 +188,29 @@ export const Missions: React.FC = () => {
                   }} 
                   className="space-y-6"
                 >
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
-                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Título de la Misión</label>
-                      <input name="title" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="sm:col-span-2">
+                      <label className="mb-2 block text-sm font-medium text-on-surface">Nombre de la misión</label>
+                      <input name="title" required className="w-full rounded-xl bg-surface-container-high px-4 py-3.5 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Ubicación</label>
-                      <input name="location" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" />
+                      <label className="mb-2 block text-sm font-medium text-on-surface">Ubicación</label>
+                      <input name="location" className="w-full rounded-xl bg-surface-container-high px-4 py-3.5 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Fecha de Inicio</label>
-                      <input name="startDate" type="date" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" />
+                      <label className="mb-2 block text-sm font-medium text-on-surface">Fecha de inicio</label>
+                      <input name="startDate" type="date" required className="w-full rounded-xl bg-surface-container-high px-4 py-3.5 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Objetivos / Descripción</label>
-                    <textarea name="description" rows={3} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors" />
+                    <label className="mb-2 block text-sm font-medium text-on-surface">Objetivos y descripción</label>
+                    <textarea name="description" rows={3} className="w-full resize-y rounded-xl bg-surface-container-high px-4 py-3.5 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
                   </div>
 
+                  {createMutation.isError && <p role="alert" className="text-sm text-error">No pudimos crear la misión. Revisa los datos e inténtalo de nuevo.</p>}
                   <button
                     disabled={createMutation.isPending || !isOnline}
-                    className="w-full bg-primary text-on-primary py-5 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 font-semibold text-on-primary transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50"
                   >
                     {createMutation.isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : (
                       <>
@@ -269,52 +277,54 @@ const MissionItem: React.FC<MissionItemProps> = ({
   const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
   return (
-    <div className="glass-card rounded-3xl overflow-hidden border border-white/5">
-      <div 
+    <article className="glass-card overflow-hidden rounded-2xl">
+      <button
+        type="button"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
-        className="p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6 cursor-pointer hover:bg-white/[0.02] transition-colors"
+        className="flex w-full flex-col gap-5 p-5 text-left transition-colors hover:bg-surface-container-high focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-primary md:flex-row md:items-center sm:p-6"
       >
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
-          <LifeBuoy className="w-8 h-8 text-primary" />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary-fixed-dim">
+          <LifeBuoy aria-hidden="true" className="h-6 w-6" />
         </div>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-1">
-            <h3 className="text-xl font-bold text-white truncate">{mission.title}</h3>
-            <span className="bg-primary/20 text-primary text-[10px] font-black px-2 py-1 rounded-full uppercase">
-              {mission.status}
+          <div className="mb-2 flex items-center gap-3">
+            <h3 className="truncate font-headline text-lg font-semibold text-white sm:text-xl">{mission.title}</h3>
+            <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary-fixed-dim">
+              {missionStatusLabels[mission.status] || mission.status}
             </span>
           </div>
-          <div className="flex flex-wrap gap-4 text-gray-500 text-xs font-bold uppercase tracking-wider">
-            <div className="flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5" />
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-on-surface-variant">
+            <span className="flex items-center gap-1.5">
+              <MapPin aria-hidden="true" className="h-4 w-4" />
               {mission.location || 'Sin ubicación'}
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
-              {new Date(mission.startDate).toLocaleDateString()}
-            </div>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Calendar aria-hidden="true" className="h-4 w-4" />
+              {new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium' }).format(new Date(mission.startDate))}
+            </span>
           </div>
         </div>
 
-        <div className="w-full md:w-48 space-y-2">
-          <div className="flex justify-between text-[10px] font-black uppercase text-gray-500">
+        <div className="w-full space-y-2 md:w-48">
+          <div className="flex justify-between text-xs text-on-surface-variant">
             <span>Progreso</span>
             <span>{completedTasks}/{totalTasks} Tareas</span>
           </div>
-          <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+          <div role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label={`Progreso de ${mission.title}`} className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container-highest">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              className="h-full bg-primary rounded-full shadow-[0_0_8px_rgba(0,168,255,0.4)]"
+              className="h-full rounded-full bg-primary"
             />
           </div>
         </div>
 
-        <div className="shrink-0">
-          {isOpen ? <ChevronUp className="text-gray-600" /> : <ChevronDown className="text-gray-600" />}
+        <div aria-hidden="true" className="hidden shrink-0 text-on-surface-variant md:block">
+          {isOpen ? <ChevronUp /> : <ChevronDown />}
         </div>
-      </div>
+      </button>
 
       <AnimatePresence>
         {isOpen && (
@@ -322,43 +332,45 @@ const MissionItem: React.FC<MissionItemProps> = ({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-t border-white/5 bg-black/20"
+            className="bg-surface-container-high/40"
           >
-            <div className="p-8 space-y-4">
-              <p className="text-gray-400 text-sm leading-relaxed mb-6">
+            <div className="space-y-4 p-5 sm:p-6">
+              <p className="mb-6 text-sm leading-relaxed text-on-surface-variant">
                 {mission.description || 'Sin descripción detallada de objetivos.'}
               </p>
 
-              <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Checklist de Tareas</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <h4 className="mb-4 text-sm font-semibold text-white">Tareas ({completedTasks} de {totalTasks} completas)</h4>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 {mission.tasks?.map((task: MissionTask) => (
-                  <div 
+                  <button
+                    type="button"
                     key={task.id}
                     onClick={() => toggleTaskMutation.mutate({ taskId: task.id, isCompleted: !task.isCompleted })}
-                    className={`flex items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer ${
+                    aria-pressed={task.isCompleted}
+                    className={`flex items-center gap-3 rounded-xl p-4 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                       task.isCompleted 
-                        ? 'bg-secondary/5 border-secondary/20 text-secondary' 
-                        : 'bg-white/5 border-white/5 text-gray-400 hover:border-white/10'
+                        ? 'bg-secondary/10 text-secondary'
+                        : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-bright'
                     }`}
                   >
-                    {task.isCompleted ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
+                    {task.isCompleted ? <CheckSquare aria-hidden="true" className="h-5 w-5 shrink-0" /> : <Square aria-hidden="true" className="h-5 w-5 shrink-0" />}
                     <div className="flex-1">
                       <p className={`text-sm font-bold ${task.isCompleted ? 'line-through opacity-50' : ''}`}>
                         {task.title}
                       </p>
                       {task.assignedTo && (
-                        <p className="text-[10px] font-black uppercase tracking-tighter opacity-70">
+                        <p className="mt-1 text-xs opacity-70">
                           Asignado: {task.assignedTo}
                         </p>
                       )}
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </article>
   );
 };

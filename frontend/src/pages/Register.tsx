@@ -62,28 +62,26 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#0c0c0c] relative overflow-hidden">
-      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[120px]" />
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-surface-container-lowest px-5 py-8 text-on-surface sm:px-8">
+      <div aria-hidden="true" className="pointer-events-none absolute -left-48 top-1/3 h-96 w-96 rounded-full bg-primary/10 blur-[120px]" />
+      <div aria-hidden="true" className="pointer-events-none absolute -right-52 -top-44 h-[34rem] w-[34rem] rounded-full bg-secondary/10 blur-[140px]" />
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 w-full max-w-md bg-[#161616]/80 border border-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl"
+        className="relative z-10 w-full max-w-lg rounded-3xl bg-surface-container p-6 shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-9"
       >
-        <Link to="/" className="inline-block mb-6">
-          <h1 className="text-3xl font-bold text-white">
-            <span className="text-primary">Impacta</span>+
-          </h1>
+        <Link to="/" aria-label="Impacta+, volver al inicio" className="mb-7 inline-flex items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+          <img src="/logo.png" alt="" className="h-10 w-10 object-contain" />
+          <span className="text-xl font-extrabold uppercase italic tracking-tight impacta-gradient-text">Impacta+</span>
         </Link>
-        <h2 className="text-xl font-semibold text-white mb-1">Crea tu organización</h2>
-        <p className="text-sm text-gray-400 mb-6">
-          14 días de prueba. Sin tarjeta.
-        </p>
+        <p className="text-sm font-semibold text-secondary">Comienza en Impacta+</p>
+        <h2 className="mt-2 font-headline text-3xl font-semibold tracking-tight text-white">Crea tu organización</h2>
+        <p className="mb-7 mt-2 text-sm leading-relaxed text-on-surface-variant">Registra el espacio de trabajo y la cuenta de su administrador.</p>
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label className="text-xs uppercase tracking-wider text-gray-400 mb-1.5 block">Nombre de la ONG</label>
+            <label className="mb-2 block text-sm font-medium text-on-surface">Nombre de la organización</label>
             <div className="relative">
               <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <input
@@ -92,13 +90,14 @@ export const RegisterPage: React.FC = () => {
                 onChange={(e) => handleOrgNameChange(e.target.value)}
                 required
                 placeholder="Conservación Marina Chile"
-                className="w-full pl-10 pr-3 py-2.5 bg-black/40 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-primary transition"
+                autoComplete="organization"
+                className="w-full rounded-xl bg-surface-container-high py-3.5 pl-10 pr-4 text-white placeholder:text-on-surface-variant/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs uppercase tracking-wider text-gray-400 mb-1.5 block">Slug (URL de tu org)</label>
+            <label className="mb-2 block text-sm font-medium text-on-surface">Identificador de la organización</label>
             <div className="relative">
               <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <input
@@ -107,14 +106,15 @@ export const RegisterPage: React.FC = () => {
                 onChange={(e) => setOrgSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                 required
                 placeholder="conservacion-marina"
-                className="w-full pl-10 pr-3 py-2.5 bg-black/40 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-primary transition font-mono text-sm"
+                autoComplete="off"
+                className="w-full rounded-xl bg-surface-container-high py-3.5 pl-10 pr-4 font-mono text-sm text-white placeholder:text-on-surface-variant/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               />
             </div>
-            <p className="text-[11px] text-gray-500 mt-1">impacta.pinguinoseguro.cl/dashboard?org={orgSlug || 'tu-org'}</p>
+            <p className="mt-2 text-xs text-on-surface-variant">Se usará para identificar tu organización dentro de Impacta+.</p>
           </div>
 
           <div>
-            <label className="text-xs uppercase tracking-wider text-gray-400 mb-1.5 block">Email del admin</label>
+            <label className="mb-2 block text-sm font-medium text-on-surface">Correo del administrador</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <input
@@ -123,13 +123,14 @@ export const RegisterPage: React.FC = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="director@ong.cl"
-                className="w-full pl-10 pr-3 py-2.5 bg-black/40 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-primary transition"
+                autoComplete="email"
+                className="w-full rounded-xl bg-surface-container-high py-3.5 pl-10 pr-4 text-white placeholder:text-on-surface-variant/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs uppercase tracking-wider text-gray-400 mb-1.5 block">Contraseña</label>
+            <label className="mb-2 block text-sm font-medium text-on-surface">Contraseña</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <input
@@ -139,7 +140,8 @@ export const RegisterPage: React.FC = () => {
                 required
                 minLength={8}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-3 py-2.5 bg-black/40 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-primary transition"
+                autoComplete="new-password"
+                className="w-full rounded-xl bg-surface-container-high py-3.5 pl-10 pr-4 text-white placeholder:text-on-surface-variant/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               />
             </div>
           </div>
@@ -148,7 +150,8 @@ export const RegisterPage: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2"
+              role="alert"
+              className="rounded-xl bg-error-container/40 px-4 py-3 text-sm text-error"
             >
               {error}
             </motion.div>
@@ -157,17 +160,17 @@ export const RegisterPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 text-black font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 font-semibold text-on-primary transition-colors hover:bg-primary-fixed-dim focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Crear cuenta <ArrowRight className="w-4 h-4" /></>}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
+        <p className="mt-6 text-center text-sm text-on-surface-variant">
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="text-primary hover:underline">Inicia sesión</Link>
+          <Link to="/login" className="font-semibold text-primary-fixed-dim hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">Inicia sesión</Link>
         </p>
       </motion.div>
-    </div>
+    </main>
   );
 };

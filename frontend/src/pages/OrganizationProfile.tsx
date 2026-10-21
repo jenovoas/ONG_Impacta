@@ -1,105 +1,111 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Building2, 
-  Globe, 
-  ExternalLink, 
-  Copy, 
-  Shield, 
-  Mail,
-  Lock,
-  Loader2,
-  CheckCircle
-} from 'lucide-react';
+import { Building2, Copy, Shield, Mail, Loader2, CheckCircle, Check, Globe2 } from 'lucide-react';
 import client from '../api/client';
 
+type Organization = {
+  id: string;
+  name: string;
+  slug: string;
+  plan?: string;
+  createdAt?: string;
+};
+
 export const OrganizationProfile: React.FC = () => {
-  const { data: org, isLoading } = useQuery({
+  const [copied, setCopied] = useState(false);
+  const { data: org, isLoading, isError } = useQuery<Organization>({
     queryKey: ['org-details'],
     queryFn: async () => {
-      const { data } = await client.get('/organizations/me'); // Ajustar si el endpoint es distinto
+      const { data } = await client.get('/organizations/me');
       return data;
     },
   });
 
-  if (isLoading) return <div className="flex justify-center p-20"><Loader2 className="w-10 h-10 animate-spin text-primary" /></div>;
+  const copySlug = async () => {
+    if (!org?.slug) return;
+    try {
+      await navigator.clipboard.writeText(org.slug);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+    }
+  };
 
-  const publicUrl = `https://impacta.pinguinoseguro.cl/${org?.slug}`;
+  if (isLoading) return <div role="status" className="flex justify-center p-20"><Loader2 aria-hidden="true" className="h-8 w-8 animate-spin text-primary" /><span className="sr-only">Cargando organización</span></div>;
+  if (isError || !org) return <p role="alert" className="rounded-2xl bg-error-container/40 p-5 text-sm text-error">No pudimos cargar el perfil de la organización.</p>;
 
   return (
-    <div className="max-w-4xl space-y-10">
+    <div className="max-w-5xl space-y-8">
       <header>
-        <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter">
-          Perfil de <span className="text-primary">Organización</span>
-        </h1>
-        <p className="text-gray-500 font-medium mt-2">Configuración de identidad y credenciales del sistema.</p>
+        <p className="mb-3 text-sm font-semibold text-primary-fixed-dim">Configuración</p>
+        <h1 className="font-headline text-3xl font-semibold tracking-tight text-white sm:text-4xl">Perfil de la organización</h1>
+        <p className="mt-3 max-w-2xl text-on-surface-variant">Consulta la identidad y los datos de tu espacio de trabajo.</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-6">
-          <section className="glass-card p-8 rounded-[32px] border border-white/5">
-            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-primary" />
-              Información General
-            </h2>
-            
-            <div className="space-y-6">
-              <div>
-                <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Nombre de la ONG</label>
-                <p className="text-xl font-bold text-white bg-white/5 p-4 rounded-2xl border border-white/5">{org?.name}</p>
-              </div>
-              
-              <div>
-                <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Slug del Sistema (ID Único)</label>
-                <div className="flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <p className="text-primary font-mono font-bold flex-1">{org?.slug}</p>
-                  <Lock className="w-4 h-4 text-gray-600" />
-                </div>
-              </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr]">
+        <section aria-labelledby="org-info-title" className="glass-card rounded-2xl p-5 sm:p-7">
+          <div className="mb-7 flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary-fixed-dim"><Building2 aria-hidden="true" className="h-5 w-5" /></span>
+            <h2 id="org-info-title" className="font-headline text-xl font-semibold text-white">Datos de la organización</h2>
+          </div>
+          <dl className="space-y-5">
+            <div>
+              <dt className="mb-2 text-sm text-on-surface-variant">Nombre</dt>
+              <dd className="rounded-xl bg-surface-container-high px-4 py-3.5 font-medium text-white">{org.name}</dd>
             </div>
-          </section>
-
-          <section className="glass-card p-8 rounded-[32px] border border-white/5">
-            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Globe className="w-5 h-5 text-secondary" />
-              Presencia Pública
-            </h2>
-            
-            <div className="p-6 rounded-2xl bg-secondary/5 border border-secondary/10">
-              <label className="block text-[10px] font-black text-secondary uppercase tracking-widest mb-3">Tu página pública de recaudación</label>
-              <div className="flex items-center gap-3">
-                <p className="text-white text-sm font-medium truncate flex-1">{publicUrl}</p>
-                <button className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400">
-                  <Copy className="w-4 h-4" />
+            <div>
+              <dt className="mb-2 text-sm text-on-surface-variant">Identificador de la organización</dt>
+              <dd className="flex items-center gap-3 rounded-xl bg-surface-container-high px-4 py-2.5">
+                <code className="min-w-0 flex-1 break-all text-sm text-primary-fixed-dim">{org.slug}</code>
+                <button type="button" onClick={copySlug} aria-label="Copiar identificador" className="shrink-0 rounded-lg p-2 text-on-surface-variant hover:bg-surface-bright hover:text-white focus-visible:outline-2 focus-visible:outline-primary">
+                  {copied ? <Check aria-hidden="true" className="h-4 w-4 text-secondary" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
                 </button>
-                <a href={publicUrl} target="_blank" rel="noreferrer" className="p-2 bg-secondary text-on-secondary rounded-lg hover:scale-105 transition-transform">
-                  <ExternalLink className="w-4 h-4" />
-                </a>
+              </dd>
+              <p role="status" className="mt-2 min-h-5 text-xs text-secondary">{copied ? 'Identificador copiado' : ''}</p>
+            </div>
+          </dl>
+        </section>
+
+        <section aria-labelledby="org-public-title" className="glass-card rounded-2xl p-5 sm:p-7">
+          <div className="mb-5 flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/10 text-secondary"><Globe2 aria-hidden="true" className="h-5 w-5" /></span>
+            <div>
+              <h2 id="org-public-title" className="font-headline text-xl font-semibold text-white">Presencia pública</h2>
+              <p className="mt-1 text-sm text-on-surface-variant">Página pública de recaudación</p>
+            </div>
+          </div>
+          <div className="rounded-xl bg-secondary/5 p-4 sm:p-5">
+            <span className="inline-flex items-center gap-2 rounded-full bg-tertiary/10 px-3 py-1 text-xs font-medium text-tertiary">
+              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-tertiary" />
+              Aún no disponible
+            </span>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-on-surface-variant">El perfil público de recaudación todavía no está habilitado. El identificador de la organización se mantiene disponible para reconocer tu espacio en Impacta+.</p>
+          </div>
+        </section>
+
+        <div className="space-y-4">
+          <section aria-labelledby="org-plan-title" className="glass-card rounded-2xl p-5 sm:p-6">
+            <h2 id="org-plan-title" className="mb-5 font-headline text-lg font-semibold text-white">Cuenta</h2>
+            <dl className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Shield aria-hidden="true" className="h-4 w-4 text-primary-fixed-dim" />
+                <div><dt className="text-xs text-on-surface-variant">Plan</dt><dd className="mt-1 text-sm font-medium text-white">{org.plan || '—'}</dd></div>
               </div>
-            </div>
+              <div className="flex items-center gap-3">
+                <CheckCircle aria-hidden="true" className="h-4 w-4 text-secondary" />
+                <div><dt className="text-xs text-on-surface-variant">Fecha de creación</dt><dd className="mt-1 text-sm font-medium text-white">{org.createdAt ? new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium' }).format(new Date(org.createdAt)) : '—'}</dd></div>
+              </div>
+            </dl>
           </section>
-        </div>
 
-        <div className="space-y-6">
-          <div className="glass-card p-6 rounded-[32px] border border-white/5 space-y-4">
-            <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Detalles</h4>
-            <div className="flex items-center gap-3 text-white">
-              <Shield className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold">Plan: {org?.plan || 'FREE'}</span>
-            </div>
-            <div className="flex items-center gap-3 text-white">
-              <CheckCircle className="w-4 h-4 text-secondary" />
-              <span className="text-xs font-bold">Creada: {org?.createdAt ? new Date(org.createdAt).toLocaleDateString('es-CL') : '—'}</span>
-            </div>
-          </div>
-
-          <div className="glass-card p-6 rounded-[32px] border border-white/5 space-y-4">
-            <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Soporte</h4>
-            <div className="flex items-center gap-3 text-white">
-              <Mail className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold">soporte@pinguinoseguro.cl</span>
-            </div>
-          </div>
+          <section aria-labelledby="org-support-title" className="glass-card rounded-2xl p-5 sm:p-6">
+            <h2 id="org-support-title" className="mb-4 font-headline text-lg font-semibold text-white">Soporte</h2>
+            <a href="mailto:soporte@pinguinoseguro.cl" className="inline-flex items-center gap-3 rounded-lg text-sm text-on-surface-variant hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+              <Mail aria-hidden="true" className="h-4 w-4 text-primary-fixed-dim" />
+              soporte@pinguinoseguro.cl
+            </a>
+          </section>
         </div>
       </div>
     </div>

@@ -13,13 +13,19 @@ import {
 import client from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const speciesStatusLabels: Record<string, string> = {
+  ACTIVE: 'Saludable',
+  THREATENED: 'Amenazada',
+  ENDANGERED: 'En peligro',
+};
+
 export const Species: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const queryClient = useQueryClient();
 
   // Fetch Species
-  const { data: species = [], isLoading } = useQuery({
+  const { data: species = [], isLoading, isError } = useQuery({
     queryKey: ['species'],
     queryFn: async () => {
       const { data } = await client.get('/species');
@@ -48,40 +54,42 @@ export const Species: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter">
-            Biblioteca de <span className="text-secondary">Especies</span>
-          </h1>
-          <p className="text-gray-500 font-medium mt-2">Catálogo de biodiversidad y biodiversidad local.</p>
+          <p className="mb-3 text-sm font-semibold text-secondary">Conservación</p>
+          <h1 className="font-headline text-3xl font-semibold tracking-tight text-white sm:text-4xl">Especies</h1>
+          <p className="mt-3 max-w-2xl text-on-surface-variant">Catálogo de biodiversidad monitoreada por tu organización.</p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-secondary text-on-secondary px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform shadow-lg shadow-secondary/20"
+          className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-secondary px-5 py-3 font-semibold text-on-secondary transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
         >
           <Plus className="w-5 h-5" />
           Registrar Especie
         </button>
       </header>
 
-      <div className="relative max-w-md">
+      <div className="relative max-w-lg rounded-2xl bg-surface-container p-3">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
         <input
-          type="text"
+          type="search"
+          aria-label="Buscar especie por nombre común o científico"
           placeholder="Buscar especie por nombre..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-surface-container-low border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-secondary/50 transition-colors"
+          className="w-full rounded-xl bg-surface-container-high py-3.5 pl-12 pr-4 text-white placeholder:text-on-surface-variant/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
         />
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center p-20">
+        <div role="status" className="flex justify-center p-20">
           <Loader2 className="w-10 h-10 animate-spin text-secondary" />
         </div>
+      ) : isError ? (
+        <p role="alert" className="rounded-2xl bg-error-container/40 p-5 text-sm text-error">No pudimos cargar las especies. Vuelve a intentarlo.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           <AnimatePresence>
             {filteredSpecies.map((s: any) => (
               <motion.div
@@ -90,35 +98,42 @@ export const Species: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="glass-card rounded-3xl overflow-hidden border border-white/5 group"
+                className="glass-card overflow-hidden rounded-2xl"
               >
-                <div className="h-48 bg-surface-container-highest relative overflow-hidden">
+                <div className="group relative h-48 overflow-hidden bg-surface-container-highest">
                   {s.imageUrl ? (
-                    <img src={s.imageUrl} alt={s.commonName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <img src={s.imageUrl} alt={s.commonName} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-secondary/10">
                       <Leaf className="w-12 h-12 text-secondary/30" />
                     </div>
                   )}
-                  <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md p-2 rounded-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreVertical className="w-5 h-5 text-white" />
-                  </div>
+                  <span aria-hidden="true" className="absolute right-4 top-4 rounded-xl bg-black/50 p-2 text-white opacity-70 backdrop-blur-md transition-opacity group-hover:opacity-100">
+                    <MoreVertical className="h-5 w-5" />
+                  </span>
                 </div>
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold text-white">{s.commonName}</h3>
-                    <span className="bg-secondary/20 text-secondary text-[10px] font-black px-2 py-1 rounded-full uppercase">
-                      {s.status}
+                <div className="p-5">
+                  <div className="mb-2 flex items-start justify-between gap-3">
+                    <h3 className="font-headline text-lg font-semibold text-white">{s.commonName}</h3>
+                    <span className="shrink-0 rounded-full bg-secondary/10 px-2.5 py-1 text-xs font-medium text-secondary">
+                      {speciesStatusLabels[s.status] || s.status}
                     </span>
                   </div>
-                  <p className="text-gray-500 text-sm italic font-medium mb-4">{s.scientificName || 'N/A'}</p>
-                  <p className="text-gray-400 text-sm line-clamp-2 leading-relaxed">
+                  <p className="mb-3 text-sm italic text-on-surface-variant">{s.scientificName || 'Nombre científico no registrado'}</p>
+                  <p className="line-clamp-3 text-sm leading-relaxed text-on-surface-variant">
                     {s.description || 'Sin descripción disponible.'}
                   </p>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
+          {filteredSpecies.length === 0 && (
+            <div className="col-span-full rounded-2xl bg-surface-container px-6 py-12 text-center">
+              <Leaf aria-hidden="true" className="mx-auto h-7 w-7 text-secondary" />
+              <p className="mt-3 font-medium text-white">{species.length ? 'No encontramos especies' : 'Aún no hay especies registradas'}</p>
+              <p className="mt-1 text-sm text-on-surface-variant">{species.length ? 'Prueba otra búsqueda.' : 'Agrega una especie para comenzar el catálogo.'}</p>
+            </div>
+          )}
         </div>
       )}
 
@@ -137,12 +152,12 @@ export const Species: React.FC = () => {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-2xl glass-card rounded-[40px] border border-white/10 shadow-2xl overflow-hidden"
+              className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-surface-container shadow-2xl"
             >
               <div className="p-8 md:p-12">
-                <div className="flex justify-between items-center mb-10">
-                  <h2 className="text-3xl font-black text-white uppercase italic">Registrar <span className="text-secondary">Especie</span></h2>
-                  <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-white/5 rounded-full transition-colors text-gray-500">
+                <div className="mb-8 flex items-center justify-between gap-4">
+                  <div><p className="text-sm font-semibold text-secondary">Conservación</p><h2 className="mt-1 font-headline text-2xl font-semibold text-white">Registrar especie</h2></div>
+                  <button aria-label="Cerrar formulario" onClick={() => setIsModalOpen(false)} className="rounded-xl p-2 text-on-surface-variant transition-colors hover:bg-surface-bright hover:text-white focus-visible:outline-2 focus-visible:outline-secondary">
                     <X className="w-6 h-6" />
                   </button>
                 </div>
@@ -151,6 +166,7 @@ export const Species: React.FC = () => {
                   onSubmit={(fd: FormData) => createMutation.mutate(fd)} 
                   loading={createMutation.isPending}
                 />
+                {createMutation.isError && <p role="alert" className="mt-4 text-sm text-error">No pudimos guardar la especie. Revisa los datos e inténtalo de nuevo.</p>}
               </div>
             </motion.div>
           </div>
@@ -184,16 +200,16 @@ const SpeciesForm = ({ onSubmit, loading }: any) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">Nombre Común</label>
-            <input name="commonName" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
+            <label className="mb-2 block text-sm font-medium text-on-surface">Nombre común</label>
+            <input name="commonName" required className="w-full rounded-xl bg-surface-container-high px-4 py-3.5 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary" />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">Nombre Científico</label>
-            <input name="scientificName" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white italic focus:outline-none focus:border-secondary/50 transition-colors" />
+            <label className="mb-2 block text-sm font-medium text-on-surface">Nombre científico</label>
+            <input name="scientificName" className="w-full rounded-xl bg-surface-container-high px-4 py-3.5 text-white italic focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary" />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">Estado</label>
-            <select name="status" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors appearance-none">
+            <label className="mb-2 block text-sm font-medium text-on-surface">Estado de conservación</label>
+            <select name="status" className="w-full appearance-none rounded-xl bg-surface-container-high px-4 py-3.5 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary">
               <option value="ACTIVE" className="bg-surface">Activa / Saludable</option>
               <option value="THREATENED" className="bg-surface">Amenazada</option>
               <option value="ENDANGERED" className="bg-surface">En Peligro</option>
@@ -202,34 +218,35 @@ const SpeciesForm = ({ onSubmit, loading }: any) => {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">Fotografía de Referencia</label>
-          <div className="aspect-square rounded-3xl border-2 border-dashed border-white/10 bg-white/5 overflow-hidden relative group cursor-pointer">
+          <label className="mb-2 block text-sm font-medium text-on-surface">Fotografía de referencia</label>
+          <label className="relative block aspect-square cursor-pointer overflow-hidden rounded-2xl bg-surface-container-high focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-secondary">
             {preview ? (
               <img src={preview} alt="Preview" className="w-full h-full object-cover" />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 gap-2">
                 <Camera className="w-10 h-10 opacity-30" />
-                <span className="text-xs font-bold uppercase tracking-wider">Subir Imagen</span>
+                <span className="text-sm font-medium">Seleccionar imagen</span>
               </div>
             )}
             <input 
               type="file" 
               accept="image/*" 
               onChange={handleFileChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
+              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              aria-label="Seleccionar fotografía de referencia"
             />
-          </div>
+          </label>
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">Descripción / Hábitat</label>
-        <textarea name="description" rows={3} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white focus:outline-none focus:border-secondary/50 transition-colors" />
+        <label className="mb-2 block text-sm font-medium text-on-surface">Descripción y hábitat</label>
+        <textarea name="description" rows={3} className="w-full resize-y rounded-xl bg-surface-container-high px-4 py-3.5 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary" />
       </div>
 
       <button
         disabled={loading}
-        className="w-full bg-secondary text-on-secondary py-5 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-secondary py-3.5 font-semibold text-on-secondary transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary disabled:opacity-50"
       >
         {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
           <>
