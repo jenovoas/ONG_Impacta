@@ -67,7 +67,9 @@ describe('MissionsService', () => {
 
       // Tenant 2 attempting to access Tenant 1 task
       await expect(
-        service.updateTaskStatus('org-tenant-2', 'mission-1', 'task-101', { isCompleted: true }),
+        service.updateTaskStatus('org-tenant-2', 'mission-1', 'task-101', {
+          isCompleted: true,
+        }),
       ).rejects.toThrow(NotFoundException);
 
       expect(dbService.missionTask.update).not.toHaveBeenCalled();
@@ -77,7 +79,12 @@ describe('MissionsService', () => {
       dbService.missionTask.findUnique.mockResolvedValue(mockMissionTask);
 
       await expect(
-        service.updateTaskStatus('org-tenant-1', 'wrong-mission-id', 'task-101', { isCompleted: true }),
+        service.updateTaskStatus(
+          'org-tenant-1',
+          'wrong-mission-id',
+          'task-101',
+          { isCompleted: true },
+        ),
       ).rejects.toThrow(NotFoundException);
 
       expect(dbService.missionTask.update).not.toHaveBeenCalled();
@@ -104,7 +111,10 @@ describe('MissionsService', () => {
         const conflictErr = err as ConflictException;
         const response = conflictErr.getResponse() as Record<string, unknown>;
         expect(response.serverTask).toBeDefined();
-        const serverTask = response.serverTask as { id: string; isCompleted: boolean };
+        const serverTask = response.serverTask as {
+          id: string;
+          isCompleted: boolean;
+        };
         expect(serverTask.id).toBe('task-101');
         expect(serverTask.isCompleted).toBe(false);
       }

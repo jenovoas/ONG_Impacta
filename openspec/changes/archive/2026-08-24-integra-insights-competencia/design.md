@@ -1,6 +1,6 @@
 ## Context
 
-Impacta+ está estabilizado como **UN SOLO SISTEMA** (landing + front + panel en `https://impacta.pinguinoseguro.cl`, `app-impacta` 301, fake data eliminada). Stack: Vite+React 19 + TanStack Query, NestJS 11 + Prisma 5 + Postgres nativo + Redis, nginx proxy `/api/` → `127.0.0.1:3001`. Misiones hoy es online-only (`GET/PATCH /missions`), Donaciones no tiene portal self-service. Investigación muestra que SERCA gana por offline-first y Neon por portal donante — ambas se pueden añadir sin romper dominio único ni multi-tenant.
+Impacta+ está estabilizado como **UN SOLO SISTEMA** (landing + front + panel en `https://impacta.pinguinoseguro.cl`, `impacta.pinguinoseguro.cl` 301, fake data eliminada). Stack: Vite+React 19 + TanStack Query, NestJS 11 + Prisma 5 + Postgres nativo + Redis, nginx proxy `/api/` → `127.0.0.1:3001`. Misiones hoy es online-only (`GET/PATCH /missions`), Donaciones no tiene portal self-service. Investigación muestra que SERCA gana por offline-first y Neon por portal donante — ambas se pueden añadir sin romper dominio único ni multi-tenant.
 
 ## Goals / Non-Goals
 

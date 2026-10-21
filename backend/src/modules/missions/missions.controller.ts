@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Patch, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Headers,
+} from '@nestjs/common';
 import { MissionsService } from './missions.service';
 import { CreateMissionDto } from './dto/create-mission.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -37,6 +45,12 @@ export class MissionsController {
     @Headers('if-unmodified-since') headerIfUnmodifiedSince?: string,
   ) {
     const clientUpdatedAt = updateTaskDto?.updatedAt || headerIfUnmodifiedSince;
-    return this.missionsService.updateTaskStatus(orgId, id, taskId, updateTaskDto, clientUpdatedAt);
+    return this.missionsService.updateTaskStatus(
+      orgId,
+      id,
+      taskId,
+      updateTaskDto,
+      clientUpdatedAt,
+    );
   }
 }

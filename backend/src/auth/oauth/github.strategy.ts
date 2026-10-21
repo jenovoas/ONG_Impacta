@@ -33,7 +33,10 @@ export class GithubStrategy implements OAuthVerifier {
     // 1) /user
     let userRes;
     try {
-      userRes = await axios.get('https://api.github.com/user', { headers, timeout: 10_000 });
+      userRes = await axios.get('https://api.github.com/user', {
+        headers,
+        timeout: 10_000,
+      });
     } catch (err) {
       this.logger.warn(`GitHub /user failed: ${(err as Error).message}`);
       throw new UnauthorizedException('GitHub accessToken inválido o expirado');
@@ -50,9 +53,13 @@ export class GithubStrategy implements OAuthVerifier {
     // 2) Si email es null (privado), buscar en /user/emails
     if (!email) {
       try {
-        const emailsRes = await axios.get('https://api.github.com/user/emails', {
-          headers, timeout: 10_000,
-        });
+        const emailsRes = await axios.get(
+          'https://api.github.com/user/emails',
+          {
+            headers,
+            timeout: 10_000,
+          },
+        );
         const primary = Array.isArray(emailsRes.data)
           ? emailsRes.data.find((e: any) => e.primary && e.verified)
           : null;
@@ -61,7 +68,9 @@ export class GithubStrategy implements OAuthVerifier {
           emailVerified = true;
         }
       } catch (err) {
-        this.logger.debug(`GitHub /user/emails failed (non-fatal): ${(err as Error).message}`);
+        this.logger.debug(
+          `GitHub /user/emails failed (non-fatal): ${(err as Error).message}`,
+        );
       }
     }
 

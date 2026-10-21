@@ -1,4 +1,11 @@
-import { IsEmail, IsString, MinLength, MaxLength, Matches, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  MaxLength,
+  Matches,
+  IsOptional,
+} from 'class-validator';
 
 export class RegisterDto {
   @IsEmail()
@@ -23,7 +30,8 @@ export class RegisterDto {
   @MinLength(2)
   @MaxLength(60)
   @Matches(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, {
-    message: 'orgSlug debe ser lowercase, alfanumérico y puede contener guiones',
+    message:
+      'orgSlug debe ser lowercase, alfanumérico y puede contener guiones',
   })
   orgSlug?: string;
 

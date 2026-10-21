@@ -28,4 +28,4 @@
 
 - [ ] 5.1 Aislamiento y enumeración: grep — `GET /p2p/:slug`, `receipts/:captureId` y `POST /campaigns/:id/p2p` filtran por `organizationId` y devuelven 404 genérico; sin filtro debe fallar
 - [ ] 5.2 Docs: actualizar `AGENTS.md` regla #1 (nueva ruta `/p2p/:slug` y suscripciones Webpay/Flow) y `README.md` con credenciales de pasarela solo en server
-- [ ] 5.3 Verificación: `npm run build` frontend/backend, `npm test` backend, `./deploy.sh frontend`, `./deploy.sh verify` (impacta 200, app-impacta 301, api 401, public-stats real), navegación manual: crear página P2P, abrir `/p2p/:slug`, activar suscripción en `/portal`, confirmar gift receipt
+- [ ] 5.3 Verificación: `npm run build` frontend/backend, `npm test` backend, `./deploy.sh frontend`, `./deploy.sh verify` (impacta 200, impacta.pinguinoseguro.cl 301, api 401, public-stats real), navegación manual: crear página P2P, abrir `/p2p/:slug`, activar suscripción en `/portal`, confirmar gift receipt

@@ -17,7 +17,7 @@ export class CampaignsService {
 
   async findAll(orgId: string, status?: string) {
     return this.prisma.campaign.findMany({
-      where: { 
+      where: {
         organizationId: orgId,
         ...(status ? { status } : {}),
       },
@@ -53,6 +53,131 @@ export class CampaignsService {
     return this.prisma.campaign.update({
       where: { id: campaignId },
       data: { currentAmount: total },
+    });
+  }
+
+  async createP2PPage(
+    orgId: string,
+    campaignId: string,
+    dto: { title: string; memberId: string; personalGoal?: number },
+  ) {
+    // Generate a simple unique slug
+    const baseSlug = dto.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    const uniqueSuffix = Math.random().toString(36).substring(2, 6);
+    const slug = `${baseSlug}-${uniqueSuffix}`;
+
+    return this.prisma.campaignP2PPage.create({
+      data: {
+        organizationId: orgId,
+        campaignId,
+        memberId: dto.memberId,
+        title: dto.title,
+        slug,
+        personalGoal: dto.personalGoal,
+      },
+    });
+  }
+
+  async getP2PPageById(orgId: string, campaignId: string, pageId: string) {
+    const page = await this.prisma.campaignP2PPage.findFirst({
+      where: { id: pageId, campaignId, organizationId: orgId },
+      include: {
+        member: { select: { firstName: true, lastName: true } },
+        campaign: {
+          select: { name: true, goalAmount: true, currentAmount: true },
+        },
+      },
+    });
+    if (!page) throw new NotFoundException('P2P Page not found');
+    return page;
+  }
+
+  async getPublicP2PPage(slug: string) {
+    const page = await this.prisma.campaignP2PPage.findFirst({
+      where: { slug, status: 'ACTIVE' },
+      include: {
+        organization: { select: { name: true, logo: true, slug: true } },
+        member: { select: { firstName: true, lastName: true } },
+        campaign: { select: { name: true, description: true, endDate: true } },
+        donations: {
+          where: { status: 'SUCCEEDED' },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+          select: {
+            amount: true,
+            createdAt: true,
+            member: { select: { firstName: true, lastName: true } },
+          },
+        },
+      },
+    });
+
+    if (!page) throw new NotFoundException('Public P2P Page not found');
+
+    const raised = Number(page.currentAmount || 0);
+    const goal = Number(page.personalGoal) || 1;
+    const percentRaised = Math.min(100, Math.round((raised / goal) * 100));
+
+    let daysLeft: number | null = null;
+    if (page.campaign.endDate) {
+      const ms = page.campaign.endDate.getTime() - new Date().getTime();
+      daysLeft = Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+    }
+
+    return {
+      ...page,
+      percentRaised,
+      daysLeft,
+    };
+  }
+
+  async updateP2PPageStatus(
+    orgId: string,
+    campaignId: string,
+    pageId: string,
+    status: 'ACTIVE' | 'CANCELLED' | 'COMPLETED',
+  ) {
+    const page = await this.prisma.campaignP2PPage.findFirst({
+      where: { id: pageId, campaignId, organizationId: orgId },
+    });
+
+    if (!page) {
+      throw new NotFoundException('P2P Page not found');
+    }
+
+    // Cancellation must not affect currentAmount or donations
+    return this.prisma.campaignP2PPage.update({
+      where: { id: pageId },
+      data: { status },
+    });
+  }
+
+  async completeCampaign(orgId: string, campaignId: string) {
+    return this.prisma.$transaction([
+      this.prisma.campaign.update({
+        where: { id: campaignId, organizationId: orgId },
+        data: { status: 'COMPLETED' },
+      }),
+      this.prisma.campaignP2PPage.updateMany({
+        where: { campaignId, organizationId: orgId },
+        data: { status: 'COMPLETED' },
+      }),
+    ]);
+  }
+
+  async updateCampaign(orgId: string, id: string, dto: any) {
+    const campaign = await this.prisma.campaign.findFirst({
+      where: { id, organizationId: orgId },
+    });
+    if (!campaign) {
+      throw new NotFoundException('Campaign not found');
+    }
+    return this.prisma.campaign.update({
+      where: { id },
+      data: dto,
     });
   }
 }

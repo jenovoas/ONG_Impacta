@@ -71,7 +71,10 @@ describe('DonationsService (portal donante)', () => {
       const result = await service.findMyDonations(orgId, user);
 
       expect(prisma.member.findFirst).toHaveBeenCalledWith({
-        where: { organizationId: orgId, OR: [{ email: 'donante@example.com' }] },
+        where: {
+          organizationId: orgId,
+          OR: [{ email: 'donante@example.com' }],
+        },
       });
       expect(prisma.donation.findMany).toHaveBeenCalledWith({
         where: { organizationId: orgId, memberId: 'member-1' },
@@ -131,9 +134,9 @@ describe('DonationsService (portal donante)', () => {
     it('lanza 404 si el member del donante no existe (denied_attempt loggeado)', async () => {
       prisma.member.findFirst.mockResolvedValue(null);
 
-      await expect(service.generateReceiptPdf(orgId, user, 'd-1')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.generateReceiptPdf(orgId, user, 'd-1'),
+      ).rejects.toThrow(NotFoundException);
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('denied_attempt'),
       );
@@ -148,9 +151,9 @@ describe('DonationsService (portal donante)', () => {
         amount: 100,
       });
 
-      await expect(service.generateReceiptPdf(orgId, user, 'd-otra')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.generateReceiptPdf(orgId, user, 'd-otra'),
+      ).rejects.toThrow(NotFoundException);
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('denied_attempt'),
       );
@@ -170,7 +173,12 @@ describe('DonationsService (portal donante)', () => {
         recurringStatus: 'PAUSED',
       });
 
-      const result = await service.updateRecurringStatus(orgId, user, 'd-1', 'PAUSED');
+      const result = await service.updateRecurringStatus(
+        orgId,
+        user,
+        'd-1',
+        'PAUSED',
+      );
 
       expect(prisma.donation.update).toHaveBeenCalledWith({
         where: { id: 'd-1' },

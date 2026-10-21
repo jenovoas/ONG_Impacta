@@ -13,6 +13,9 @@ import { SpeciesModule } from './modules/species/species.module';
 import { MissionsModule } from './modules/missions/missions.module';
 import { DemoRequestsModule } from './modules/demo-requests/demo-requests.module';
 import { LoggerModule } from 'nestjs-pino';
+import { CommunityModule } from './modules/community/community.module';
+import { AiSecurityModule } from './modules/ai-security/ai-security.module';
+import { AiGatewayModule } from './modules/ai-gateway/ai-gateway.module';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 const lokiHost = process.env.LOKI_HOST?.trim();
@@ -70,15 +73,16 @@ const logTransport = isDevelopment
     CampaignsModule,
     SpeciesModule,
     MissionsModule,
-    DemoRequestsModule
+    DemoRequestsModule,
+    CommunityModule,
+    AiSecurityModule,
+    AiGatewayModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(TenantMiddleware)
-      .forRoutes('*');
+    consumer.apply(TenantMiddleware).forRoutes('*');
   }
 }

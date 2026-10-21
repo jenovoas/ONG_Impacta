@@ -18,7 +18,10 @@ describe('UsersService', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UsersService, { provide: DatabaseService, useValue: mockDatabase }],
+      providers: [
+        UsersService,
+        { provide: DatabaseService, useValue: mockDatabase },
+      ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);

@@ -10,7 +10,6 @@ import { DatabaseService } from '../database/database.service';
 import { OAuthService } from './oauth/oauth.service';
 import { RegisterDto } from './dto/register.dto';
 import { OAuthLoginDto, OAuthRegisterDto } from './dto/oauth.dto';
-import type { OAuthProfile } from './oauth/oauth.types';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
@@ -42,7 +41,11 @@ export class AuthService {
   // Local (email + password)
   // ====================================================================
 
-  async validateUser(email: string, pass: string, orgSlug: string): Promise<any> {
+  async validateUser(
+    email: string,
+    pass: string,
+    orgSlug: string,
+  ): Promise<any> {
     const user = await this.database.user.findFirst({
       where: {
         email,
@@ -64,18 +67,25 @@ export class AuthService {
     return this.issueTokensForUser(user, ctx);
   }
 
-  async register(dto: RegisterDto, ctx?: { userAgent?: string; ipAddress?: string }) {
+  async register(
+    dto: RegisterDto,
+    ctx?: { userAgent?: string; ipAddress?: string },
+  ) {
     const slug = dto.orgSlug ?? this.slugify(dto.orgName);
 
     // 1) Verificar que el slug no exista
-    const existingOrg = await this.database.organization.findUnique({ where: { slug } });
+    const existingOrg = await this.database.organization.findUnique({
+      where: { slug },
+    });
     if (existingOrg) {
       throw new ConflictException(`El slug "${slug}" ya está en uso`);
     }
 
     // 2) Verificar email no usado en NINGUNA org (cada email debe ser único por org,
     //    pero para register fresh asumimos email global unique en el form)
-    const emailTaken = await this.database.user.findFirst({ where: { email: dto.email } });
+    const emailTaken = await this.database.user.findFirst({
+      where: { email: dto.email },
+    });
     if (emailTaken) {
       throw new ConflictException(`El email "${dto.email}" ya está registrado`);
     }
@@ -114,7 +124,12 @@ export class AuthService {
         email: user.email,
         role: user.role,
         organizationId: org.id,
-        organization: { id: org.id, name: org.name, slug: org.slug, plan: org.plan },
+        organization: {
+          id: org.id,
+          name: org.name,
+          slug: org.slug,
+          plan: org.plan,
+        },
       },
     };
   }
@@ -123,7 +138,10 @@ export class AuthService {
   // Refresh + logout
   // ====================================================================
 
-  async refreshTokens(refreshToken: string, ctx?: { userAgent?: string; ipAddress?: string }) {
+  async refreshTokens(
+    refreshToken: string,
+    ctx?: { userAgent?: string; ipAddress?: string },
+  ) {
     if (!refreshToken || refreshToken.length < 20) {
       throw new UnauthorizedException('Refresh token inválido');
     }
@@ -135,8 +153,10 @@ export class AuthService {
     });
 
     if (!stored) throw new UnauthorizedException('Refresh token no encontrado');
-    if (stored.revokedAt) throw new UnauthorizedException('Refresh token revocado');
-    if (stored.expiresAt < new Date()) throw new UnauthorizedException('Refresh token expirado');
+    if (stored.revokedAt)
+      throw new UnauthorizedException('Refresh token revocado');
+    if (stored.expiresAt < new Date())
+      throw new UnauthorizedException('Refresh token expirado');
     if (!stored.user.isActive) throw new UnauthorizedException('User inactivo');
 
     // Atomic rotation: revoca el refresh usado (anti-replay) y emite un par nuevo.
@@ -192,7 +212,10 @@ export class AuthService {
   // OAuth
   // ====================================================================
 
-  async loginWithOAuth(dto: OAuthLoginDto, ctx?: { userAgent?: string; ipAddress?: string }) {
+  async loginWithOAuth(
+    dto: OAuthLoginDto,
+    ctx?: { userAgent?: string; ipAddress?: string },
+  ) {
     const profile = await this.oauthService.verify(dto.provider, {
       idToken: dto.idToken,
       accessToken: dto.accessToken,
@@ -257,7 +280,10 @@ export class AuthService {
     return this.issueTokensForUser(oauth.user, ctx);
   }
 
-  async registerWithOAuth(dto: OAuthRegisterDto, ctx?: { userAgent?: string; ipAddress?: string }) {
+  async registerWithOAuth(
+    dto: OAuthRegisterDto,
+    ctx?: { userAgent?: string; ipAddress?: string },
+  ) {
     const profile = await this.oauthService.verify(dto.provider, {
       idToken: dto.idToken,
       accessToken: dto.accessToken,
@@ -289,11 +315,15 @@ export class AuthService {
       },
     });
     if (dupOAuth) {
-      throw new ConflictException(`Este perfil de ${dto.provider} ya está vinculado a otro usuario`);
+      throw new ConflictException(
+        `Este perfil de ${dto.provider} ya está vinculado a otro usuario`,
+      );
     }
 
     const slug = dto.orgSlug ?? this.slugify(dto.orgName);
-    const existingOrg = await this.database.organization.findUnique({ where: { slug } });
+    const existingOrg = await this.database.organization.findUnique({
+      where: { slug },
+    });
     if (existingOrg) {
       throw new ConflictException(`El slug "${slug}" ya está en uso`);
     }
@@ -349,7 +379,12 @@ export class AuthService {
   private async issueTokensForUser(user: any, ctx?: any, orgOverride?: any) {
     const org = orgOverride ?? user.organization;
     return this.generateTokenPair(
-      { id: user.id, email: user.email, orgId: user.organizationId, role: user.role },
+      {
+        id: user.id,
+        email: user.email,
+        orgId: user.organizationId,
+        role: user.role,
+      },
       ctx,
     ).then((tokens) => ({
       ...tokens,
@@ -381,7 +416,9 @@ export class AuthService {
 
     const refresh_token = crypto.randomBytes(32).toString('base64url');
     const tokenHash = this.hashToken(refresh_token);
-    const expiresAt = new Date(Date.now() + AuthService.REFRESH_TTL_DAYS * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(
+      Date.now() + AuthService.REFRESH_TTL_DAYS * 24 * 60 * 60 * 1000,
+    );
 
     await this.database.refreshToken.create({
       data: {
@@ -406,12 +443,14 @@ export class AuthService {
   }
 
   private slugify(text: string): string {
-    return text
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // strip accents
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 60) || `org-${Date.now().toString(36)}`;
+    return (
+      text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // strip accents
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60) || `org-${Date.now().toString(36)}`
+    );
   }
 }

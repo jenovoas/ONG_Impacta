@@ -11,11 +11,11 @@ export class TenantMiddleware implements NestMiddleware {
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
       try {
-        const payload = this.jwtService.decode(token) as any;
+        const payload = this.jwtService.decode(token);
         if (payload && payload.orgId) {
           req.tenant = payload.orgId;
         }
-      } catch (e) {
+      } catch {
         // Ignore decoding errors in middleware, let the Guard handle authentication
       }
     }

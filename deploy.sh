@@ -12,7 +12,7 @@
 #   - Postgres 16 y Redis corren NATIVOS como servicios systemd (no hay contenedores).
 #   - El backend corre como servicio systemd `impacta-backend.service` desde backend/dist/.
 #   - Dominio único impacta.pinguinoseguro.cl sirve landing + dashboard desde /var/www/impacta.pinguinoseguro.cl/.
-#   - app-impacta.pinguinoseguro.cl es solo redirect 301 legado (no sirve contenido).
+#   - NO SE USAN otros subdominios legado (no sirve contenido).
 
 set -euo pipefail
 
@@ -81,11 +81,9 @@ verify() {
     && ok "systemd: $SERVICE activo" \
     || { echo "FAIL: $SERVICE inactivo"; fails=$((fails+1)); }
 
-  for h in impacta api-impacta app-impacta; do
+  for h in impacta; do
     code=$(curl -s -o /dev/null -w '%{http_code}' -m 8 "https://$h.pinguinoseguro.cl/" || echo 'ERR')
     case "$h" in
-      api-impacta) [[ "$code" == '200' || "$code" == '401' ]] && verdict='ok (API responde)' || { verdict='FAIL'; fails=$((fails+1)); } ;;
-      app-impacta) [[ "$code" == '301' ]] && verdict='ok (301 → impacta.*)' || { verdict='FAIL (esperaba 301)'; fails=$((fails+1)); } ;;
       *)           [[ "$code" == '200' ]] && verdict='ok' || { verdict='FAIL'; fails=$((fails+1)); } ;;
     esac
     printf '  %-28s %s %s\n' "$h.pinguinoseguro.cl" "$code" "$verdict"

@@ -10,10 +10,17 @@ export class SpeciesService {
     private readonly storage: StorageService,
   ) {}
 
-  async create(orgId: string, dto: CreateSpeciesDto, file?: Express.Multer.File) {
+  async create(
+    orgId: string,
+    dto: CreateSpeciesDto,
+    file?: Express.Multer.File,
+  ) {
     let imageUrl: string | null = null;
     if (file) {
-      imageUrl = await this.storage.uploadFile(file, `organizations/${orgId}/species`);
+      imageUrl = await this.storage.uploadFile(
+        file,
+        `organizations/${orgId}/species`,
+      );
     }
 
     return this.prisma.species.create({
@@ -44,12 +51,20 @@ export class SpeciesService {
     return species;
   }
 
-  async update(orgId: string, id: string, dto: any, file?: Express.Multer.File) {
+  async update(
+    orgId: string,
+    id: string,
+    dto: any,
+    file?: Express.Multer.File,
+  ) {
     const species = await this.findOne(orgId, id);
-    
+
     let imageUrl = species.imageUrl;
     if (file) {
-      imageUrl = await this.storage.uploadFile(file, `organizations/${orgId}/species`);
+      imageUrl = await this.storage.uploadFile(
+        file,
+        `organizations/${orgId}/species`,
+      );
     }
 
     return this.prisma.species.update({

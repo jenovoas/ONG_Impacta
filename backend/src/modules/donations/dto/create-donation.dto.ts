@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Min } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+} from 'class-validator';
 
 export class CreateDonationDto {
   @IsNumber()
@@ -17,4 +24,12 @@ export class CreateDonationDto {
   @IsUUID()
   @IsOptional()
   campaignId?: string;
+
+  @IsString()
+  @IsOptional()
+  sourceType?: 'DIRECT' | 'P2P' | 'SUBSCRIPTION';
+
+  @IsUUID()
+  @IsOptional()
+  p2pPageId?: string;
 }

@@ -2,6 +2,14 @@
 
 Documento autosuficiente: cualquier agente puede recoger este plan sin depender del historial de Claude.
 
+> **Extensión estratégica 25-ago-2026:** la planificación completa de identidad
+> comunitaria, catálogo científico, red de profesionales, oportunidades,
+> mensajería cifrada, periodismo ciudadano, runtime Sentinel y cerebro IA
+> API→Qwen local está en
+> [`docs/PLAN_MAESTRO_CEREBRO_OPERATIVO_REGIONAL.md`](docs/PLAN_MAESTRO_CEREBRO_OPERATIVO_REGIONAL.md).
+> Sus fases y gates complementan este backlog; no autorizan despliegues o cambios
+> de infraestructura sin confirmación.
+
 ---
 
 ## 0. Estado actual (2026-08-24)
@@ -24,13 +32,13 @@ Las rutas ahora cargan sus pantallas por separado; el módulo de entrada bajó d
 > Historia: el stack vivió antes en un VM llamada `fan` (Rocky + podman rootless), **apagada el 23-ago-2026**. La migración a fenix cambió el runtime: postgres/redis nativos vía systemd, backend como proceso node bajo systemd. Todo lo que mencione podman/compose en producción está obsoleto.
 
 **Stack:**
-- `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto en `https://api-impacta.pinguinoseguro.cl` (nginx `proxy_pass` al servicio systemd `impacta-backend.service` escuchando en `127.0.0.1:3001`).
+- `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto en `https://impacta.pinguinoseguro.cl/api` (nginx `proxy_pass` al servicio systemd `impacta-backend.service` escuchando en `127.0.0.1:3001`).
 - `landing/` — Next.js 16.2.4 (standalone) + Tailwind v4 + Manrope/Inter. **NO desplegado en producción desde `1380fb9`.** El código se conserva en el repo como referencia (incluye el wiring real: `DemoRequest` POST, `public-stats` fetch, `DemoModal` con focus trap + scroll lock). Path A (deploy Next.js en `impacta.pinguinoseguro.cl`) fue revocado por el usuario: degradaba visualmente el sitio (sin Three.js EarthBackground, sin `logo.png`, sin navbar completa).
 - `frontend/` — Vite + React 19. **UN SOLO dominio usuario-facing: `https://impacta.pinguinoseguro.cl`:**
   - `/` — landing pública (`LandingPage.tsx`) con `EarthBackground` (Three.js), `logo.png`, navbar, module cards con "Ver módulo en acción", demo modal (POST a `/api/demo-requests`, dedup 5min/email), stats bar con datos REALES desde `/api/organizations/public-stats`. Sin sesión solo se ve esto.
   - `/login`, `/register` — acceso; tras autenticar se entra a la app.
   - `/dashboard/*` — Overview, Members, Donations, Campaigns, Species, Missions, Organization Profile.
-  - `app-impacta.pinguinoseguro.cl` quedó como legado: el SPA (`LegacyDomainRedirect` en `App.tsx`) redirige todo su tráfico a `impacta.*`.
+  - `impacta.pinguinoseguro.cl` quedó como legado: el SPA (`LegacyDomainRedirect` en `App.tsx`) redirige todo su tráfico a `impacta.*`.
   - Mismo build estático (`npm run build` → `dist/`), copiado a `/var/www/impacta.pinguinoseguro.cl/` y servido por nginx.
 - **PostgreSQL 16 NATIVO** (systemd `postgresql`, `127.0.0.1:5432`), DB `impacta`. Migraciones aplicadas (incluida `20260816190000_add_demo_requests`). **Redis NATIVO** (systemd `redis-server`, `127.0.0.1:6379`).
 - [docker-compose.yml](docker-compose.yml) queda **solo para desarrollo local** fuera del server.
@@ -41,13 +49,16 @@ Las rutas ahora cargan sus pantallas por separado; el módulo de entrada bajó d
 - ✅ `organizations` — CRUD completo + `findBySlug` + `getSummary` + `publicStats`
 - ✅ `users` — CRUD de usuarios con roles (`SUPERADMIN`, `ADMIN`, `OPERATOR`, `VIEWER`)
 - ✅ `members` — CRUD de socios/voluntarios con validación RUT chileno
-- ✅ `donations` — Gestión de donaciones (PENDING → SUCCEEDED por callback)
-- ✅ `campaigns` — Campañas de recaudación con meta y progreso
+- ✅ `donations` — Gestión de donaciones (PENDING → SUCCEEDED por callback, suscripciones recurrentes)
+- ✅ `campaigns` — Campañas de recaudación con meta, progreso y recaudación P2P
 - ✅ `species` — Biblioteca de especies con upload a MinIO
-- ✅ `missions` — Misiones de campo con subtasks (`MissionTask`)
-- ✅ `auth` — JWT + bcrypt, login por email + orgSlug, refresh token
+- ✅ `missions` — Misiones de campo con subtasks (`MissionTask`) y sincronización offline
+- ✅ `auth` — JWT + bcrypt, login por email + orgSlug, refresh token, OAuth2
 - ✅ `storage` — Servicio MinIO con `getFileStream`
 - ✅ `demo-requests` — Lead form público del landing (sin tenant, sin auth). Endpoint `POST /api/demo-requests` con dedup de 5 min por email. Endpoint `GET /demo-requests` protegido por `@Roles`. Schema dedicado: `DemoRequest { id, name, email, org, phone?, message?, status: NEW|CONTACTED|REJECTED, createdAt }` con índice en `(email, createdAt)`.
+- ✅ `community` — Gestión de identidades, perfiles comunitarios y credenciales verificables
+- ✅ `ai-security` — Ingress guard, privacy sanitizer y telemetría segura
+- ✅ `ai-gateway` — Orquestador AI local con soporte OmniRoute y fallbacks seguros
 
 **Módulos backend NO implementados (si existen):** revisar `ls src/modules/`
 
@@ -119,10 +130,10 @@ Fuente de verdad: **Google Stitch project `4741044715461206908`** ("Interfaz Dis
 
 > **Nota:** esta fase fue planificada cuando el diseño era multi-dominio. Desde el
 > 24-ago-2026 rige la regla #1: UN SOLO SISTEMA en `impacta.pinguinoseguro.cl`;
-> `app-impacta.*` solo redirige (301) y la API vive en `api-impacta.*`.
+> Todo vive bajo `https://impacta.pinguinoseguro.cl`.
 
 **Pre-requisitos cumplidos:**
-- Backend expuesto en `api-impacta.pinguinoseguro.cl` ✅
+- Backend expuesto en `/api` bajo `impacta.pinguinoseguro.cl` ✅
 - Frontend desplegado en `impacta.pinguinoseguro.cl` (landing + auth + dashboard, un build) ✅
 - CORS configurado ✅
 

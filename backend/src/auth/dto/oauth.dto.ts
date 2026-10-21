@@ -1,7 +1,18 @@
-import { IsString, IsIn, IsEmail, IsOptional, MinLength, MaxLength, Matches } from 'class-validator';
+import {
+  IsString,
+  IsIn,
+  IsOptional,
+  MinLength,
+  MaxLength,
+  Matches,
+} from 'class-validator';
 
-export const SUPPORTED_OAUTH_PROVIDERS = ['google', 'facebook', 'github'] as const;
-export type OAuthProvider = typeof SUPPORTED_OAUTH_PROVIDERS[number];
+export const SUPPORTED_OAUTH_PROVIDERS = [
+  'google',
+  'facebook',
+  'github',
+] as const;
+export type OAuthProvider = (typeof SUPPORTED_OAUTH_PROVIDERS)[number];
 
 /**
  * Login con un provider OAuth. El frontend obtiene el token del provider
@@ -46,7 +57,8 @@ export class OAuthRegisterDto extends OAuthLoginDto {
   @MinLength(2)
   @MaxLength(60)
   @Matches(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, {
-    message: 'orgSlug debe ser lowercase, alfanumérico y puede contener guiones',
+    message:
+      'orgSlug debe ser lowercase, alfanumérico y puede contener guiones',
   })
   orgSlug?: string;
 }

@@ -12,7 +12,7 @@ async function cleanAndUpdate() {
     // Limpiar especies duplicadas
     await prisma.species.deleteMany({ where: { organizationId: org.id } });
 
-    const baseUrl = 'https://api-impacta.pinguinoseguro.cl/assets/organizations/demo/species';
+    const baseUrl = 'https://impacta.pinguinoseguro.cl/api/assets/organizations/demo/species';
     
     const species = [
       { commonName: 'Puma Chileno', scientificName: 'Puma concolor araucanus', status: 'THREATENED', description: 'Félido nativo de gran tamaño.', imageUrl: baseUrl + '/puma.png' },

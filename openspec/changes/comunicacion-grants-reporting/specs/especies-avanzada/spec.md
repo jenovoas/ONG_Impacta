@@ -6,7 +6,7 @@ Elevar Especies de CRUD básico a biblioteca con estado de conservación UICN, e
 ## ADDED Requirements
 
 ### Requirement: Estado de conservación UICN por especie
-Cada especie debe registrar su categoría UICN (EX, EW, CR, EN, VU, NT, LC, DD, NE) y año de evaluación.
+Cada especie MUST registrar su categoría UICN (EX, EW, CR, EN, VU, NT, LC, DD, NE) y año de evaluación.
 
 #### Scenario: Registrar categoría UICN
 - **WHEN** staff hace `PATCH /species/:id` con `{ iucnStatus: "EN", iucnYear: 2024 }`
@@ -17,14 +17,14 @@ Cada especie debe registrar su categoría UICN (EX, EW, CR, EN, VU, NT, LC, DD, 
 - **THEN** cada org solo edita su `Species` (filtro `organizationId`); el catálogo UICN es compartido (referencia global) pero el registro es propio
 
 ### Requirement: Multimedia por especie
-Cada especie debe poder tener una galería de imágenes/audio con captura de créditos y coexistencia con el mapa.
+Cada especie MUST poder tener una galería de imágenes/audio con captura de créditos y coexistencia con el mapa.
 
 #### Scenario: Subir evidencia multimedia
 - **WHEN** staff hace `POST /species/:id/media` con `{ type: "IMAGE", url, caption, credit }`
 - **THEN** backend guarda `SpeciesMedia` asociado a la `Species` del tenant y lo muestra en la galería de la ficha
 
 ### Requirement: Observaciones de campo geo-referenciadas
-Voluntarios y staff deben registrar avistamientos con lat/lng, timestamp y nota, y verlos agregados en un mapa simple por especie.
+Voluntarios y staff MUST poder registrar avistamientos con lat/lng, timestamp y nota, y verlos agregados en un mapa simple por especie.
 
 #### Scenario: Registrar observación con coordenadas
 - **WHEN** un usuario autenticado hace `POST /species/:id/observations` con `{ lat, lng, notes, observedAt }`

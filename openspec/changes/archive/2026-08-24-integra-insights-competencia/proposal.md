@@ -31,6 +31,6 @@ Si no integramos esos dos aprendizajes, Impacta+ queda como “Neon para Chile�
 
 - **Frontend**: `frontend/src/pages/Missions.tsx` + nuevo `frontend/src/lib/missions-db.ts` (idb), `frontend/src/pages/PortalDonante.tsx`, `frontend/src/app/serviceWorker` opcional, `frontend/src/pages/LandingPage.tsx` docs.
 - **Backend**: `backend/src/modules/missions` (sync idempotente, conflicto last-write-wins), `backend/src/modules/donations` (`GET /me`, `receipt`), `backend/src/modules/members` vínculo donante↔member por RUT/email, Prisma `RecurringDonation` si aplica.
-- **Infra**: Sin cambios — sigue dominio único `impacta.*` (API en `api-impacta.*`), `app-impacta` 301. Nativo systemd.
+- **Infra**: Sin cambios — sigue dominio único `impacta.*` (API en `impacta.pinguinoseguro.cl/api`), `impacta.pinguinoseguro.cl` 301. Nativo systemd.
 - **Docs**: `AGENTS.md` regla #1, `README.md`, `openspec/specs/misiones-offline`, `portal-donante`.
 - **Riesgos**: IndexedDB por tenant debe aislar por `organizationId` + `userId` para no filtrar entre orgs; sync debe ser idempotente.

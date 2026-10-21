@@ -22,15 +22,18 @@ export class StorageController {
     this.logger.debug(`Fetching asset: ${actualPath}`);
     try {
       const stream = await this.storageService.getFileStream(actualPath);
-      
+
       // Headers de caché para mejorar el rendimiento
       res.setHeader('Cache-Control', 'public, max-age=31536000');
-      
+
       // Content-Type dinámico
-      if (actualPath.endsWith('.png')) res.setHeader('Content-Type', 'image/png');
-      else if (actualPath.endsWith('.jpg') || actualPath.endsWith('.jpeg')) res.setHeader('Content-Type', 'image/jpeg');
-      else if (actualPath.endsWith('.svg')) res.setHeader('Content-Type', 'image/svg+xml');
-      
+      if (actualPath.endsWith('.png'))
+        res.setHeader('Content-Type', 'image/png');
+      else if (actualPath.endsWith('.jpg') || actualPath.endsWith('.jpeg'))
+        res.setHeader('Content-Type', 'image/jpeg');
+      else if (actualPath.endsWith('.svg'))
+        res.setHeader('Content-Type', 'image/svg+xml');
+
       stream.pipe(res);
     } catch (error) {
       this.logger.error('Failed to fetch asset', error);

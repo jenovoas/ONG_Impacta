@@ -27,17 +27,26 @@ export class OAuthService {
     };
   }
 
-  async verify(provider: OAuthProvider, input: { idToken?: string; accessToken?: string }): Promise<OAuthProfile> {
+  async verify(
+    provider: OAuthProvider,
+    input: { idToken?: string; accessToken?: string },
+  ): Promise<OAuthProfile> {
     const v = this.verifiers[provider];
     if (!v) {
-      throw new UnauthorizedException(`Provider OAuth no soportado: ${provider}`);
+      throw new UnauthorizedException(
+        `Provider OAuth no soportado: ${provider}`,
+      );
     }
     try {
       return await v.verify(input);
     } catch (err) {
       if (err instanceof UnauthorizedException) throw err;
-      this.logger.error(`OAuth verify failed for ${provider}: ${(err as Error).message}`);
-      throw new UnauthorizedException(`No se pudo verificar el token de ${provider}`);
+      this.logger.error(
+        `OAuth verify failed for ${provider}: ${(err as Error).message}`,
+      );
+      throw new UnauthorizedException(
+        `No se pudo verificar el token de ${provider}`,
+      );
     }
   }
 
@@ -54,11 +63,15 @@ export class OAuthService {
       case 'facebook':
         // FacebookStrategy usa app_id + app_secret como credenciales del servidor
         // en el debug_token call. Ambos requeridos.
-        return !!process.env.FACEBOOK_APP_ID && !!process.env.FACEBOOK_APP_SECRET;
+        return (
+          !!process.env.FACEBOOK_APP_ID && !!process.env.FACEBOOK_APP_SECRET
+        );
       case 'github':
         // GithubStrategy usa Basic auth con client_id:client_secret para /user.
         // Ambos requeridos (client_id solo o secret solo no alcanzan).
-        return !!process.env.GITHUB_CLIENT_ID && !!process.env.GITHUB_CLIENT_SECRET;
+        return (
+          !!process.env.GITHUB_CLIENT_ID && !!process.env.GITHUB_CLIENT_SECRET
+        );
       default:
         return false;
     }

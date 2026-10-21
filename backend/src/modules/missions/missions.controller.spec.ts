@@ -21,9 +21,7 @@ describe('MissionsController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MissionsController],
-      providers: [
-        { provide: MissionsService, useValue: mockMissionsService },
-      ],
+      providers: [{ provide: MissionsService, useValue: mockMissionsService }],
     }).compile();
 
     controller = module.get<MissionsController>(MissionsController);
@@ -39,12 +37,10 @@ describe('MissionsController', () => {
       const mockResult = { id: 't1', isCompleted: true };
       service.updateTaskStatus.mockResolvedValue(mockResult);
 
-      const res = await controller.updateTask(
-        'org-1',
-        'm1',
-        't1',
-        { isCompleted: true, updatedAt: '2026-08-24T12:00:00.000Z' },
-      );
+      const res = await controller.updateTask('org-1', 'm1', 't1', {
+        isCompleted: true,
+        updatedAt: '2026-08-24T12:00:00.000Z',
+      });
 
       expect(res).toBe(mockResult);
       expect(service.updateTaskStatus).toHaveBeenCalledWith(

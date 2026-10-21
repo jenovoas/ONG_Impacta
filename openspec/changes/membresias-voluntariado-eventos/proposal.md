@@ -33,6 +33,6 @@ Sin esto, una ONG que quiere cobrar socios, coordinar brigadas y hacer eventos d
 
 - **Frontend**: nuevas páginas/secciones `frontend/src/pages/DashboardMembers.tsx` (tiers + directorio), `frontend/src/pages/Voluntariado.tsx` (turnos), `frontend/src/pages/Eventos.tsx` (eventos + check-in), extensión de `PortalDonante.tsx` con sección socio/tier, y enrutado en `App.tsx` bajo `/dashboard/membership`, `/dashboard/voluntariado`, `/dashboard/eventos`.
 - **Backend**: `backend/src/modules/members` (campos `membershipTier`, endpoints tier), `backend/src/modules/memberships` (cuota, auto-renovación, worker BullMQ), `backend/src/modules/volunteers` (`VolunteerShift`), `backend/src/modules/events` (`Event`, `Ticket`, `check-in`), Prisma schema extendido.
-- **Infra**: Sin cambios — sigue dominio único `impacta.*` (API en `api-impacta.*`), `app-impacta` 301, nativo systemd. Sin nuevos servicios.
+- **Infra**: Sin cambios — sigue dominio único `impacta.*` (API en `impacta.pinguinoseguro.cl/api`), `impacta.pinguinoseguro.cl` 301, nativo systemd. Sin nuevos servicios.
 - **Docs**: `README.md`, `AGENTS.md` regla #1 con módulos nuevos, `openspec/specs/{membresias-avanzadas,voluntariado,eventos}`.
 - **Riesgos**: vencimiento/auto-renovación requiere worker idempotente y UTC consistente; overbooking de turnos y de tickets requiere control de inventario; tier con precios en CLP debe definir `amount`/`currency` para no colisionar con donaciones.

@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { CreateMissionDto } from './dto/create-mission.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -7,7 +12,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 export class MissionsService {
   private readonly logger = new Logger(MissionsService.name);
 
-  constructor(private readonly prisma: DatabaseService) { }
+  constructor(private readonly prisma: DatabaseService) {}
 
   async create(orgId: string, dto: CreateMissionDto) {
     const { tasks, ...missionData } = dto;
@@ -16,9 +21,11 @@ export class MissionsService {
       data: {
         ...missionData,
         organizationId: orgId,
-        tasks: tasks ? {
-          create: tasks,
-        } : undefined,
+        tasks: tasks
+          ? {
+              create: tasks,
+            }
+          : undefined,
       },
       include: { tasks: true },
     });
@@ -57,12 +64,18 @@ export class MissionsService {
       include: { mission: true },
     });
 
-    if (!task || task.missionId !== missionId || task.mission.organizationId !== orgId) {
-      this.logger.warn(`Task update denied: task ${taskId} in mission ${missionId} not found for organization`);
+    if (
+      !task ||
+      task.missionId !== missionId ||
+      task.mission.organizationId !== orgId
+    ) {
+      this.logger.warn(
+        `Task update denied: task ${taskId} in mission ${missionId} not found for organization`,
+      );
       throw new NotFoundException(`Task with ID ${taskId} not found`);
     }
 
-    const { mission, ...serverTask } = task;
+    const { mission: _mission, ...serverTask } = task;
 
     if (clientUpdatedAt) {
       const clientTime = new Date(clientUpdatedAt).getTime();
@@ -86,12 +99,20 @@ export class MissionsService {
 
     const { isCompleted, title, description, assignedTo } = dto;
 
-    const isCompletedUnchanged = isCompleted === undefined || isCompleted === serverTask.isCompleted;
+    const isCompletedUnchanged =
+      isCompleted === undefined || isCompleted === serverTask.isCompleted;
     const titleUnchanged = title === undefined || title === serverTask.title;
-    const descriptionUnchanged = description === undefined || description === serverTask.description;
-    const assignedToUnchanged = assignedTo === undefined || assignedTo === serverTask.assignedTo;
+    const descriptionUnchanged =
+      description === undefined || description === serverTask.description;
+    const assignedToUnchanged =
+      assignedTo === undefined || assignedTo === serverTask.assignedTo;
 
-    if (isCompletedUnchanged && titleUnchanged && descriptionUnchanged && assignedToUnchanged) {
+    if (
+      isCompletedUnchanged &&
+      titleUnchanged &&
+      descriptionUnchanged &&
+      assignedToUnchanged
+    ) {
       return serverTask;
     }
 
