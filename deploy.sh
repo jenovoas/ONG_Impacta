@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 #
-# deploy.sh — Deploy de Impacta+ en el server fenix (Azure, Ubuntu 24.04)
+# deploy.sh — Deploy de Impacta+ en fenix (Alpine, rama infra/alpine-fenix)
 #
 # Uso:
-#   ./deploy.sh frontend   # build de frontend/ → copia dist/ a /var/www/ (landing + dashboard)
-#   ./deploy.sh backend    # build de backend/  → restart del servicio systemd impacta-backend
-#   ./deploy.sh migrate    # ejecuta prisma migrate deploy contra la DB nativa
-#   ./deploy.sh verify     # verificación post-deploy (dominio único + API + redirect legado)
+#   ./deploy.sh frontend   # build de frontend/ (nginx sirve frontend/dist directo)
+#   ./deploy.sh migrate    # prisma migrate deploy dentro del contenedor backend
+#   ./deploy.sh backend    # build + up del stack docker (db, redis, backend en 3101)
+#   ./deploy.sh verify     # verificación post-deploy
 #
-# Realidad de producción (ver AGENTS.md):
-#   - Postgres 16 y Redis corren NATIVOS como servicios systemd (no hay contenedores).
-#   - El backend corre como servicio systemd `impacta-backend.service` desde backend/dist/.
-#   - Dominio único impacta.pinguinoseguro.cl sirve landing + dashboard desde /var/www/impacta.pinguinoseguro.cl/.
-#   - NO SE USAN otros subdominios legado (no sirve contenido).
-
+# Realidad (rama Alpine):
+#   - Sin systemd: servicios vía docker compose (stack propio impacta-*; NO tocar sentinel-*).
+#   - Nginx (host): /etc/nginx/http.d/impacta.conf — root a frontend/dist, /api/ → 127.0.0.1:3101.
+#   - .env en la raíz (gitignored) con JWT_SECRET real — el backend se niega a arrancar sin él.
+#
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WWW_DIR="/var/www/impacta.pinguinoseguro.cl"
-SERVICE="impacta-backend.service"
+COMPOSE="sudo docker compose -f $REPO_ROOT/docker-compose.yml -f $REPO_ROOT/docker-compose.prod.yml"
+API="https://impacta.pinguinoseguro.cl"
+RESOLVE="--resolve impacta.pinguinoseguro.cl:443:127.0.0.1"
 
 log()  { printf '\033[1;34m[deploy]\033[0m %s\n' "$*"; }
 ok()   { printf '\033[1;32m[ ok ]\033[0m %s\n' "$*"; }
@@ -28,72 +28,60 @@ require_repo_root() {
   [[ -d "$REPO_ROOT/frontend" && -d "$REPO_ROOT/backend" ]] || die "Ejecuta este script desde la raíz del repo ($REPO_ROOT)"
 }
 
+require_secrets() {
+  [[ -f "$REPO_ROOT/.env" ]] || die "Falta $REPO_ROOT/.env con JWT_SECRET real"
+  grep -q '^JWT_SECRET=PENDIENTE' "$REPO_ROOT/.env" && die ".env aún tiene JWT_SECRET placeholder — reemplazar antes de desplegar"
+}
+
 deploy_frontend() {
   require_repo_root
-  log "Build de frontend/ (dominio único impacta.* — landing + dashboard)..."
+  log "Build de frontend/ (nginx sirve frontend/dist directo, sin copia)..."
   (
     cd "$REPO_ROOT/frontend"
     npm ci --silent 2>/dev/null || npm install --silent
     npm run build
   )
   [[ -f "$REPO_ROOT/frontend/dist/index.html" ]] || die "El build no generó frontend/dist/index.html"
-  log "Copiando dist/ → $WWW_DIR ..."
-  sudo mkdir -p "$WWW_DIR"
-  sudo rsync -a --delete --chown=www-data:www-data \
-    --exclude='.well-known' \
-    "$REPO_ROOT/frontend/dist/" "$WWW_DIR/"
-  ok "Frontend desplegado en $WWW_DIR (dominio único impacta.*)"
-}
-
-deploy_backend() {
-  require_repo_root
-  log "Build de backend/..."
-  (
-    cd "$REPO_ROOT/backend"
-    npm ci --silent 2>/dev/null || npm install --silent
-    npx prisma generate
-    npm run build
-  )
-  [[ -f "$REPO_ROOT/backend/dist/src/main.js" ]] || die "El build no generó backend/dist/src/main.js (el unit file espera dist/src/main)"
-  log "Reiniciando $SERVICE ..."
-  sudo systemctl restart "$SERVICE"
-  sleep 2
-  systemctl is-active --quiet "$SERVICE" && ok "Servicio $SERVICE activo" || die "El servicio $SERVICE no arrancó — revisar: journalctl -u $SERVICE -n 50"
+  ok "Frontend construido en frontend/dist (servido directo por nginx)"
 }
 
 run_migrations() {
   require_repo_root
-  log "Aplicando migraciones Prisma (prisma migrate deploy)..."
-  (
-    cd "$REPO_ROOT/backend"
-    # El CLI de Prisma no sube a buscar el .env de la raíz — cargarlo explícitamente
-    set -a; source "$REPO_ROOT/.env"; set +a
-    npx prisma migrate deploy
-  )
-  log "Reiniciando backend para cargar cambios de schema..."
-  sudo systemctl restart "$SERVICE"
-  ok "Migraciones aplicadas y backend reiniciado"
+  require_secrets
+  log "Aplicando migraciones Prisma (prisma migrate deploy en contenedor)..."
+  $COMPOSE up -d postgres redis
+  $COMPOSE run --rm backend npx prisma migrate deploy
+  ok "Migraciones aplicadas"
+}
+
+deploy_backend() {
+  require_repo_root
+  require_secrets
+  log "Build + up del stack (db, redis, backend:3101)..."
+  $COMPOSE up -d --build
+  log "Esperando backend en :3101..."
+  for i in $(seq 1 30); do
+    curl -sf -m 2 -o /dev/null "http://127.0.0.1:3101/api/organizations/public-stats" && break
+    [[ $i -eq 30 ]] && die "El backend no respondió en :3101 — revisar: sudo docker logs impacta-backend"
+    sleep 2
+  done
+  ok "Stack arriba (impacta-backend, impacta-db, impacta-redis)"
 }
 
 verify() {
   local fails=0
-  systemctl is-active --quiet "$SERVICE" \
-    && ok "systemd: $SERVICE activo" \
-    || { echo "FAIL: $SERVICE inactivo"; fails=$((fails+1)); }
+  $COMPOSE ps --status running | grep -q 'impacta-backend' \
+    && ok "docker: impacta-backend corriendo" \
+    || { echo "FAIL: impacta-backend no corre"; fails=$((fails+1)); }
 
-  for h in impacta; do
-    code=$(curl -s -o /dev/null -w '%{http_code}' -m 8 "https://$h.pinguinoseguro.cl/" || echo 'ERR')
-    case "$h" in
-      *)           [[ "$code" == '200' ]] && verdict='ok' || { verdict='FAIL'; fails=$((fails+1)); } ;;
-    esac
-    printf '  %-28s %s %s\n' "$h.pinguinoseguro.cl" "$code" "$verdict"
-  done
+  code=$(curl -sk -o /dev/null -w '%{http_code}' -m 8 $RESOLVE "$API/" || echo 'ERR')
+  [[ "$code" == '200' ]] && ok "landing: 200" || { echo "FAIL: landing $code"; fails=$((fails+1)); }
 
-  stats=$(curl -s -m 8 https://impacta.pinguinoseguro.cl/api/organizations/public-stats || true)
+  stats=$(curl -sk -m 8 $RESOLVE "$API/api/organizations/public-stats" || true)
   if echo "$stats" | grep -q 'speciesCount'; then
-    ok "public-stats con datos reales: $stats"
+    ok "public-stats con datos reales"
   else
-    echo "FAIL: public-stats sin respuesta válida"; fails=$((fails+1))
+    echo "FAIL: public-stats sin respuesta válida ($stats)"; fails=$((fails+1))
   fi
 
   [[ $fails -eq 0 ]] && ok "Verificación completa: todo operativo" || die "Verificación con $fails problema(s)"
