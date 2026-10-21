@@ -27,6 +27,13 @@ El desarrollo se retoma desde `origin/main`; la pausa fue por disponibilidad de 
 
 Las rutas ahora cargan sus pantallas por separado; el módulo de entrada bajó de ~1.48 MB a ~224 KB sin minificar. El paquete 3D de la landing sigue siendo grande (~914 KB) para conservar EarthBackground. Los builds de backend y frontend pasan en esta rama. No se desplegó ni se modificó infraestructura.
 
+### Consolidación 21-oct-2026 (merges + deploy parcial)
+
+- Fusionadas a `main` (`1a73832`): `feat/frontend-login-polish`, `chore-direnv-envrc` y `origin/feat/campanas-p2p` (P2P + recurrencia + community + ai-security + ai-gateway + knowledge RAG). Ver detalle y decisiones de conflictos en [AGENTS.md](AGENTS.md) § Estado actual 21-oct-2026.
+- **Infra real verificada ≠ docs antiguos:** sin systemd, con docker (sentinel ocupa 3001/5432/6379 — no tocar), nginx en `/etc/nginx/http.d/` sirviendo `frontend/dist`, backend objetivo puerto `3101`, sin `.env` (secrets pendientes). Fuente vigente: [AGENTS.md](AGENTS.md) § Infraestructura.
+- **Deploy 21-oct:** frontend ✅ arriba; backend ⏳ bloqueado por `DATABASE_URL` + `JWT_SECRET` (+ definir supervisor). 3 migraciones nuevas listas (`migrate deploy`).
+- Specs P2P: avance real marcado en `openspec/changes/campanas-p2p-recaudacion/tasks.md`. Pendiente: pasarela real (mock vigente), páginas `/p2p/:slug`, suscripciones en portal, e2e en CI, navegación manual.
+
 **Infra:** servidor **`fenix`**, VM **Azure** con Ubuntu 24.04 LTS. Serving edge: nginx directo. **Stack 100% nativo — NADA corre en contenedores en producción.** Wildcard `*.pinguinoseguro.cl` (`/etc/letsencrypt/live/pinguinoseguro.cl/`). **NO TOCAR infra existente** de los otros proyectos del server (pinguinoseguro, laespiguita, lotaindomito, micelia, portfolio, transcript). Solo agregar servicios. Ver [AGENTS.md](AGENTS.md) sección Infraestructura para el patrón de serving.
 
 > Historia: el stack vivió antes en un VM llamada `fan` (Rocky + podman rootless), **apagada el 23-ago-2026**. La migración a fenix cambió el runtime: postgres/redis nativos vía systemd, backend como proceso node bajo systemd. Todo lo que mencione podman/compose en producción está obsoleto.

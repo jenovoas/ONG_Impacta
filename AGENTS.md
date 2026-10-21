@@ -52,31 +52,34 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 
 - Host compartido con **múltiples proyectos en producción** (pinguinoseguro, laespiguita, lotaindomito, micelia, portfolio, transcript). **Regla dura: NO tocar infra existente de otros proyectos.** Solo agregar servicios.
 - Wildcard cert `*.pinguinoseguro.cl` (`/etc/letsencrypt/live/pinguinoseguro.cl/`). Cubre un nivel de subdominio. **NO usar subdominios para Impacta+.**
-- **Stack de Impacta en fenix (todo nativo):**
-  - PostgreSQL 16 nativo — servicio systemd `postgresql`, escucha `127.0.0.1:5432`, DB `impacta`
-  - Redis nativo — servicio systemd `redis-server`, escucha `127.0.0.1:6379`
-  - Backend NestJS — servicio systemd **`impacta-backend.service`** (unit file en `/etc/systemd/system/`, user `jnovoas`, WorkingDirectory `~/proyectos/ONG_Impacta/backend`, `EnvironmentFile=~/proyectos/ONG_Impacta/.env`), puerto 3001
-  - Frontend — **un solo sistema** servido por nginx desde `/var/www/impacta.pinguinoseguro.cl/` (landing + dashboard). Nginx hace `proxy_pass http://127.0.0.1:3001` para `/api/`.
-- Configuración nginx activa: `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf` (copia versionada en [infra/nginx/](infra/nginx/)).
+- **Stack de Impacta verificado 21-oct-2026 (difiere del diseño systemd original — ver nota):**
+  - PostgreSQL 16 y Redis escuchan en `127.0.0.1:5432`/`6379`, pero pertenecen al stack **sentinel** en docker (NO tocar). La DB `impacta` y su `DATABASE_URL` están **pendientes de confirmar** — no hay `.env` en el repo ni en el home (21-oct-2026).
+  - Backend NestJS — compila desde `backend/dist`; puerto objetivo **`3101`** (el `3001` lo ocupa Grafana de sentinel). Sin systemd ni pm2 activos en este host: el supervisor del backend está **pendiente de definir**. Requiere `.env` con `DATABASE_URL` + `JWT_SECRET` para arrancar.
+  - Frontend — **un solo sistema** servido por nginx directo desde `frontend/dist/` del repo (landing + dashboard). Nginx hace `proxy_pass http://127.0.0.1:3101/` para `/api/` (recorta el prefijo; Nest no usa prefijo global).
+- Configuración nginx activa: `/etc/nginx/http.d/impacta.conf` (copia versionada en [infra/nginx/](infra/nginx/)). Nota: el path antiguo `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf` + root `/var/www/` ya no aplica en este host.
+> ⚠️ Nota 21-oct-2026: los docs anteriores describían stack 100% nativo con systemd (`postgresql`, `redis-server`, `impacta-backend.service`, puerto 3001). Verificado en el host: **no hay `systemctl`**, sí hay docker (sentinel), nginx usa `http.d/` y sirve desde el repo. Si la infra vuelve a systemd/nativo, actualizar esta sección y `deploy.sh` en el mismo commit.
 
 ## Comandos base
 
 ```bash
-# Deploy de frontend (sirve landing Y dashboard — mismo build)
+# Deploy de frontend (sirve landing Y dashboard — mismo build; nginx sirve frontend/dist)
 ./deploy.sh frontend
 
-# Deploy de backend (build + restart del servicio systemd)
+# Migraciones (requiere .env con DATABASE_URL — pendiente 21-oct-2026)
+./deploy.sh migrate
+
+# Deploy de backend (build + restart del servicio — supervisor pendiente 21-oct-2026)
 ./deploy.sh backend
 
 # Verificación post-deploy
 ./deploy.sh verify
 ```
 
-Verificación manual rápida:
+Verificación manual rápida (sin systemd en este host — usar SNI explícito):
 ```bash
-systemctl status impacta-backend.service
-curl -s -o /dev/null -w "impacta.pinguinoseguro.cl: %{http_code}\n" -m 5 https://impacta.pinguinoseguro.cl/
-curl -s https://impacta.pinguinoseguro.cl/api/organizations/public-stats | jq .
+curl -sk -o /dev/null -w "%{http_code}\n" --resolve impacta.pinguinoseguro.cl:443:127.0.0.1 https://impacta.pinguinoseguro.cl/
+curl -sk --resolve impacta.pinguinoseguro.cl:443:127.0.0.1 https://impacta.pinguinoseguro.cl/api/organizations/public-stats | jq .
+sudo ss -tlnp | grep 3101   # backend escuchando (502 en /api/ = proxy OK, backend caído)
 ```
 
 ## Estado actual (2026-08-25 — post-forense sabotaje)
@@ -89,6 +92,13 @@ curl -s https://impacta.pinguinoseguro.cl/api/organizations/public-stats | jq .
 - **Migración parchada (25-ago, commit `bf4356f`):** `20260824171000_add_p2p_and_subscriptions` contenía DDL destructivo contra tablas fantasma (`Event`, `Membership`) de la migración `20260824130000_add_events_tickets` — aplicada a prod pero descartada del repo. Parchada con `IF EXISTS` para que DBs frescas (CI/recovery) funcionen.
 - **e2e suite restaurada (25-ago, commit `cbbabaa`):** `backend/test/` fue borrado en `9daacaa` (rama P2P). Los e2e son la única prueba automatizada del aislamiento multi-tenant — no borrarlos de nuevo.
 - **Rama `recover/events-volunteer-shifts`** (25-ago): ancla los commits huérfanos `ccfa1ad`+`05510c8`+`2911371` descartados por un reset del 24-ago (~4000 líneas de Events/VolunteerShifts). Listos para fusionar cuando se quiera esa feature.
+
+## Estado actual (2026-10-21 — merges + deploy parcial)
+
+- `main` = `1a73832`: fusionadas `feat/frontend-login-polish` (`8e338d8`, pulido pantallas + Logger/Loki), `chore-direnv-envrc` (`aa872bd`, solo `.envrc`) y `origin/feat/campanas-p2p` (`1a73832`, P2P + suscripciones + community + ai-security + ai-gateway + knowledge RAG). Ramas `frontend-login-polish` y `feat/auth-polish-oauth` (vacía, 0 ahead) eliminadas. Conflictos resueltos: páginas/App con polish de main, `app.module.ts` combinado, e2e lado p2p (`db.base` ya no existe en `DatabaseService`), `.env.example` Loki+OmniRoute.
+- **Frontend desplegado 21-oct:** build fresco en `frontend/dist` servido por nginx (`/` y `/login` 200 con SNI correcto).
+- **Nginx 21-oct:** agregado `location /api/ → 127.0.0.1:3101` en `/etc/nginx/http.d/impacta.conf` (verificado: sin backend responde 502, proxy OK). Copia versionada actualizada en `infra/nginx/`.
+- **Backend pendiente 21-oct:** compilado y testeado (46 unit ✅), pero sin `.env` (`DATABASE_URL`, `JWT_SECRET`) no arranca ni migra. 3 migraciones nuevas (`...24171000` P2P/subs, `...5150000` community, `...5170000` knowledge) lineales y aditivas, listas para `migrate deploy`. Pasarela real (Webpay/Flow) sigue en mock (`mock_ref_`); páginas P2P públicas (`/p2p/:slug`) y lista de suscripciones en portal, pendientes (ver `openspec/changes/campanas-p2p-recaudacion/tasks.md`).
 
 ## Convenciones de commits
 
@@ -103,7 +113,7 @@ curl -s https://impacta.pinguinoseguro.cl/api/organizations/public-stats | jq .
 
 ## Source of truth y anti-patrones (leer antes de operar)
 
-**El estado de producción es este mismo server (`fenix`)**: el repo en `/home/jnovoas/proyectos/ONG_Impacta/` sincronizado con `origin/main`, más lo que esté desplegado en `/var/www/impacta.pinguinoseguro.cl/` y corriendo como `impacta-backend.service`. Cualquier rama que propongas debe basarse en `origin/main`.
+**El estado de producción es este mismo server (`fenix`)**: el repo en `/home/jnovoas/proyectos/ONG_Impacta/` sincronizado con `origin/main`, más lo desplegado en `frontend/dist/` (nginx) y el backend que escuche en `127.0.0.1:3101`. Cualquier rama que propongas debe basarse en `origin/main`.
 
 > El server anterior `fan` fue **apagado el 23-ago-2026** y con él desapareció su remote `fan`/`fan main`. Las instrucciones históricas `git fetch fan main` **ya no son ejecutables ni necesarias**: ahora se trabaja DESDE el propio server.
 
@@ -113,10 +123,10 @@ En esa fecha un commit `af06edb` ("revert: restore original 3D EarthBackground, 
 
 ### Reglas duras (codificadas tras ese desastre)
 
-1. **NUNCA uses un commit pre-desastre como baseline de un recovery.** El baseline correcto SIEMPRE es `origin/main`, y antes de cualquier reset verifica qué hay desplegado en producción (bundle de `/var/www/` vs build de main, `systemctl status impacta-backend`).
+1. **NUNCA uses un commit pre-desastre como baseline de un recovery.** El baseline correcto SIEMPRE es `origin/main`, y antes de cualquier reset verifica qué hay desplegado en producción (bundle de `frontend/dist/` vs build de main, respuesta de `/api/` con SNI).
 2. **NUNCA reescribas docs correctos con info de un commit más viejo.** Las menciones históricas a "Fenix"/"fan"/"traefik"/podman en este archivo son advertencias preservadas a propósito para explicar DE DÓNDE venimos. No las borres sin actualizar el contexto.
 3. **Antes de cualquier revert destructivo o rebase de historia:** exponer el plan completo y pedir confirmación. Un revert masivo califica como cambio de infra visible.
-4. **El servidor actual es `fenix`** (Azure, Ubuntu 24.04, stack nativo + nginx), path `/home/jnovoas/proyectos/ONG_Impacta/`. NO confundir con el fenix histórico pre-2026 (`/home/jnovoas/Desarrollo/`) ni con `fan` (apagado 23-ago-2026).
+4. **El servidor actual es `fenix`** (Azure, Ubuntu 24.04, nginx + docker/sentinel conviviendo — ver sección Infraestructura 21-oct-2026), path `/home/jnovoas/proyectos/ONG_Impacta/`. NO confundir con el fenix histórico pre-2026 (`/home/jnovoas/Desarrollo/`) ni con `fan` (apagado 23-ago-2026).
 
 ### Lecciones 25-ago-2026 (forense post-sabotaje)
 
