@@ -19,7 +19,7 @@ services:
       - redis_data:/data
 
   backend:
-    ports:
+    ports: !override
       - "3101:3101"
     environment:
       NODE_ENV: production
