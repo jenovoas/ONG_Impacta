@@ -1,7 +1,7 @@
 # Override de producción — host Alpine (fenix).
 # Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build backend
 # Difiere del compose base (dev):
-#  - backend en 3101 (el 3001 lo ocupa Grafana de sentinel — no tocar)
+#  - backend en 3101 (según configuración de despliegue vigente)
 #  - sin sufijos :z (son de podman/SELinux; Alpine+docker no los usa)
 # Requiere .env en la raíz con JWT_SECRET (+ OAuth si aplica).
 # DATABASE_URL/REDIS_URL ya apuntan a los servicios internos del compose.
@@ -20,7 +20,7 @@ services:
 
   backend:
     ports: !override
-      - "3101:3101"
+      - "3102:3101"
     environment:
       NODE_ENV: production
       PORT: 3101
