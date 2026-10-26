@@ -1,39 +1,69 @@
+import {
+  CreateBucketCommand,
+  GetObjectCommand,
+  HeadBucketCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import * as Minio from 'minio';
+import { Readable } from 'node:stream';
 
 @Injectable()
 export class StorageService implements OnModuleInit {
-  private minioClient: Minio.Client;
+  private s3Client: S3Client;
   private readonly bucketName = process.env.MINIO_BUCKET || 'impacta-assets';
 
   onModuleInit() {
-    this.minioClient = new Minio.Client({
-      endPoint: process.env.MINIO_ENDPOINT || 'localhost',
-      port: parseInt(process.env.MINIO_PORT || '9000'),
-      useSSL: process.env.MINIO_USE_SSL === 'true',
-      accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
-      secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
+    const protocol = process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http';
+    const endpoint = process.env.MINIO_ENDPOINT || 'localhost';
+    const port = process.env.MINIO_PORT || '9000';
+
+    this.s3Client = new S3Client({
+      endpoint: `${protocol}://${endpoint}:${port}`,
+      region: process.env.MINIO_REGION || 'us-east-1',
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: process.env.MINIO_ACCESS_KEY || 'minioadmin',
+        secretAccessKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
+      },
     });
   }
 
   async uploadFile(file: Express.Multer.File, path: string): Promise<string> {
     const fileName = `${path}/${Date.now()}-${file.originalname}`;
 
-    // Asegurar que el bucket existe
-    const bucketExists = await this.minioClient.bucketExists(this.bucketName);
-    if (!bucketExists) {
-      await this.minioClient.makeBucket(this.bucketName);
+    try {
+      await this.s3Client.send(new HeadBucketCommand({ Bucket: this.bucketName }));
+    } catch (error) {
+      let statusCode: number | undefined;
+      let errorName: string | undefined;
+      if (error && typeof error === 'object') {
+        if ('name' in error && typeof error.name === 'string') errorName = error.name;
+        if ('$metadata' in error && error.$metadata && typeof error.$metadata === 'object') {
+          if (
+            'httpStatusCode' in error.$metadata &&
+            typeof error.$metadata.httpStatusCode === 'number'
+          ) {
+            statusCode = error.$metadata.httpStatusCode;
+          }
+        }
+      }
+      if (statusCode !== 404 && errorName !== 'NotFound' && errorName !== 'NoSuchBucket') {
+        throw error;
+      }
+      await this.s3Client.send(new CreateBucketCommand({ Bucket: this.bucketName }));
     }
 
-    await this.minioClient.putObject(
-      this.bucketName,
-      fileName,
-      file.buffer,
-      file.size,
-      { 'Content-Type': file.mimetype },
+    await this.s3Client.send(
+      new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: fileName,
+        Body: file.buffer,
+        ContentLength: file.size,
+        ContentType: file.mimetype,
+      }),
     );
 
-    // En producción, esto debería retornar la URL pública del CDN o el endpoint de MinIO
     const protocol = process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http';
     const host =
       process.env.MINIO_PUBLIC_URL ||
@@ -42,7 +72,13 @@ export class StorageService implements OnModuleInit {
     return `${protocol}://${host}/${this.bucketName}/${fileName}`;
   }
 
-  async getFileStream(fileName: string) {
-    return this.minioClient.getObject(this.bucketName, fileName);
+  async getFileStream(fileName: string): Promise<Readable> {
+    const response = await this.s3Client.send(
+      new GetObjectCommand({ Bucket: this.bucketName, Key: fileName }),
+    );
+    if (!(response.Body instanceof Readable)) {
+      throw new Error('Storage response body is not a readable stream');
+    }
+    return response.Body;
   }
 }
