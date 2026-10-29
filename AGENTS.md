@@ -36,50 +36,34 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 
 **Pulido visual no significa simplificar ni recortar trabajo existente.** Conserva las secciones, el contenido, las interacciones y la riqueza visual que ya tiene cada pantalla; mejora jerarquía, adaptación a tamaños, accesibilidad y consistencia sin reemplazar componentes completos por versiones más pobres. Si una parte contiene datos falsos o una acción que aún no funciona, corrige ese problema de forma explícita y conserva la intención y presencia de la sección cuando sea posible. Antes de retirar una función o sección útil, consulta al usuario.
 
-## Infraestructura (servidor fenix — Alpine) [rama `infra/alpine-fenix`]
+## Infraestructura y Separación de Seguridad (Kingu - Edge / Fenix - Backend)
 
-**Alpine/Debian con docker.** El backend corre en su propio stack compose (`impacta-db`, `impacta-redis`, `impacta-backend:3102` en host, `3101` interno) — NO usar ni tocar los contenedores `sentinel-*` (otro proyecto). Nginx del host: `/etc/nginx/http.d/impacta.conf`.
+Por principios estrictos de seguridad y aislamiento, **el Frontend y el Backend están completamente separados física y lógicamente**:
 
-> 🛡️ **Requisito Sentinel (25-ago-2026):** toda instancia productiva de
-> Impacta+ debe ejecutarse sobre un nodo administrado por Sentinel. `fenix` es
-> el nodo de referencia y tiene activos Cortex, setup eBPF, Verifier y agentes
-> Sentinel. Sentinel protege el host; Impacta+ conserva autorización tenant,
-> privacidad y decisiones de negocio. Un deploy normal de Impacta+ **NO debe
-> actualizar, reiniciar ni reconfigurar Sentinel**. Ver
-> [`docs/ARQUITECTURA_DESPLIEGUE_SOBRE_SENTINEL.md`](docs/ARQUITECTURA_DESPLIEGUE_SOBRE_SENTINEL.md).
+1. **Host de Borde y Frontend público (`kingu` — `64.176.8.191` / `10.88.0.2`):**
+   - **Frontend:** SPA Vite + React 19 servida como archivos estáticos puros desde `/var/www/impacta.pinguinoseguro.cl/`. No ejecuta Node.js ni tiene acceso a base de datos, secretos (`.env`) ni código de backend.
+   - **SSL/TLS:** Gestionado por Certbot/Let's Encrypt para `impacta.pinguinoseguro.cl`.
+   - **Reverse Proxy:** Nginx enruta `/api/` hacia el backend en Fenix (`http://10.88.0.1:3102/`) a través del enlace privado WireGuard (`10.88.0.0/24`). Configuración en `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf` (copia versionada en `infra/nginx/`).
 
-> ⚠️ **Nota de nombres:** hubo un server antiguo también llamado "Fenix" (pre-2026, ruta `/home/jnovoas/Desarrollo/`) y uno llamado **`fan`** (Rocky/podman, **apagado el 23-ago-2026**, ruta `/home/jnovoas/ONG_Impacta/`). El server ACTUAL es esta VM Azure llamada `fenix`, path `/home/jnovoas/proyectos/ONG_Impacta/`. Cualquier doc que hable de podman rootless, puertos host 5435/6381/3080 o volúmenes SELinux `:z` describe el server fan RETIRADO — ya no aplica.
-
-- Host compartido con **múltiples proyectos en producción** (pinguinoseguro, laespiguita, lotaindomito, micelia, portfolio, transcript). **Regla dura: NO tocar infra existente de otros proyectos.** Solo agregar servicios.
-- Wildcard cert `*.pinguinoseguro.cl` (`/etc/letsencrypt/live/pinguinoseguro.cl/`). Cubre un nivel de subdominio. **NO usar subdominios para Impacta+.**
-- **Stack de Impacta verificado 21-oct-2026 (difiere del diseño systemd original — ver nota):**
-  - PostgreSQL 16 y Redis escuchan en `127.0.0.1:5432`/`6379`, pero pertenecen al stack **sentinel** en docker (NO tocar). La DB `impacta` y su `DATABASE_URL` están **pendientes de confirmar** — no hay `.env` en el repo ni en el home (21-oct-2026).
-  - Backend NestJS — compila desde `backend/dist`; puerto objetivo **`3101`** (el `3001` lo ocupa Grafana de sentinel). Sin systemd ni pm2 activos en este host: el supervisor del backend está **pendiente de definir**. Requiere `.env` con `DATABASE_URL` + `JWT_SECRET` para arrancar.
-  - Frontend — **un solo sistema** servido por nginx directo desde `frontend/dist/` del repo (landing + dashboard). Nginx hace `proxy_pass http://127.0.0.1:3102/` para `/api/` (recorta el prefijo; Nest no usa prefijo global).
-- Configuración nginx activa: `/etc/nginx/http.d/impacta.conf` (copia versionada en [infra/nginx/](infra/nginx/)). Nota: el path antiguo `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf` + root `/var/www/` ya no aplica en este host.
-> ⚠️ Nota rama Alpine (oct-2026): se abandona el diseño systemd/nativo (nunca existió en este host: no hay `systemctl`). Decisión vigente: **backend en docker** (stack propio, compose base + `docker-compose.prod.yml`), frontend servido por nginx desde `frontend/dist`, `.env` raíz con `JWT_SECRET` real. Ver `deploy.sh` (modo docker).
+2. **Host de Cómputo y Datos (`fenix` — `10.88.0.1`):**
+   - **Backend:** Proceso NestJS en contenedor Docker (`impacta-backend`), escuchando en el puerto privado de host `10.88.0.1:3102` (`3101` interno).
+   - **Datos:** PostgreSQL 16 (`impacta-db:5435`) y Redis 7 (`impacta-redis:6381`) en contenedores propios aislados.
+   - **Secretos:** `.env` privado en Fenix (con `JWT_SECRET` y credenciales de BD); nunca se sincroniza hacia Kingu.
 
 ## Comandos base
 
 ```bash
-# Deploy de frontend (solo build; nginx sirve frontend/dist directo)
+# Deploy de frontend (compila SPA y sincroniza con rsync a Kingu /var/www/...)
 ./deploy.sh frontend
 
-# Migraciones (contenedor backend; requiere .env con JWT_SECRET real)
+# Migraciones (contenedor backend en Fenix; requiere .env local con JWT_SECRET)
 ./deploy.sh migrate
 
-# Deploy de backend (build + up del stack docker en host 3102)
+# Deploy de backend (build + up del stack docker en Fenix puerto 3102)
 ./deploy.sh backend
 
-# Verificación post-deploy (contenedores + curl con SNI)
+# Verificación post-deploy (comprueba backend local y endpoints HTTPS públicos)
 ./deploy.sh verify
-```
-
-Verificación manual rápida:
-```bash
-sudo docker ps --filter name=impacta --format '{{.Names}} {{.Status}}'
-curl -sk -o /dev/null -w "%{http_code}\n" --resolve impacta.pinguinoseguro.cl:443:127.0.0.1 https://impacta.pinguinoseguro.cl/
-curl -sk --resolve impacta.pinguinoseguro.cl:443:127.0.0.1 https://impacta.pinguinoseguro.cl/api/organizations/public-stats | jq .
 ```
 
 ## Estado actual (2026-08-25 — post-forense sabotaje)

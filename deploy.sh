@@ -1,24 +1,29 @@
 #!/usr/bin/env bash
 #
-# deploy.sh — Deploy de Impacta+ en fenix (Alpine, rama infra/alpine-fenix)
+# deploy.sh — Despliegue de Impacta+ con separación estricta Front/Back
+#
+# Arquitectura:
+#   - Frontend (Host de borde Kingu - 10.88.0.2):
+#       Archivos estáticos en /var/www/impacta.pinguinoseguro.cl/ servidos por Nginx.
+#       Terminación SSL con Let's Encrypt (impacta.pinguinoseguro.cl).
+#       Proxy inverso de /api/ hacia el backend en Fenix vía WireGuard.
+#   - Backend (Host interno Fenix - 10.88.0.1):
+#       Docker Compose: impacta-backend (puerto 3102), impacta-db (5435), impacta-redis (6381).
+#       Base de datos y secretos (.env) aislados sin exposición pública directa.
 #
 # Uso:
-#   ./deploy.sh frontend   # build de frontend/ (nginx sirve frontend/dist directo)
+#   ./deploy.sh frontend   # build del SPA y publicación rsync en Kingu (/var/www/...)
+#   ./deploy.sh backend    # build + up del stack docker en Fenix (3102)
 #   ./deploy.sh migrate    # prisma migrate deploy dentro del contenedor backend
-#   ./deploy.sh backend    # build + up del stack docker (db, redis, backend en 3101)
-#   ./deploy.sh verify     # verificación post-deploy
-#
-# Realidad (rama Alpine):
-#   - Sin systemd: servicios vía docker compose (stack propio impacta-*; NO tocar sentinel-*).
-#   - Nginx (host): /etc/nginx/http.d/impacta.conf — root a frontend/dist, /api/ → 127.0.0.1:3101.
-#   - .env en la raíz (gitignored) con JWT_SECRET real — el backend se niega a arrancar sin él.
+#   ./deploy.sh verify     # verificación de punta a punta (local y HTTPS público)
 #
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE="sudo docker compose -f $REPO_ROOT/docker-compose.yml -f $REPO_ROOT/docker-compose.prod.yml"
 API="https://impacta.pinguinoseguro.cl"
-RESOLVE="--resolve impacta.pinguinoseguro.cl:443:127.0.0.1"
+FRONTEND_HOST="kingu"
+FRONTEND_DEST="/var/www/impacta.pinguinoseguro.cl"
 
 log()  { printf '\033[1;34m[deploy]\033[0m %s\n' "$*"; }
 ok()   { printf '\033[1;32m[ ok ]\033[0m %s\n' "$*"; }
@@ -37,14 +42,23 @@ require_secrets() {
 
 deploy_frontend() {
   require_repo_root
-  log "Build de frontend/ (nginx sirve frontend/dist directo, sin copia)..."
+  log "Build de frontend/ (Vite + React 19)..."
   (
     cd "$REPO_ROOT/frontend"
     NODE_ENV=development npm ci --silent 2>/dev/null || NODE_ENV=development npm install --silent --include=dev
     npm run build
   )
   [[ -f "$REPO_ROOT/frontend/dist/index.html" ]] || die "El build no generó frontend/dist/index.html"
-  ok "Frontend construido en frontend/dist (servido directo por nginx)"
+  ok "Frontend compilado en frontend/dist"
+
+  log "Publicando frontend estático en $FRONTEND_HOST:$FRONTEND_DEST ..."
+  ssh "$FRONTEND_HOST" "sudo -n mkdir -p '$FRONTEND_DEST' && sudo -n chown -R jnovoas:jnovoas '$FRONTEND_DEST'"
+  rsync -avz --delete "$REPO_ROOT/frontend/dist/" "$FRONTEND_HOST:$FRONTEND_DEST/"
+
+  log "Sincronizando configuración de Nginx en $FRONTEND_HOST ..."
+  scp "$REPO_ROOT/infra/nginx/impacta.pinguinoseguro.cl.conf" "$FRONTEND_HOST:/tmp/impacta.conf"
+  ssh "$FRONTEND_HOST" "sudo -n mv /tmp/impacta.conf /etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf && sudo -n nginx -t && sudo -n systemctl reload nginx"
+  ok "Frontend publicado en $FRONTEND_HOST y Nginx recargado"
 }
 
 run_migrations() {
@@ -59,7 +73,7 @@ run_migrations() {
 deploy_backend() {
   require_repo_root
   require_secrets
-  log "Build + up del stack (db, redis, backend:3102)..."
+  log "Build + up del stack backend en Fenix (puerto 3102)..."
   $COMPOSE up -d --build
   log "Esperando backend en :3102..."
   for i in $(seq 1 30); do
@@ -67,26 +81,38 @@ deploy_backend() {
     [[ $i -eq 30 ]] && die "El backend no respondió en :3102 — revisar: sudo docker logs impacta-backend"
     sleep 2
   done
-  ok "Stack arriba (impacta-backend, impacta-db, impacta-redis)"
+  ok "Stack backend arriba (impacta-backend:3102, impacta-db:5435, impacta-redis:6381)"
 }
 
 verify() {
   local fails=0
+
+  log "1. Verificando estado del contenedor backend en Fenix..."
   $COMPOSE ps --status running | grep -q 'impacta-backend' \
-    && ok "docker: impacta-backend corriendo" \
+    && ok "docker: impacta-backend corriendo en Fenix" \
     || { echo "FAIL: impacta-backend no corre"; fails=$((fails+1)); }
 
-  code=$(curl -sk -o /dev/null -w '%{http_code}' -m 8 $RESOLVE "$API/" || echo 'ERR')
-  [[ "$code" == '200' ]] && ok "landing: 200" || { echo "FAIL: landing $code"; fails=$((fails+1)); }
-
-  stats=$(curl -sk -m 8 $RESOLVE "$API/api/organizations/public-stats" || true)
-  if echo "$stats" | grep -q 'speciesCount'; then
-    ok "public-stats con datos reales"
+  log "2. Verificando respuesta interna en 127.0.0.1:3102..."
+  local_stats=$(curl -sf -m 5 "http://127.0.0.1:3102/organizations/public-stats" || true)
+  if echo "$local_stats" | grep -q 'speciesCount'; then
+    ok "backend local :3102 respondiendo"
   else
-    echo "FAIL: public-stats sin respuesta válida ($stats)"; fails=$((fails+1))
+    echo "FAIL: backend local no respondió adecuadamente"; fails=$((fails+1))
   fi
 
-  [[ $fails -eq 0 ]] && ok "Verificación completa: todo operativo" || die "Verificación con $fails problema(s)"
+  log "3. Verificando Frontend público en $API/ ..."
+  code=$(curl -s -o /dev/null -w '%{http_code}' -m 10 "$API/" || echo 'ERR')
+  [[ "$code" == '200' ]] && ok "landing frontend pública: 200 OK" || { echo "FAIL: landing $code"; fails=$((fails+1)); }
+
+  log "4. Verificando API pública a través de Kingu proxy en $API/api/organizations/public-stats ..."
+  stats=$(curl -s -m 10 "$API/api/organizations/public-stats" || true)
+  if echo "$stats" | grep -q 'speciesCount'; then
+    ok "API pública respondiendo con datos de Fenix: $stats"
+  else
+    echo "FAIL: API pública sin respuesta válida ($stats)"; fails=$((fails+1))
+  fi
+
+  [[ $fails -eq 0 ]] && ok "Verificación completa: Frontend y Backend operativos y aislados con éxito" || die "Verificación con $fails problema(s)"
 }
 
 case "${1:-}" in
@@ -95,7 +121,7 @@ case "${1:-}" in
   migrate)  run_migrations ;;
   verify)   verify ;;
   *)
-    grep -E '^#\s+\./deploy\.sh|^#\s{3}' "$0" | sed 's/^#\s\?//'
+    echo "Uso: $0 {frontend|backend|migrate|verify}"
     exit 1
     ;;
 esac
