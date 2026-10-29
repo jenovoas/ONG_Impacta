@@ -36,9 +36,9 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 
 **Pulido visual no significa simplificar ni recortar trabajo existente.** Conserva las secciones, el contenido, las interacciones y la riqueza visual que ya tiene cada pantalla; mejora jerarquía, adaptación a tamaños, accesibilidad y consistencia sin reemplazar componentes completos por versiones más pobres. Si una parte contiene datos falsos o una acción que aún no funciona, corrige ese problema de forma explícita y conserva la intención y presencia de la sección cuando sea posible. Antes de retirar una función o sección útil, consulta al usuario.
 
-## Infraestructura (servidor fenix — Azure)
+## Infraestructura (servidor fenix — Alpine) [rama `infra/alpine-fenix`]
 
-**VM Azure `fenix`, Ubuntu 24.04 LTS. Serving edge: nginx directo. Este stack NO usa contenedores en producción.**
+**Alpine/Debian con docker.** El backend corre en su propio stack compose (`impacta-db`, `impacta-redis`, `impacta-backend:3102` en host, `3101` interno) — NO usar ni tocar los contenedores `sentinel-*` (otro proyecto). Nginx del host: `/etc/nginx/http.d/impacta.conf`.
 
 > 🛡️ **Requisito Sentinel (25-ago-2026):** toda instancia productiva de
 > Impacta+ debe ejecutarse sobre un nodo administrado por Sentinel. `fenix` es
@@ -55,31 +55,31 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 - **Stack de Impacta verificado 21-oct-2026 (difiere del diseño systemd original — ver nota):**
   - PostgreSQL 16 y Redis escuchan en `127.0.0.1:5432`/`6379`, pero pertenecen al stack **sentinel** en docker (NO tocar). La DB `impacta` y su `DATABASE_URL` están **pendientes de confirmar** — no hay `.env` en el repo ni en el home (21-oct-2026).
   - Backend NestJS — compila desde `backend/dist`; puerto objetivo **`3101`** (el `3001` lo ocupa Grafana de sentinel). Sin systemd ni pm2 activos en este host: el supervisor del backend está **pendiente de definir**. Requiere `.env` con `DATABASE_URL` + `JWT_SECRET` para arrancar.
-  - Frontend — **un solo sistema** servido por nginx directo desde `frontend/dist/` del repo (landing + dashboard). Nginx hace `proxy_pass http://127.0.0.1:3101/` para `/api/` (recorta el prefijo; Nest no usa prefijo global).
+  - Frontend — **un solo sistema** servido por nginx directo desde `frontend/dist/` del repo (landing + dashboard). Nginx hace `proxy_pass http://127.0.0.1:3102/` para `/api/` (recorta el prefijo; Nest no usa prefijo global).
 - Configuración nginx activa: `/etc/nginx/http.d/impacta.conf` (copia versionada en [infra/nginx/](infra/nginx/)). Nota: el path antiguo `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf` + root `/var/www/` ya no aplica en este host.
-> ⚠️ Nota 21-oct-2026: los docs anteriores describían stack 100% nativo con systemd (`postgresql`, `redis-server`, `impacta-backend.service`, puerto 3001). Verificado en el host: **no hay `systemctl`**, sí hay docker (sentinel), nginx usa `http.d/` y sirve desde el repo. Si la infra vuelve a systemd/nativo, actualizar esta sección y `deploy.sh` en el mismo commit.
+> ⚠️ Nota rama Alpine (oct-2026): se abandona el diseño systemd/nativo (nunca existió en este host: no hay `systemctl`). Decisión vigente: **backend en docker** (stack propio, compose base + `docker-compose.prod.yml`), frontend servido por nginx desde `frontend/dist`, `.env` raíz con `JWT_SECRET` real. Ver `deploy.sh` (modo docker).
 
 ## Comandos base
 
 ```bash
-# Deploy de frontend (sirve landing Y dashboard — mismo build; nginx sirve frontend/dist)
+# Deploy de frontend (solo build; nginx sirve frontend/dist directo)
 ./deploy.sh frontend
 
-# Migraciones (requiere .env con DATABASE_URL — pendiente 21-oct-2026)
+# Migraciones (contenedor backend; requiere .env con JWT_SECRET real)
 ./deploy.sh migrate
 
-# Deploy de backend (build + restart del servicio — supervisor pendiente 21-oct-2026)
+# Deploy de backend (build + up del stack docker en host 3102)
 ./deploy.sh backend
 
-# Verificación post-deploy
+# Verificación post-deploy (contenedores + curl con SNI)
 ./deploy.sh verify
 ```
 
-Verificación manual rápida (sin systemd en este host — usar SNI explícito):
+Verificación manual rápida:
 ```bash
+sudo docker ps --filter name=impacta --format '{{.Names}} {{.Status}}'
 curl -sk -o /dev/null -w "%{http_code}\n" --resolve impacta.pinguinoseguro.cl:443:127.0.0.1 https://impacta.pinguinoseguro.cl/
 curl -sk --resolve impacta.pinguinoseguro.cl:443:127.0.0.1 https://impacta.pinguinoseguro.cl/api/organizations/public-stats | jq .
-sudo ss -tlnp | grep 3101   # backend escuchando (502 en /api/ = proxy OK, backend caído)
 ```
 
 ## Estado actual (2026-08-25 — post-forense sabotaje)

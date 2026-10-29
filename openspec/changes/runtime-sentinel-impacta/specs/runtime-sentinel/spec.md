@@ -73,3 +73,17 @@ backend o red privada autorizada.
 - **THEN** no existe una ruta pública hacia ese servicio
 - **AND** toda solicitud válida pasa por permisos y defensas de Impacta+
 
+
+### Requirement: Puerto de backend reservado sin interferir con Sentinel
+
+El backend de Impacta+ MUST publicar su puerto de host en `3102` y escuchar en
+`3101` dentro del contenedor, mientras Sentinel ocupe `127.0.0.1:3101`.
+La ruta `/api/` de nginx MUST proxy a `127.0.0.1:3102`. Un despliegue de Impacta+
+MUST NOT detener ni reconfigurar contenedores Sentinel.
+
+#### Scenario: Backend comparte host con Sentinel
+
+- **WHEN** se despliega el backend de Impacta+ en el host de referencia
+- **THEN** el backend queda publicado en el puerto de host `3102`
+- **AND** nginx enruta `/api/` al backend en `127.0.0.1:3102`
+- **AND** los servicios Sentinel siguen sin cambios
