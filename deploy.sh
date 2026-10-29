@@ -30,7 +30,9 @@ require_repo_root() {
 
 require_secrets() {
   [[ -f "$REPO_ROOT/.env" ]] || die "Falta $REPO_ROOT/.env con JWT_SECRET real"
-  grep -q '^JWT_SECRET=PENDIENTE' "$REPO_ROOT/.env" && die ".env aún tiene JWT_SECRET placeholder — reemplazar antes de desplegar"
+  if grep -q '^JWT_SECRET=PENDIENTE' "$REPO_ROOT/.env"; then
+    die ".env aún tiene JWT_SECRET placeholder — reemplazar antes de desplegar"
+  fi
 }
 
 deploy_frontend() {
@@ -61,7 +63,7 @@ deploy_backend() {
   $COMPOSE up -d --build
   log "Esperando backend en :3102..."
   for i in $(seq 1 30); do
-    curl -sf -m 2 -o /dev/null "http://127.0.0.1:3102/api/organizations/public-stats" && break
+    curl -sf -m 2 -o /dev/null "http://127.0.0.1:3102/organizations/public-stats" && break
     [[ $i -eq 30 ]] && die "El backend no respondió en :3102 — revisar: sudo docker logs impacta-backend"
     sleep 2
   done
