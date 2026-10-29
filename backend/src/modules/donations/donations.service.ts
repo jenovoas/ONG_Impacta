@@ -51,6 +51,9 @@ export class DonationsService {
       if (!p2pPage || p2pPage.organizationId !== orgId) {
         throw new NotFoundException('P2P page not found in this organization');
       }
+      if (dto.campaignId && p2pPage.campaignId !== dto.campaignId) {
+        throw new NotFoundException('P2P page not found in this organization');
+      }
     }
 
     const sourceType = dto.sourceType || (dto.p2pPageId ? 'P2P' : 'DIRECT');

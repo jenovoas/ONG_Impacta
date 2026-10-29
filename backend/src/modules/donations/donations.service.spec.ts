@@ -41,6 +41,10 @@ describe('DonationsService (portal donante)', () => {
       campaign: {
         findUnique: jest.fn(),
       },
+      campaignP2PPage: {
+        findUnique: jest.fn(),
+      },
+      $transaction: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -106,6 +110,94 @@ describe('DonationsService (portal donante)', () => {
 
       expect(result).toEqual([]);
       expect(prisma.donation.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('confirmDonation', () => {
+    it('increments the P2P page and parent campaign atomically once', async () => {
+      const tx = {
+        donation: {
+          findFirst: jest.fn().mockResolvedValue({
+            id: 'donation-1',
+            amount: 250,
+            status: 'PENDING',
+            p2pPageId: 'page-1',
+            campaignId: 'campaign-1',
+            p2pPage: { id: 'page-1', campaignId: 'campaign-1' },
+          }),
+          update: jest.fn().mockResolvedValue({
+            id: 'donation-1',
+            amount: 250,
+            status: 'SUCCEEDED',
+            p2pPageId: 'page-1',
+          }),
+        },
+        campaignP2PPage: { update: jest.fn() },
+        campaign: { update: jest.fn() },
+      };
+      prisma.$transaction.mockImplementation((callback) => callback(tx));
+
+      await service.confirmDonation({ captureId: 'capture-1' }, 'SUCCEEDED');
+
+      expect(prisma.$transaction).toHaveBeenCalledWith(
+        expect.any(Function),
+        { isolationLevel: 'Serializable' },
+      );
+      expect(tx.campaignP2PPage.update).toHaveBeenCalledWith({
+        where: { id: 'page-1' },
+        data: { currentAmount: { increment: 250 } },
+      });
+      expect(tx.campaign.update).toHaveBeenCalledWith({
+        where: { id: 'campaign-1' },
+        data: { currentAmount: { increment: 250 } },
+      });
+    });
+
+    it('does not apply the same successful capture twice', async () => {
+      const tx = {
+        donation: {
+          findFirst: jest.fn().mockResolvedValue({
+            id: 'donation-1',
+            amount: 250,
+            status: 'SUCCEEDED',
+            p2pPageId: 'page-1',
+            p2pPage: { id: 'page-1', campaignId: 'campaign-1' },
+          }),
+          update: jest.fn(),
+        },
+        campaignP2PPage: { update: jest.fn() },
+        campaign: { update: jest.fn() },
+      };
+      prisma.$transaction.mockImplementation((callback) => callback(tx));
+
+      await service.confirmDonation({ captureId: 'capture-1' }, 'SUCCEEDED');
+
+      expect(tx.donation.update).not.toHaveBeenCalled();
+      expect(tx.campaignP2PPage.update).not.toHaveBeenCalled();
+      expect(tx.campaign.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('create', () => {
+    it('rejects a P2P page paired with a different campaign', async () => {
+      prisma.campaign.findUnique.mockResolvedValue({
+        id: 'campaign-2',
+        organizationId: orgId,
+      });
+      prisma.campaignP2PPage.findUnique.mockResolvedValue({
+        id: 'page-1',
+        organizationId: orgId,
+        campaignId: 'campaign-1',
+      });
+
+      await expect(
+        service.create(orgId, {
+          amount: 100,
+          campaignId: 'campaign-2',
+          p2pPageId: 'page-1',
+        }),
+      ).rejects.toThrow(NotFoundException);
+      expect(prisma.donation.create).not.toHaveBeenCalled();
     });
   });
 
