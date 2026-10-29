@@ -9,7 +9,7 @@
 - Prisma 5 (`@prisma/client` + `prisma` CLI)
 - `class-validator` + `class-transformer` con `ValidationPipe` global (`whitelist: true`, `forbidNonWhitelisted: true`, `transform: true`).
 - Postgres 16 y Redis 7 **nativos** en el server fenix como servicios systemd (`127.0.0.1:5432` / `127.0.0.1:6379`). Para desarrollo local fuera del server: `docker-compose.yml` de la raíz (puertos 5435/6381).
-- Node 20+ en runtime (el servicio systemd usa `/usr/bin/node`).
+- Node 20+ en el runtime documentado; desarrollo local usa Node 22 (`.nvmrc`).
 
 ## Estructura
 
