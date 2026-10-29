@@ -40,7 +40,7 @@ deploy_frontend() {
   log "Build de frontend/ (nginx sirve frontend/dist directo, sin copia)..."
   (
     cd "$REPO_ROOT/frontend"
-    npm ci --silent 2>/dev/null || npm install --silent
+    NODE_ENV=development npm ci --silent 2>/dev/null || NODE_ENV=development npm install --silent --include=dev
     npm run build
   )
   [[ -f "$REPO_ROOT/frontend/dist/index.html" ]] || die "El build no generó frontend/dist/index.html"
