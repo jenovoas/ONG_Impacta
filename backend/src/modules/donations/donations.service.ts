@@ -4,6 +4,25 @@ import { CreateDonationDto } from './dto/create-donation.dto';
 import { CampaignsService } from '../campaigns/campaigns.service';
 import { AuthUser } from '../../auth/decorators/current-user.decorator';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { Prisma } from '@prisma/client';
+
+const receiptDonationInclude = {
+  campaign: true,
+  organization: true,
+  member: true,
+  p2pPage: { select: { title: true } },
+  subscription: { select: { id: true } },
+} satisfies Prisma.DonationInclude;
+
+type ReceiptDonation = Prisma.DonationGetPayload<{
+  include: typeof receiptDonationInclude;
+}> & {
+  member: NonNullable<
+    Prisma.DonationGetPayload<{
+      include: typeof receiptDonationInclude;
+    }>['member']
+  >;
+};
 
 function sanitizePdfText(str: string): string {
   if (!str) return '';
@@ -241,34 +260,56 @@ export class DonationsService {
     user: AuthUser,
     donationId: string,
   ): Promise<Buffer> {
+    const donation = await this.findOwnedDonationForReceipt(orgId, user, {
+      id: donationId,
+    });
+    return this.renderReceiptPdf(orgId, donation);
+  }
+
+  async generateReceiptPdfByCaptureId(
+    orgId: string,
+    user: AuthUser,
+    captureId: string,
+  ): Promise<Buffer> {
+    const donation = await this.findOwnedDonationForReceipt(orgId, user, {
+      captureId,
+    });
+    return this.renderReceiptPdf(orgId, donation);
+  }
+
+  private async findOwnedDonationForReceipt(
+    orgId: string,
+    user: AuthUser,
+    lookup: Prisma.DonationWhereInput,
+  ): Promise<ReceiptDonation> {
     const member = await this.findMemberForUser(orgId, user);
     if (!member) {
       this.logger.warn(
-        `denied_attempt: No member found for user ${user?.email} in org ${orgId}`,
+        `denied_attempt: receipt ownership could not be resolved in org ${orgId}`,
       );
-      throw new NotFoundException('Donation not found');
+      throw new NotFoundException('Receipt not found');
     }
 
     const donation = await this.prisma.donation.findFirst({
-      where: { id: donationId },
-      include: {
-        campaign: true,
-        organization: true,
-        member: true,
-      },
+      where: { ...lookup, organizationId: orgId, memberId: member.id },
+      include: receiptDonationInclude,
     });
 
-    if (
-      !donation ||
-      donation.organizationId !== orgId ||
-      donation.memberId !== member.id
-    ) {
+    if (!donation || !donation.member) {
       this.logger.warn(
-        `denied_attempt: donation ${donationId} ownership verification failed for member ${member.id} in org ${orgId}`,
+        `denied_attempt: receipt ownership verification failed for member ${member.id} in org ${orgId}`,
       );
-      throw new NotFoundException('Donation not found');
+      throw new NotFoundException('Receipt not found');
     }
 
+    return donation;
+  }
+
+  private async renderReceiptPdf(
+    orgId: string,
+    donation: ReceiptDonation,
+  ): Promise<Buffer> {
+    const member = donation.member;
     const org = donation.organization;
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([595.28, 841.89]);
@@ -343,6 +384,24 @@ export class DonationsService {
     const amountClp = Math.round(Number(donation.amount));
     drawRow('Monto:', `$${amountClp.toLocaleString('es-CL')} CLP`);
     drawRow('Estado:', donation.status);
+    drawRow(
+      'Origen:',
+      donation.sourceType ||
+        (donation.p2pPageId
+          ? 'P2P'
+          : donation.subscriptionId
+            ? 'SUBSCRIPTION'
+            : 'DIRECT'),
+    );
+    if (donation.p2pPage) {
+      drawRow('Pagina P2P:', donation.p2pPage.title);
+    }
+    if (donation.subscription) {
+      drawRow('Suscripcion:', donation.subscription.id);
+    }
+    if (donation.captureId) {
+      drawRow('Referencia de pago:', donation.captureId);
+    }
     if (donation.recurringStatus) {
       drawRow('Recurrencia:', donation.recurringStatus);
     }

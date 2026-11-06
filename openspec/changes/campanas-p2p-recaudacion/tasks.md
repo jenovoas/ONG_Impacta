@@ -2,8 +2,8 @@
 
 - [x] 1.1 Crear modelo Prisma `CampaignP2PPage { id, organizationId, campaignId, memberId, slug, title, personalGoal?, currentAmount, status }` + migración y relación a `Campaign`/`Member` — verificado en merge `1a73832` (modelo + migración `...24171000` + FKs, 21-oct-2026)
 - [x] 1.2 Endpoints `POST /campaigns/:id/p2p` (guard member + aislamiento org), `GET /campaigns/:id/p2p/:pageId`, `GET /p2p/:slug` público con `percentRaised`, `recentDonors`, `daysLeft` — endpoints existen (`campaigns.controller` + `p2p.controller`, `PATCH` incluido); payload social por confirmar
-- [ ] 1.3 Transacción de aporte: al SUCCEEDED, `increment` atómico de `currentAmount` en página y campaña madre (`prisma.$transaction`), idempotente por `captureId`
-- [ ] 1.4 Cierre/cancelación: marcar `COMPLETED` de página al completar campaña madre; `PATCH .../p2p/:pageId { status:"CANCELLED" }` sin borrar `Donation` ni afectar `currentAmount`
+- [x] 1.3 Transacción de aporte: al SUCCEEDED, `increment` atómico de `currentAmount` en página y campaña madre (`prisma.$transaction`), idempotente ante callback repetido. Implementado en `donations.service.ts::confirmDonation` con aislamiento `Serializable` y retorno temprano si ya está `SUCCEEDED`.
+- [x] 1.4 Cierre/cancelación: completar campaña cierra sus páginas en transacción; `PATCH .../p2p/:pageId { status:"CANCELLED" }` conserva donaciones y montos. Implementado en `campaigns.service.ts::completeCampaign` y `updateP2PPageStatus`.
 
 ## 2. Recurrencia — suscripción y pasarela
 
@@ -15,8 +15,8 @@
 ## 3. Pagos — trazabilidad y recibos
 
 - [x] 3.1 Añadir `sourceType`/`sourceId` (P2P/SUBSCRIPTION/DIRECT) y `captureId`/`gatewayRef` únicos en `Donation` + migración; retrotraer los PDFs recibos a incluir origen (`p2pPage.title`/`subscriptionId`/`captureId`) — campos ✅ (`...24171000`); origen impreso en PDF por confirmar
-- [x] 3.2 Gift receipt: `GET /receipts/:captureId` con guard de ownership (404 genérico si `captureId` ajeno), genera PDF con pdf-lib (org, RUT, amount CLP, campaign, origen, `Content-Disposition: attachment`) — parcial: existe `GET donations/:id/receipt` con `generateReceiptPdf` (pdf-lib ✅); lookup por `:captureId` + guard ownership pendientes
-- [ ] 3.3 Tests de idempotencia y atómica: doble callback de pasarela no duplica `currentAmount`; transacción P2P suma a página y madre en un solo paso
+- [x] 3.2 `GET /receipts/:captureId` implementado en `receipts.controller.ts`; el servicio filtra por `organizationId` y miembro autenticado, oculta ausencia/ajeno con 404 genérico y agrega al PDF origen, página P2P/suscripción y referencia de pago. Preparación local 2026-11-06; compilación y pruebas quedan pendientes en §5.1/5.3.
+- [x] 3.3 Casos unitarios escritos para incremento atómico y callback exitoso repetido en `donations.service.spec.ts`; no ejecutados en esta sesión.
 
 ## 4. Frontend — páginas P2P y portal reforzado
 

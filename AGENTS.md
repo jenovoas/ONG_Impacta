@@ -21,6 +21,12 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 
 ## Estructura del monorepo
 
+## Reanudación y backlog vigente
+
+- Antes de retomar trabajo abierto, leer [HANDOFF.md](HANDOFF.md) y [PENDIENTES.md](PENDIENTES.md).
+- `PENDIENTES.md` ordena el trabajo por dependencias y riesgo; las specs OpenSpec conservan los criterios de aceptación detallados.
+- La memoria persistente vive en `~/proyectos/personalvault`: consultar `HANDOFF.md` y `Impacta/PENDIENTES.md`, y registrar allí los cambios verificables al cerrar.
+
 - [backend/](backend/) — NestJS 11 + Prisma 5 + Postgres. Ver [backend/AGENTS.md](backend/AGENTS.md).
 - [landing/](landing/) — Next.js 16 + Tailwind v4. **NO desplegado en producción** (Path A revocado el 16-ago-2026). Conservado solo como referencia de diseño (tokens `@theme` en `app/globals.css`) y wiring real (`DemoRequest`, `public-stats`).
 - [frontend/](frontend/) — Vite + React 19 + TanStack Query. **Sirve UN SOLO SISTEMA** (ver regla #1): Landing (`LandingPage.tsx` en `/`) + Front auth (`/login`, `/register`) + Panel de Control de Usuarios (`/dashboard/*`). Un build → `/var/www/impacta.pinguinoseguro.cl/`.
