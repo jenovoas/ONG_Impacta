@@ -74,17 +74,19 @@ Fuentes: `openspec/changes/membresias-voluntariado-eventos/` y `comunicacion-gra
 
 ## Estado de specs
 
-- `campanas-p2p-recaudacion`: modelo/rutas base; atomicidad, idempotencia y cierre/cancelación implementados; recibo seguro en preparación local; UI, gateway real y hardening pendientes.
+- `campanas-p2p-recaudacion`: modelo/rutas base; atomicidad, idempotencia, cierre/cancelación y recibo seguro implementados; CI backend aprobado; UI, gateway real y hardening pendientes.
 - `comunidad-segura-asistente-ia`: primera rebanada de identidad y controles de ingreso implementados; gobierno, mensajería, denuncias, periodismo y la mayor parte de IA pendientes.
 - `runtime-sentinel-impacta`: saneamiento/telemetría iniciales; conformidad, degradación y operación pendientes.
 - `catalogo-biodiversidad-educacion`, `comunicacion-grants-reporting`, `membresias-voluntariado-eventos`: principalmente propuestas y tareas abiertas.
 
 ## Sesión actual — 2026-11-06
 
-- `feat/deploy-separado-multitenant` publicada en `origin` (`cb9a455`); Graphify actualizado sobre ese commit (2423 nodos, 3702 aristas, 188 comunidades), sin extremos huérfanos ni bucles.
+- Refactor de despliegue fusionado vía [PR #2](https://github.com/jenovoas/ONG_Impacta/pull/2) en `main` (`70b55a5`); cabeza `96189bf`; ramas local/remota eliminadas. Sin deploy a producción.
+- CI `42152556855`: backend, frontend y landing aprobaron; backend completó migraciones efímeras, unitarias y e2e. Lint/build local pasaron en los tres proyectos.
+- Graphify actualizado y etiquetado: 2436 nodos, 3723 aristas, 183 comunidades; diagnóstico en cero para nodos sin verificar, endpoints faltantes/huérfanos y bucles.
 - Revisión estática inicial de la migración RAG: crea las dos tablas, índices y FKs esperados. No se ejecutó contra una base.
 - Revisión de código P2P detectó atomicidad/idempotencia, cierre/cancelación y casos unitarios ya implementados; se corrigieron sus checkboxes OpenSpec.
-- Inicio del recibo seguro: se agregó `ReceiptsController` en `/receipts/:captureId`, consulta por `organizationId` + miembro autenticado y PDF con procedencia P2P/suscripción. Preparación local; no compilado ni probado.
+- Recibo seguro: `ReceiptsController` en `/receipts/:captureId`, ownership por organización/miembro autenticado y PDF con procedencia P2P/suscripción; build y pruebas de backend aprobados en CI.
 - Puertos observados: 5432 `sentinel-postgres`, 5435 `impacta-db`; ambos persistentes. No usar como scratch.
 - Evidencia de solo lectura: despliegue separado Kingu/Fenix; API 3102, PostgreSQL 5435 y Redis 6381 aún publicados en todas las interfaces. Refactor Compose/script preparado localmente, sin aplicar.
-- Sin pruebas, compilaciones, migraciones, despliegues ni cambios de servicio.
+- Sin despliegue de producción ni cambios de servicio. Las migraciones y pruebas del PR corrieron en la base efímera del runner.
