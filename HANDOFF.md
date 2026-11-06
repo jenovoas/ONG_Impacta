@@ -13,7 +13,7 @@ tags: [impacta, handoff]
 - Artefactos principales Graphify ya versionados; el estado/caché local previo está preservado en un stash.
 - Refactor desplegado el 2026-11-06 desde `main` (`c32ecdb`); evidencia y puertos finales en la sección de despliegue.
 - Graphify conserva el grafo completo previo (2436 nodos, 3723 aristas, 183 comunidades). El intento incremental de hoy omitió 47/112 fuentes y el guard de reducción impidió sobrescribir el grafo raíz; no usar `--allow-partial`. Detalle para reanudar abajo.
-- CI del PR, ejecución `42152556855`: backend, frontend y landing aprobados; backend completó migraciones, pruebas unitarias y e2e. Lint y build de backend/frontend/landing también pasaron localmente. Jaime confirmó que desactivó Kilo en su panel; no configurar ni reactivar. `main` no tiene protección de rama configurada.
+- CI del PR `42152556855` y CI de cierre `42159609305`: backend, frontend y landing aprobados; backend completó migraciones, lint, build, unitarias y e2e. El cierre mostró solo avisos no bloqueantes de Node.js 20 en acciones, transición de `ubuntu-latest` y fuentes Next. Jaime confirmó que desactivó Kilo en su panel; no configurar ni reactivar. `main` no tiene protección de rama configurada.
 - `PLAN.md` y `ARQUITECTURA_TECNICA.md` contienen contexto desfasado. Contrastar siempre con `AGENTS.md`, los commits actuales y las specs.
 
 ## Trabajo abierto y prioridad

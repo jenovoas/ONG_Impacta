@@ -97,4 +97,5 @@ Fuentes: `openspec/changes/membresias-voluntariado-eventos/` y `comunicacion-gra
 - Variables privadas faltantes incorporadas a `.env` en Fenix con permisos `0600`; valores no registrados en Git, salida ni handoff.
 - Jaime confirmó la desactivación de Kilo en su panel. No existe integración local en workflows del repositorio.
 - Aviso de build: chunk `LandingPage` de 913.38 kB sin comprimir; build correcto. CI del PR `42152556855` aprobó backend, frontend y landing.
+- Commit de cierre documental `8defc8a` publicado en `origin/main`; CI de push `42159609305` aprobó backend, frontend y landing. Avisos no bloqueantes: Node.js 20 de las acciones, transición de `ubuntu-latest` y fuentes Next.
 - Graphify: intento incremental fallido con 47/112 fuentes omitidas; el guard conservó `graphify-out/graph.json` raíz. La copia previa de la carpeta fechada quedó preservada en `graphify-out/2026-11-06-before-update/`. Caché parcial queda local y sin seguimiento; no aceptar salida parcial.
