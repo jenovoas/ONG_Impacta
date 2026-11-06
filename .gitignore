@@ -32,6 +32,10 @@ build
 .code-review-graph/
 .codegraph/
 
+# Estado local de Graphify: ruta del intérprete y caché de extracción semántica
+graphify-out/.graphify_python
+graphify-out/cache/semantic/
+
 # Herramientas alucinadas — nunca usadas en este repo (no restaurar)
 .cursorrules
 .windsurfrules

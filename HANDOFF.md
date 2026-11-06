@@ -28,7 +28,7 @@ Detalle vivo: [PENDIENTES.md](PENDIENTES.md). Estado persistente: `Impacta/PENDI
 
 ## Punto de reanudación
 
-- Mañana: auditar el commit documental y el despliegue del 2026-11-06 con las evidencias de abajo; `main` debe seguir sincronizado con `origin/main`. Se conservan como archivos locales sin seguimiento `.graphify_python` y `graphify-out/cache/semantic/` de la extracción incompleta; no añadir la caché parcial al commit.
+- Mañana: auditar el commit documental y el despliegue del 2026-11-06 con las evidencias de abajo; `main` debe seguir sincronizado con `origin/main`. `.graphify_python` y `graphify-out/cache/semantic/` siguen en disco e ignorados por `.gitignore`; no versionar la extracción parcial.
 - Producción quedó con puertos restringidos y checks HTTP 200; no repetir despliegue ni aplicar migraciones sin cambios nuevos.
 - Sincronización Graphify pendiente: `graphify . --update --no-viz` omitió 47 de 112 fuentes semánticas y rechazó el grafo menor. `graphify-out/graph.json` raíz permanece intacto. La copia anterior de `graphify-out/2026-11-06/` se preservó en `graphify-out/2026-11-06-before-update/`; no sobrescribir ni borrar. No pasar `--allow-partial`; reintentar mañana con chunks menores y solo después de auditar el diff.
 - El siguiente trabajo de producto está en `PENDIENTES.md`, P1 (UI pública/QR y autoservicio de suscripciones P2P).
