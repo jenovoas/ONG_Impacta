@@ -13,6 +13,20 @@ import {
 import client from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 
+interface SpeciesRecord {
+  id: string;
+  commonName: string;
+  scientificName: string | null;
+  imageUrl: string | null;
+  description: string | null;
+  status: string;
+}
+
+interface SpeciesFormProps {
+  onSubmit: (formData: FormData) => void;
+  loading: boolean;
+}
+
 const speciesStatusLabels: Record<string, string> = {
   ACTIVE: 'Saludable',
   THREATENED: 'Amenazada',
@@ -28,7 +42,7 @@ export const Species: React.FC = () => {
   const { data: species = [], isLoading, isError } = useQuery({
     queryKey: ['species'],
     queryFn: async () => {
-      const { data } = await client.get('/species');
+      const { data } = await client.get<SpeciesRecord[]>('/species');
       return data;
     },
   });
@@ -47,7 +61,7 @@ export const Species: React.FC = () => {
     },
   });
 
-  const filteredSpecies = species.filter((s: any) => 
+  const filteredSpecies = species.filter((s) =>
     s.commonName.toLowerCase().includes(search.toLowerCase()) ||
     s.scientificName?.toLowerCase().includes(search.toLowerCase())
   );
@@ -91,7 +105,7 @@ export const Species: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           <AnimatePresence>
-            {filteredSpecies.map((s: any) => (
+            {filteredSpecies.map((s) => (
               <motion.div
                 key={s.id}
                 layout
@@ -176,7 +190,7 @@ export const Species: React.FC = () => {
   );
 };
 
-const SpeciesForm = ({ onSubmit, loading }: any) => {
+const SpeciesForm = ({ onSubmit, loading }: SpeciesFormProps) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
 

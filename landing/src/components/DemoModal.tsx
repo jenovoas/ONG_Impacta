@@ -24,16 +24,6 @@ export default function DemoModal({ open, onClose }: DemoModalProps) {
   const [done, setDone] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Reset state every time the modal opens
-  useEffect(() => {
-    if (open) {
-      setForm(EMPTY);
-      setError(null);
-      setDone(false);
-      setSubmitting(false);
-    }
-  }, [open]);
-
   // Close on Escape
   useEffect(() => {
     if (!open) return;

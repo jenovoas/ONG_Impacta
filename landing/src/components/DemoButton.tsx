@@ -28,7 +28,7 @@ export default function DemoButton({ variant = "hero", label, icon }: Props) {
           <span>{displayLabel}</span>
           <span className="material-symbols-outlined text-xl">{displayIcon}</span>
         </button>
-        <DemoModal open={open} onClose={() => setOpen(false)} />
+        {open && <DemoModal open={open} onClose={() => setOpen(false)} />}
       </>
     );
   }
@@ -44,7 +44,7 @@ export default function DemoButton({ variant = "hero", label, icon }: Props) {
         <span>{displayLabel}</span>
         <span className="material-symbols-outlined">{displayIcon}</span>
       </button>
-      <DemoModal open={open} onClose={() => setOpen(false)} />
+      {open && <DemoModal open={open} onClose={() => setOpen(false)} />}
     </>
   );
 }

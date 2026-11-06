@@ -11,6 +11,23 @@ import {
 import client from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 
+interface Campaign {
+  id: string;
+  name: string;
+  description: string | null;
+  goalAmount: number | string;
+  currentAmount: number | string;
+  status: string;
+  endDate: string | null;
+}
+
+interface NewCampaign {
+  name: string;
+  description: string;
+  goalAmount: number;
+  endDate?: string;
+}
+
 export const Campaigns: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -18,13 +35,13 @@ export const Campaigns: React.FC = () => {
   const { data: campaigns = [], isLoading, isError } = useQuery({
     queryKey: ['campaigns'],
     queryFn: async () => {
-      const { data } = await client.get('/campaigns');
+      const { data } = await client.get<Campaign[]>('/campaigns');
       return data;
     },
   });
 
   const createMutation = useMutation({
-    mutationFn: async (newCampaign: any) => {
+    mutationFn: async (newCampaign: NewCampaign) => {
       const { data } = await client.post('/campaigns', newCampaign);
       return data;
     },
@@ -60,7 +77,7 @@ export const Campaigns: React.FC = () => {
         <p role="alert" className="rounded-2xl bg-error-container/40 p-5 text-sm text-error">No pudimos cargar las campañas. Vuelve a intentarlo.</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          {campaigns.length ? campaigns.map((c: any) => (
+          {campaigns.length ? campaigns.map((c) => (
             <CampaignCard key={c.id} campaign={c} />
           )) : (
             <div className="col-span-full rounded-2xl bg-surface-container px-6 py-12 text-center">
@@ -98,12 +115,12 @@ export const Campaigns: React.FC = () => {
                 </div>
 
                 <form 
-                  onSubmit={(e: any) => {
+                  onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                     e.preventDefault();
-                    const formData = new FormData(e.target);
+                    const formData = new FormData(e.currentTarget);
                     createMutation.mutate({
-                      name: formData.get('name'),
-                      description: formData.get('description'),
+                      name: String(formData.get('name') ?? ''),
+                      description: String(formData.get('description') ?? ''),
                       goalAmount: Number(formData.get('goalAmount')),
                       endDate: formData.get('endDate') ? new Date(formData.get('endDate') as string).toISOString() : undefined,
                     });
@@ -151,7 +168,7 @@ export const Campaigns: React.FC = () => {
   );
 };
 
-const CampaignCard = ({ campaign }: { campaign: any }) => {
+const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
   const goal = Number(campaign.goalAmount || 0);
   const current = Number(campaign.currentAmount || 0);
   const progress = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;

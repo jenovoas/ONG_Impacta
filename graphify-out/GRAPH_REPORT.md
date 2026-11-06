@@ -4,33 +4,34 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 2423 nodes · 3702 edges · 188 communities (144 shown, 44 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 138 edges (avg confidence: 0.9)
-- Token cost: 0 input · 0 output
+- 2436 nodes · 3723 edges · 183 communities (150 shown, 33 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 142 edges (avg confidence: 0.9)
+- Token cost: 2,022 input · 437 output
 
 ## Graph Freshness
-- Built from commit: `cb9a4556`
+- Built from commit: `250788a8`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Demo Request Management
-- Authentication and User Accounts
+- Authentication Token Service
 - AI Gateway
-- Community Credentials and Profiles
+- Authentication Request Validation
 - Docker Development Environment
 - Species Management
 - Organization Validation
 - CI Pipeline
 - Mission Task Management
-- User and Donation Endpoints
+- Donation Management
 - Backend Dependencies
 - CampaignsService
 - Frontend Dependencies
-- devDependencies
-- Campaign
+- Backend Development Dependencies
+- Campaign Management
+- P2P Campaign Requirements
 - Actualización aislada de API y migraciones separadas
-- Database Service and Tests
+- Application Bootstrap and Seeding
 - Member Management and RUT Validation
 - Backend TypeScript Configuration
 - Backend Package Scripts
@@ -40,9 +41,9 @@
 - Landing TypeScript Configuration
 - Landing Development Dependencies
 - Node TypeScript Configuration
-- Authentication Module and Guards
-- Donation Creation
-- community.controller.ts
+- Authentication Module
+- Donation Creation Validation
+- Campaign Request Validation
 - Backend Scripts
 - Landing Page Components
 - Application Health Endpoint
@@ -53,21 +54,21 @@
 - Role-Based Authorization
 - ESLint Configuration
 - Public P2P Pages
-- Donation Management and Receipts
+- OAuth Provider Integration
 - Nest CLI Configuration
 - Backend Bootstrap and Logging
-- CreateP2PPageDto
+- Authentication Controller
 - Backend Build Configuration
 - Landing Package Scripts
 - ESLint Dependency
 - ESLint Core Dependency
 - Knowledge Search
-- backend/package.json
+- Backend Package Configuration
 - Frontend Project References
 - Code Review MCP Configuration
 - Code Review MCP Configuration
 - HTTP Logging Dependency
-- Prettier Dependency
+- Payment Tracking Requirements
 - ts-node Dependency
 - Review Session Startup Script
 - Review Graph Update Script
@@ -77,8 +78,8 @@
 - 20260816190000_add_demo_requests/migration.sql
 - Canal de denuncias
 - Missions.tsx
-- CommunityService
-- AiProvider
+- Community Profiles and Credentials
+- Runtime Sentinel Telemetry
 - Impacta+ — Periodismo ciudadano e investigación protegida
 - Impacta+ — Cerebro operativo para una red regional
 - ADDED Requirements
@@ -90,7 +91,7 @@
 - Impacta+ — Arquitectura de inteligencia independiente del modelo
 - Volunteer Membership Feature Design
 - ADDED Requirements
-- NestJS Modules and Infrastructure
+- Role-Based Access Control
 - omniroute.provider.ts
 - ADDED Requirements
 - ADDED Requirements
@@ -104,7 +105,7 @@
 - Requirements
 - Impacta+ — Plan de trabajo (hand-off a Antigravity)
 - Organization Creation Validation
-- Mission Management API
+- Mission Request Validation
 - Dashboard Navigation
 - ADDED Requirements
 - ADDED Requirements
@@ -114,22 +115,21 @@
 - ai-gateway.module.ts
 - ADDED Requirements
 - backend/README.md
-- CreateCredentialDto
+- Frontend Dependencies
 - Impacta+ — Perfiles, participación y conocimiento comunitario
 - Impacta+ — Plan maestro del cerebro operativo regional
 - Donation Dashboard
 - Tasks: Catálogo global de biodiversidad y educación científica
 - ADDED Requirements
 - Impacta+ — Multi-tenant SaaS for NGOs 🌿
-- CreateDemoRequestDto
-- Species Data Cleanup
+- JWT Authentication Strategy
+- Database Service and Prisma
 - RecurrenceToggle
 - Authentication and Mission Sync
 - Proposal: Catálogo global de biodiversidad y educación científica
 - Tasks: Comunidad segura y asistente de IA
 - Pendientes priorizados de Impacta+
 - vite.config.ts
-- Dependency Configuration
 - Identidad Visual - Impacta+
 - Propuesta: Integrar aprendizajes de competencia (Neon/SERCA) — misiones offline + portal donante
 - Propuesta: Comunicación por jornadas, subvenciones/board y biblioteca de especies avanzada
@@ -138,11 +138,11 @@
 - Componentes propuestos
 - Species
 - Decisions
-- CreateCampaignDto
+- P2P Fundraising Proposal
 - Design: Catálogo global de biodiversidad y educación científica
 - comunicacion-grants-reporting/tasks.md
 - membresias-voluntariado-eventos/tasks.md
-- PDF Generation Library
+- User Registration Validation
 - Debug Issue
 - Explore Codebase
 - Refactor Safely
@@ -163,23 +163,25 @@
 - Review Changes
 - MCP Tools: code-review-graph
 - MCP Tools: code-review-graph
-- 2026-08-24-integra-insights-competencia/design.md
-- comunicacion-grants-reporting/design.md
+- Tenant Request Middleware
+- Public API Planning
 - MCP Tools: code-review-graph
+- P2P Campaign Design
 - Fase 4 — Catálogo científico y educación regional
 - Fase 5 — Red profesional, oportunidades y proyectos
 - Fase 6 — Mensajería `PRIVATE_MANAGED`
 - Fase 8 — E2EE e intercambio de inteligencia
 - Fase 11 — Escala regional e interoperabilidad
 - Fase 0 — Gobierno, baseline y seguridad de trabajo
-- Fase 2 — Runtime Sentinel y defensa independiente del modelo
+- ESLint Dependency
 - React + TypeScript + Vite
 - landing/README.md
 - Estrategia de pruebas
 - Mapa de módulos futuro
 - ESLint Formatting Configuration
-- CampaignsController
-- NestJS CLI Tooling
+- Prisma Dependency
+- Node.js Type Definitions
+- TypeScript Linting Dependencies
 - This is NOT the Next.js you know
 - 2026-08-24-integra-insights-competencia/README.md
 - campanas-p2p-recaudacion/README.md
@@ -189,11 +191,6 @@
 - runtime-sentinel-impacta/README.md
 - backend/CLAUDE.md
 - scripts
-- UpdateProfileDto
-- UpdateCampaignDto
-- Code Formatting
-- TypeScript Path Aliases
-- typescript@^5.7.3
 - @nestjs/schematics@^11.0.0
 - CLAUDE.md
 
@@ -210,77 +207,89 @@
 10. `class-validator` - 22 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `Punto de reanudación` --references--> `ReceiptsController`  [INFERRED]
+  HANDOFF.md → backend/src/modules/donations/receipts.controller.ts
 - ``ContentIngressGuard`` --references--> `ContentIngressGuard`  [INFERRED]
   docs/REUTILIZACION_DEFENSA_COGNITIVA_SENTINEL.md → backend/src/modules/ai-security/content-ingress-guard.ts
 - `Estado actual (2026-10-21 — merges + deploy parcial)` --references--> `DatabaseService`  [INFERRED]
   AGENTS.md → backend/src/database/database.service.ts
 - ``PrivacySanitizer`` --references--> `PrivacySanitizer`  [INFERRED]
   docs/REUTILIZACION_DEFENSA_COGNITIVA_SENTINEL.md → backend/src/modules/ai-security/privacy-sanitizer.ts
-- `Context` --references--> `Species()`  [INFERRED]
-  openspec/changes/catalogo-biodiversidad-educacion/design.md → frontend/src/pages/Species.tsx
-- `Impact` --references--> `Species()`  [INFERRED]
-  openspec/changes/catalogo-biodiversidad-educacion/proposal.md → frontend/src/pages/Species.tsx
+- `3. Portal donante — backend` --references--> `Member`  [INFERRED]
+  openspec/changes/archive/2026-08-24-integra-insights-competencia/tasks.md → frontend/src/pages/Members.tsx
 
 ## Import Cycles
 - None detected.
 
-## Communities (188 total, 44 thin omitted)
+## Communities (183 total, 33 thin omitted)
 
 ### Community 0 - "Demo Request Management"
-Cohesion: 0.18
-Nodes (3): DemoRequestsController, DemoRequestsModule, DemoRequestsService
+Cohesion: 0.10
+Nodes (4): DemoRequestsController, DemoRequestsModule, DemoRequestsService, CreateDemoRequestDto
 
-### Community 1 - "Authentication and User Accounts"
-Cohesion: 0.05
-Nodes (17): AuthController, AuthService, Public(), LoginDto, OAuthLoginDto, OAuthProvider, OAuthRegisterDto, SUPPORTED_OAUTH_PROVIDERS (+9 more)
+### Community 1 - "Authentication Token Service"
+Cohesion: 0.18
+Nodes (3): AuthService, OAuthProvider, OAuthService
+
+### Community 3 - "Authentication Request Validation"
+Cohesion: 0.14
+Nodes (6): LoginDto, OAuthLoginDto, OAuthRegisterDto, SUPPORTED_OAUTH_PROVIDERS, RefreshDto, class-validator
 
 ### Community 4 - "Docker Development Environment"
 Cohesion: 0.05
 Nodes (44): build, container_name, depends_on, env_file, environment, ports, restart, context (+36 more)
 
 ### Community 5 - "Species Management"
-Cohesion: 0.08
-Nodes (4): SpeciesController, SpeciesService, StorageController, StorageService
+Cohesion: 0.06
+Nodes (9): @aws-sdk/client-s3@^3.1156.0, CreateSpeciesDto, SpeciesController, SpeciesModule, SpeciesService, StorageController, StorageModule, StorageService (+1 more)
 
 ### Community 6 - "Organization Validation"
-Cohesion: 0.15
-Nodes (4): ORGANIZATION_PLANS, OrganizationPlan, OrganizationsController, OrganizationsService
+Cohesion: 0.14
+Nodes (3): OrganizationsController, OrganizationsModule, OrganizationsService
 
 ### Community 7 - "CI Pipeline"
 Cohesion: 0.06
 Nodes (39): defaults, env, runs-on, services, steps, run, DATABASE_URL, JWT_SECRET (+31 more)
 
 ### Community 8 - "Mission Task Management"
-Cohesion: 0.08
-Nodes (4): CreateMissionDto, CreateMissionTaskDto, UpdateTaskDto, MissionsController
+Cohesion: 0.11
+Nodes (3): UpdateTaskDto, MissionsController, MissionsService
+
+### Community 9 - "Donation Management"
+Cohesion: 0.10
+Nodes (8): AuthUser, CurrentUser, DonationsController, DonationsService, sanitizePdfText(), UpdateRecurringDonationDto, ReceiptsController, Sesión actual — 2026-11-06
 
 ### Community 10 - "Backend Dependencies"
-Cohesion: 0.06
-Nodes (35): dependencies, @aws-sdk/client-s3@^3.1156.0, axios@^1.19.0, bcrypt@^6.0.0, class-transformer@^0.5.1, class-validator@^0.15.1, google-auth-library@^10.9.1, @nestjs/common@^11.0.1 (+27 more)
+Cohesion: 0.07
+Nodes (30): dependencies, axios@^1.19.0, bcrypt@^6.0.0, class-validator@^0.15.1, google-auth-library@^10.9.1, @nestjs/common@^11.0.1, @nestjs/core@^11.0.1, @nestjs/jwt@^11.0.2 (+22 more)
 
 ### Community 12 - "Frontend Dependencies"
-Cohesion: 0.09
-Nodes (23): dependencies, axios@^1.15.0, clsx@^2.1.1, framer-motion@^12.38.0, idb@^8.0.3, lucide-react@^1.8.0, react@^19.2.4, react-dom@^19.2.4 (+15 more)
+Cohesion: 0.10
+Nodes (21): dependencies, axios@^1.15.0, clsx@^2.1.1, framer-motion@^12.38.0, idb@^8.0.3, lucide-react@^1.8.0, react-router-dom@^7.14.1, @react-three/drei@^10.7.7 (+13 more)
 
-### Community 13 - "devDependencies"
-Cohesion: 0.07
-Nodes (29): devDependencies, eslint@^9.18.0, @eslint/eslintrc@^3.2.0, @eslint/js@^9.18.0, eslint-plugin-prettier@^5.2.2, globals@^17.0.0, @nestjs/testing@^11.0.1, pino-pretty@^13.2.0 (+21 more)
+### Community 13 - "Backend Development Dependencies"
+Cohesion: 0.06
+Nodes (31): devDependencies, @eslint/eslintrc@^3.2.0, @eslint/js@^9.18.0, jest@^30.0.0, @nestjs/cli@^11.0.0, @nestjs/testing@^11.0.1, prettier@^3.4.2, source-map-support@^0.5.21 (+23 more)
 
-### Community 15 - "Campaign"
-Cohesion: 0.05
-Nodes (40): Campaign, Context, Decisions, Goals / Non-Goals, Risks / Trade-offs, Capabilities, Impact, Modified Capabilities (+32 more)
+### Community 14 - "Campaign Management"
+Cohesion: 0.13
+Nodes (3): CurrentTenant, CampaignsController, CampaignsService
+
+### Community 15 - "P2P Campaign Requirements"
+Cohesion: 0.13
+Nodes (14): ADDED Requirements, campanas-p2p Specification, Purpose, Requirement: Cierre de página y agregación a campaña madre, Requirement: Métrica de social proof en la página, Requirement: Página de colecta personal vinculada a campaña madre, Scenario: Acceso público a la página, Scenario: Aislamiento multi-tenant (+6 more)
 
 ### Community 16 - "Actualización aislada de API y migraciones separadas"
 Cohesion: 0.25
 Nodes (5): Separación de frontend y backend entre Kingu y Fenix, Bindings preparados para WireGuard y loopback, Actualización aislada de API y migraciones separadas, Publicación reversible del frontend estático en Kingu, Proxy del dominio único hacia Fenix por WireGuard
 
-### Community 17 - "Database Service and Tests"
-Cohesion: 0.11
-Nodes (9): prisma, AppModule, DatabaseService, prisma, resetDb(), bcrypt, @nestjs/testing, @prisma/client (+1 more)
+### Community 17 - "Application Bootstrap and Seeding"
+Cohesion: 0.12
+Nodes (11): nestjs-pino@^5.3.1, prisma, AppModule, bootstrap(), logger, validateRequiredEnv(), prisma, resetDb() (+3 more)
 
 ### Community 18 - "Member Management and RUT Validation"
-Cohesion: 0.10
-Nodes (6): Roles(), ROLES_KEY, RolesGuard, validateRut(), MembersController, MembersService
+Cohesion: 0.13
+Nodes (3): validateRut(), MembersController, MembersService
 
 ### Community 19 - "Backend TypeScript Configuration"
 Cohesion: 0.09
@@ -294,10 +303,6 @@ Nodes (49): "Member", Member_organizationId_rut_key, "Organization", Organizatio
 Cohesion: 0.38
 Nodes (3): TenantContext, tenantContextStorage, multiTenantExtension
 
-### Community 22 - "User Management API"
-Cohesion: 0.14
-Nodes (3): UsersController, UsersModule, UsersService
-
 ### Community 23 - "Frontend TypeScript Configuration"
 Cohesion: 0.11
 Nodes (18): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, jsx, lib, module, moduleDetection, moduleResolution (+10 more)
@@ -307,20 +312,20 @@ Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+10 more)
 
 ### Community 25 - "Landing Development Dependencies"
-Cohesion: 0.07
-Nodes (29): nextConfig, dependencies, next@^16.4.2, react@19.2.4, react-dom@19.2.4, devDependencies, tailwindcss@^4, @tailwindcss/postcss@^4 (+21 more)
+Cohesion: 0.06
+Nodes (34): nextConfig, dependencies, next@^16.4.2, react@19.2.4, react-dom@19.2.4, devDependencies, eslint@^10.14.0, eslint-config-next@^16.4.5 (+26 more)
 
 ### Community 26 - "Node TypeScript Configuration"
 Cohesion: 0.11
 Nodes (17): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib, module, moduleDetection, moduleResolution, noEmit (+9 more)
 
-### Community 27 - "Authentication Module and Guards"
-Cohesion: 0.09
-Nodes (10): AuthModule, IS_PUBLIC_KEY, JwtAuthGuard, JwtStrategy, TenantRequest, TenantMiddleware, @nestjs/core, @nestjs/jwt (+2 more)
+### Community 27 - "Authentication Module"
+Cohesion: 0.17
+Nodes (5): AuthModule, JwtAuthGuard, OAuthModule, @nestjs/jwt, @nestjs/throttler
 
-### Community 29 - "community.controller.ts"
-Cohesion: 0.13
-Nodes (8): UpdateP2PPageDto, CredentialRow, DisciplineRow, ProfileRow, RoleAssignmentRow, VerifyCredentialDto, UpdateRecurringDonationDto, class-validator
+### Community 29 - "Campaign Request Validation"
+Cohesion: 0.09
+Nodes (4): CreateCampaignDto, CreateP2PPageDto, UpdateCampaignDto, UpdateP2PPageDto
 
 ### Community 30 - "Backend Scripts"
 Cohesion: 0.15
@@ -331,20 +336,20 @@ Cohesion: 0.23
 Nodes (10): getPublicStats(), LandingPage(), DemoButton(), Props, DemoModal(), DemoModalProps, EMPTY, Field() (+2 more)
 
 ### Community 32 - "Application Health Endpoint"
-Cohesion: 0.09
-Nodes (14): nestjs-pino@^5.3.1, AppController, lokiHost, lokiUsername, AppService, bootstrap(), logger, validateRequiredEnv() (+6 more)
+Cohesion: 0.10
+Nodes (10): AppController, lokiHost, lokiUsername, AppService, DatabaseModule, CommunityModule, DonationsModule, MembersModule (+2 more)
 
 ### Community 33 - "Organization and Campaign Pages"
-Cohesion: 0.14
-Nodes (13): RecurrenceToggleProps, CampaignCard(), Campaigns(), Donation, formatCLP(), OrganizationSummary, Overview(), StatCard() (+5 more)
+Cohesion: 0.11
+Nodes (19): RecurrenceToggleProps, Campaign, CampaignCard(), Campaigns(), NewCampaign, MemberPage, NewMember, Donation (+11 more)
 
 ### Community 34 - "Deployment Scripts"
 Cohesion: 0.35
 Nodes (18): compose(), deploy_backend(), deploy_frontend(), die(), env_value(), list_frontend_releases(), log(), ok() (+10 more)
 
 ### Community 35 - "Frontend Development Dependencies"
-Cohesion: 0.13
-Nodes (21): devDependencies, eslint@^9.39.4, @eslint/js@^9.39.4, globals@^17.4.0, @types/node@^24.12.2, @types/react@^19.2.14, @types/react-dom@^19.2.3, typescript@~6.0.2 (+13 more)
+Cohesion: 0.12
+Nodes (17): devDependencies, eslint@^9.39.4, @eslint/js@^9.39.4, globals@^17.4.0, @types/node@^24.12.2, @types/react@^19.2.14, @types/react-dom@^19.2.3, typescript@~6.0.2 (+9 more)
 
 ### Community 36 - "Jest Configuration"
 Cohesion: 0.22
@@ -355,24 +360,24 @@ Cohesion: 0.04
 Nodes (46): 10. Riesgos y Dependencias, 11. Plan de Monetización, 12. Glosario, 13. Aprobaciones, 1.1 Propósito, 1.2 Problema a Resolver, 1.3 Visión del Producto, 1.4 Modelo de Negocio (+38 more)
 
 ### Community 38 - "ESLint Configuration"
-Cohesion: 0.24
+Cohesion: 0.28
 Nodes (4): eslint-plugin-react-hooks@^7.0.1, eslint-plugin-react-refresh@^0.5.2, eslint-plugin-react-hooks, eslint-plugin-react-refresh
 
 ### Community 39 - "Public P2P Pages"
 Cohesion: 0.04
 Nodes (45): ADDED Requirements, Asistente de IA Specification, Purpose, Requirement: Acciones humanas, Requirement: Asistencia contextual, Requirement: Continuidad sin modelo, Requirement: Defensa cognitiva independiente del proveedor, Requirement: Escritura limitada a borradores (+37 more)
 
-### Community 40 - "Donation Management and Receipts"
-Cohesion: 0.27
-Nodes (4): AuthUser, DonationsService, sanitizePdfText(), P1 — Pagos correctos antes de cobrar en producción
+### Community 40 - "OAuth Provider Integration"
+Cohesion: 0.25
+Nodes (5): FacebookStrategy, GithubStrategy, GoogleStrategy, OAuthProfile, OAuthVerifier
 
 ### Community 41 - "Nest CLI Configuration"
 Cohesion: 0.33
 Nodes (5): collection, compilerOptions, deleteOutDir, $schema, sourceRoot
 
 ### Community 42 - "Backend Bootstrap and Logging"
-Cohesion: 0.16
-Nodes (14): ContentIngressGuard, PrivacySanitizer, Rule, SafeTelemetryEmitter, DataClass, IngressDecision, ProviderKind, RedactionKind (+6 more)
+Cohesion: 0.20
+Nodes (9): AiSecurityModule, PrivacySanitizer, Rule, DataClass, IngressDecision, ProviderKind, RedactionKind, SafeTelemetryEvent (+1 more)
 
 ### Community 44 - "Backend Build Configuration"
 Cohesion: 0.50
@@ -394,17 +399,17 @@ Nodes (24): Actores científicos y académicos prioritarios, Arquitectura de int
 Cohesion: 0.22
 Nodes (5): KnowledgeModule, KnowledgeSearchRow, KnowledgeService, PublicKnowledgeCitation, PublicKnowledgeContext
 
-### Community 49 - "backend/package.json"
-Cohesion: 0.10
-Nodes (20): author, description, jest@^30.0.0, ts-jest@^29.2.5, ts-node@^10.9.2, @types/express@^5.0.0, @types/jest@^30.0.0, @types/passport-jwt@^4.0.1 (+12 more)
+### Community 49 - "Backend Package Configuration"
+Cohesion: 0.09
+Nodes (21): author, description, eslint-plugin-prettier@^5.2.2, globals@^17.0.0, pino-pretty@^13.2.0, ts-jest@^29.2.5, @types/supertest@^7.0.0, globals (+13 more)
 
 ### Community 53 - "HTTP Logging Dependency"
 Cohesion: 0.09
 Nodes (22): 1. Baseline antes de entrenar, 2. SFT con LoRA/QLoRA, 3. DPO opcional, 4. Evaluación de checkpoints, Arquitectura, Copiloto profesional y editorial, Decisión inicial, Estrategia de fine-tuning (+14 more)
 
-### Community 54 - "Prettier Dependency"
-Cohesion: 0.33
-Nodes (4): 1. P2P — backend (modelo y endpoints), 2. Recurrencia — suscripción y pasarela, 3. Pagos — trazabilidad y recibos, 5. Hardening + docs + verificación
+### Community 54 - "Payment Tracking Requirements"
+Cohesion: 0.13
+Nodes (14): ADDED Requirements, pagos-trazabilidad Specification, Purpose, Requirement: Actualización atómica de currentAmount, Requirement: Gift receipt, Requirement: QR y enlace de trazabilidad por pago, Scenario: Comprobante de suscripción, Scenario: Donación desde QR de página P2P (+6 more)
 
 ### Community 55 - "ts-node Dependency"
 Cohesion: 0.09
@@ -415,24 +420,24 @@ Cohesion: 0.09
 Nodes (21): ADDED Requirements, Purpose, Requirement: Board portal (directorio y gobernanza), Requirement: Catálogo global de oportunidades verificables, Requirement: Colaboración consentida, Requirement: Formulación asistida sin envío autónomo, Requirement: Gestión de subvenciones (grants) con deadlines y documentos, Requirement: KPIs y reportes de fondos y gobernanza (+13 more)
 
 ### Community 60 - "App.tsx"
-Cohesion: 0.22
-Nodes (15): App(), Campaigns, Donations, LandingPage, LoginPage, Members, Missions, OrganizationProfile (+7 more)
+Cohesion: 0.16
+Nodes (17): Lecciones 25-ago-2026 (forense post-sabotaje), 4. Commit camuflado `40873de` — desmanteló protecciones de dominio único, App(), Campaigns, Donations, LandingPage, LegacyDomainRedirect(), LoginPage (+9 more)
 
 ### Community 62 - "Canal de denuncias"
 Cohesion: 0.10
 Nodes (20): Acceso sin cuenta, Alcance inicial, Autorización, Canal de denuncias, Construir o integrar, Criterios de aceptación, Fases, Flujo y publicación (+12 more)
 
 ### Community 63 - "Missions.tsx"
-Cohesion: 0.29
-Nodes (16): assertTenant(), clearTenant(), getAll(), getDB(), getPending(), LocalMission, markTaskSynced(), MissionsDBSchema (+8 more)
+Cohesion: 0.28
+Nodes (16): assertTenant(), clearTenant(), getAll(), getDB(), getPending(), LocalMission, LocalMissionTask, markTaskSynced() (+8 more)
 
-### Community 64 - "CommunityService"
-Cohesion: 0.19
-Nodes (3): CurrentUser, CommunityController, CommunityService
+### Community 64 - "Community Profiles and Credentials"
+Cohesion: 0.05
+Nodes (10): CommunityController, CommunityService, CredentialRow, DisciplineRow, ProfileRow, RoleAssignmentRow, CreateCredentialDto, CreateRoleAssignmentDto (+2 more)
 
-### Community 65 - "AiProvider"
-Cohesion: 0.10
-Nodes (19): AiProvider, Qwen local sobre Sentinel, Criterio de migración local, Fases y criterio de salida, Reglas para la etapa API, Transición de cerebro API a Qwen local, Alcance permitido, Alcance prohibido (+11 more)
+### Community 65 - "Runtime Sentinel Telemetry"
+Cohesion: 0.12
+Nodes (13): SafeTelemetryEmitter, Componentes, Criterio de salida, Fase 2 — Runtime Sentinel y defensa independiente del modelo, Objetivo, Reutilización Sentinel, `SafeTelemetryEmitter`, 0. Baseline (+5 more)
 
 ### Community 66 - "Impacta+ — Periodismo ciudadano e investigación protegida"
 Cohesion: 0.11
@@ -471,16 +476,16 @@ Cohesion: 0.13
 Nodes (15): Anti-patrones prohibidos, Arquitectura, Contratos canónicos, Criterios de aceptación, Decisión fundamental, Evaluación como puerta de entrada, Impacta+ — Arquitectura de inteligencia independiente del modelo, OmniRoute como gateway inicial (+7 more)
 
 ### Community 76 - "Volunteer Membership Feature Design"
-Cohesion: 0.10
-Nodes (19): Lecciones 25-ago-2026 (forense post-sabotaje), 4. Commit camuflado `40873de` — desmanteló protecciones de dominio único, LegacyDomainRedirect(), Mission, MissionItemProps, Context, Decisions, Goals / Non-Goals (+11 more)
+Cohesion: 0.07
+Nodes (29): Modelo conceptual, Mission, MissionTask, Member, MissionItemProps, Organization, Context, Decisions (+21 more)
 
 ### Community 77 - "ADDED Requirements"
 Cohesion: 0.13
 Nodes (14): ADDED Requirements, Purpose, recurrencia-webpay Specification, Requirement: Cobro programado e idempotente, Requirement: Creación de suscripción recurrente con Webpay/Flow, Requirement: Portal de pausa/cancelación (complementa portal-donante), Scenario: Aislamiento multi-tenant, Scenario: Alta de suscripción mensual (+6 more)
 
-### Community 78 - "NestJS Modules and Infrastructure"
-Cohesion: 0.12
-Nodes (7): DatabaseModule, CampaignsModule, ReceiptDonation, receiptDonationInclude, CreateSpeciesDto, StorageModule, @nestjs/common
+### Community 78 - "Role-Based Access Control"
+Cohesion: 0.21
+Nodes (6): IS_PUBLIC_KEY, Roles(), ROLES_KEY, RolesGuard, @nestjs/common, @nestjs/core
 
 ### Community 79 - "omniroute.provider.ts"
 Cohesion: 0.24
@@ -495,8 +500,8 @@ Cohesion: 0.14
 Nodes (13): ADDED Requirements, Canal de denuncias Specification, Purpose, Requirement: Ingreso sin cuenta, Requirement: Límites del anonimato, Requirement: Minimización de metadatos, Requirement: Publicación redactada y revisada, Requirement: Separación de acceso (+5 more)
 
 ### Community 82 - "Impacta+ — guía raíz para agentes"
-Cohesion: 0.08
-Nodes (24): Al operar como agente, Comandos base, Convenciones de commits, Design system, El desastre del 13-ago-2026 (contexto, NO repetir), Estado actual (2026-08-25 — post-forense sabotaje), Estado actual (2026-10-21 — merges + deploy parcial), Estructura del monorepo (+16 more)
+Cohesion: 0.14
+Nodes (14): Comandos base, Convenciones de commits, Design system, El desastre del 13-ago-2026 (contexto, NO repetir), Estado actual (2026-08-25 — post-forense sabotaje), Estado actual (2026-10-21 — merges + deploy parcial), Estructura del monorepo, Impacta+ — guía raíz para agentes (+6 more)
 
 ### Community 83 - "Impacta+ — Arquitectura de despliegue sobre Sentinel"
 Cohesion: 0.15
@@ -507,8 +512,8 @@ Cohesion: 0.15
 Nodes (13): Alcance, Fuentes académicas iniciales, Fuentes de ocurrencias y comunidad, Fuentes iniciales — Biodiversidad del Biobío y piloto Curanilahue, Fuentes oficiales prioritarias, Fuentes regionales y territoriales, Inventario forestal comunal, Jerarquía de confianza propuesta (+5 more)
 
 ### Community 85 - "Decisions"
-Cohesion: 0.17
-Nodes (11): Conocimiento comunitario, Context, Data flow, Decisions, Denuncias, Design: Comunidad segura y asistente de IA, Goals / Non-Goals, Identidad y autorización (+3 more)
+Cohesion: 0.15
+Nodes (12): Asistente de IA, Conocimiento comunitario, Context, Data flow, Decisions, Denuncias, Design: Comunidad segura y asistente de IA, Goals / Non-Goals (+4 more)
 
 ### Community 86 - "ADDED Requirements"
 Cohesion: 0.15
@@ -530,9 +535,17 @@ Nodes (12): portal-donante Specification, Purpose, Requirement: Acceso sin expon
 Cohesion: 0.18
 Nodes (11): 0.5 Source of truth y reglas duras (anti-patrones), 1. Design system — "The Digital Steward", 2. Backlog ordenado, 3. Convenciones de ejecución, 4. Entrypoint para el agente, Bloqueantes futuros, El desastre, Fase D — Pulido (en curso) (+3 more)
 
+### Community 91 - "Organization Creation Validation"
+Cohesion: 0.12
+Nodes (3): CreateOrganizationDto, ORGANIZATION_PLANS, OrganizationPlan
+
+### Community 92 - "Mission Request Validation"
+Cohesion: 0.21
+Nodes (4): class-transformer@^0.5.1, CreateMissionDto, CreateMissionTaskDto, class-transformer
+
 ### Community 93 - "Dashboard Navigation"
-Cohesion: 0.31
-Nodes (7): cn(), groupsByPath, NavGroup, navGroups, NavItem, Sidebar(), DashboardLayout()
+Cohesion: 0.19
+Nodes (12): Al operar como agente, Earth(), EarthBackground(), cn(), groupsByPath, NavGroup, navGroups, NavItem (+4 more)
 
 ### Community 94 - "ADDED Requirements"
 Cohesion: 0.17
@@ -556,7 +569,7 @@ Nodes (11): Backend — guía para agentes, Comandos, Commits, Despliegue y mult
 
 ### Community 99 - "ai-gateway.module.ts"
 Cohesion: 0.18
-Nodes (7): AiGatewayController, AI_PROVIDER, AiGatewayModule, AiOrchestratorService, AiGatewayClient, AiMessage, AiSecurityModule
+Nodes (7): AiGatewayController, AI_PROVIDER, AiGatewayModule, AiOrchestratorService, AiGatewayClient, AiMessage, ContentIngressGuard
 
 ### Community 100 - "ADDED Requirements"
 Cohesion: 0.18
@@ -566,9 +579,13 @@ Nodes (10): ADDED Requirements, Purpose, Requirement: Almacenamiento offline ais
 Cohesion: 0.20
 Nodes (9): Compile and run the project, Deployment, Description, License, Project setup, Resources, Run tests, Stay in touch (+1 more)
 
+### Community 102 - "Frontend Dependencies"
+Cohesion: 0.15
+Nodes (12): react@^19.2.4, react-dom@^19.2.4, @react-three/fiber@^9.6.0, tailwindcss@^4.2.2, react, react-dom, tailwindcss, name (+4 more)
+
 ### Community 103 - "Impacta+ — Perfiles, participación y conocimiento comunitario"
-Cohesion: 0.20
-Nodes (10): Conocimiento comunitario y consentimiento, Credenciales y confianza, Criterios de aceptación, Decisión de arquitectura, Flujo de contribución, Impacta+ — Perfiles, participación y conocimiento comunitario, Modelo conceptual, Perfiles de participación (+2 more)
+Cohesion: 0.22
+Nodes (9): Conocimiento comunitario y consentimiento, Credenciales y confianza, Criterios de aceptación, Decisión de arquitectura, Flujo de contribución, Impacta+ — Perfiles, participación y conocimiento comunitario, Perfiles de participación, Propósito (+1 more)
 
 ### Community 104 - "Impacta+ — Plan maestro del cerebro operativo regional"
 Cohesion: 0.20
@@ -590,33 +607,37 @@ Nodes (9): ADDED Requirements, especies-avanzada Specification, Purpose, Require
 Cohesion: 0.20
 Nodes (10): Core, 🛠️ Desarrollo Local, 📖 Documentación Relacionada, 🚀 Ecosistema Productivo, 📂 Estructura del Proyecto, Impacta+ — Multi-tenant SaaS for NGOs 🌿, Infraestructura, Logs del backend (+2 more)
 
+### Community 109 - "JWT Authentication Strategy"
+Cohesion: 0.22
+Nodes (5): @nestjs/passport@^11.0.5, passport-jwt@^4.0.1, JwtStrategy, @nestjs/passport, passport-jwt
+
+### Community 110 - "Database Service and Prisma"
+Cohesion: 0.15
+Nodes (7): prisma, { PrismaClient }, DatabaseService, ReceiptDonation, receiptDonationInclude, @nestjs/testing, @prisma/client
+
 ### Community 112 - "RecurrenceToggle"
-Cohesion: 0.19
-Nodes (12): RecurrenceStatus, RecurrenceToggle(), DEFAULT_STATUS_CONFIG, MyDonation, PortalDonante(), STATUS_CONFIGS, StatusBadge(), 2. Misiones offline — backend sync idempotente (+4 more)
+Cohesion: 0.13
+Nodes (12): RecurrenceStatus, RecurrenceToggle(), MyDonation, 2. Misiones offline — backend sync idempotente, 3. Portal donante — backend, 4. Portal donante — frontend, 5. Hardening + docs + verificación, 1. P2P — backend (modelo y endpoints) (+4 more)
 
 ### Community 113 - "Authentication and Mission Sync"
-Cohesion: 0.29
-Nodes (9): client, LocalMissionTask, RETRY_DELAYS, areas, LoginPage(), RegisterPage(), AuthState, AuthUser (+1 more)
+Cohesion: 0.22
+Nodes (13): client, RETRY_DELAYS, areas, LoginPage(), Campaign, DEFAULT_STATUS_CONFIG, PortalDonante(), STATUS_CONFIGS (+5 more)
 
 ### Community 114 - "Proposal: Catálogo global de biodiversidad y educación científica"
 Cohesion: 0.22
 Nodes (8): Capabilities, Impact, Modified Capabilities, New Capabilities, Non-goals, Proposal: Catálogo global de biodiversidad y educación científica, What Changes, Why
 
 ### Community 115 - "Tasks: Comunidad segura y asistente de IA"
-Cohesion: 0.22
-Nodes (8): 0. Gobierno y validación, 1. Identidad y comunidad, 2. Mensajería interna, 3. Canal de denuncias, 3B. Periodismo ciudadano e investigación, 5. Fine-tuning y producción futura, 6. Verificación integral, Tasks: Comunidad segura y asistente de IA
+Cohesion: 0.12
+Nodes (16): AiProvider, Qwen local sobre Sentinel, Criterio de migración local, Fases y criterio de salida, Reglas para la etapa API, Transición de cerebro API a Qwen local, 0. Gobierno y validación, 1. Identidad y comunidad (+8 more)
 
 ### Community 116 - "Pendientes priorizados de Impacta+"
-Cohesion: 0.08
-Nodes (28): Guía raíz para agentes de Impacta+, Reglas de reanudación y backlog vigente, ReceiptsController, Organization, Canario de migraciones en PostgreSQL scratch, Grafo actualizado: 2423 nodos, 3702 aristas y 188 comunidades, Estado de entrada, Handoff vigente de Impacta+ (+20 more)
+Cohesion: 0.09
+Nodes (24): Guía raíz para agentes de Impacta+, Reglas de reanudación y backlog vigente, Canario de migraciones en PostgreSQL scratch, Grafo actualizado: 2423 nodos, 3702 aristas y 188 comunidades, Estado de entrada, Handoff vigente de Impacta+, Punto de reanudación, Trabajo abierto y prioridad (+16 more)
 
 ### Community 117 - "vite.config.ts"
 Cohesion: 0.29
 Nodes (6): @tailwindcss/vite@^4.2.2, vite@^8.0.4, @vitejs/plugin-react@^6.0.1, @tailwindcss/vite, vite, @vitejs/plugin-react
-
-### Community 118 - "Dependency Configuration"
-Cohesion: 0.67
-Nodes (3): overrides, js-yaml, multer
 
 ### Community 119 - "Identidad Visual - Impacta+"
 Cohesion: 0.25
@@ -649,6 +670,10 @@ Nodes (7): Species(), SpeciesForm(), Migración, 3. Migración de especies actua
 ### Community 126 - "Decisions"
 Cohesion: 0.29
 Nodes (7): Decisions, Fuentes académicas, Interoperabilidad y colaboración, Modelo lógico, Participación comunitaria, Privacidad geográfica, Publicación
+
+### Community 127 - "P2P Fundraising Proposal"
+Cohesion: 0.25
+Nodes (7): Capabilities, Impact, Modified Capabilities, New Capabilities, Propuesta: Campañas P2P/crowdfunding + recurrencia Webpay/Flow + trazabilidad de pagos, What Changes, Why
 
 ### Community 128 - "Design: Catálogo global de biodiversidad y educación científica"
 Cohesion: 0.33
@@ -742,17 +767,17 @@ Nodes (4): Key Tools, MCP Tools: code-review-graph, When to use graph tools FIRS
 Cohesion: 0.40
 Nodes (4): Key Tools, MCP Tools: code-review-graph, When to use graph tools FIRST, Workflow
 
-### Community 152 - "2026-08-24-integra-insights-competencia/design.md"
-Cohesion: 0.40
-Nodes (4): Context, Decisions, Goals / Non-Goals, Risks / Trade-offs
-
-### Community 153 - "comunicacion-grants-reporting/design.md"
-Cohesion: 0.40
-Nodes (4): Context, Decisions, Goals / Non-Goals, Risks / Trade-offs
+### Community 153 - "Public API Planning"
+Cohesion: 0.33
+Nodes (6): Alcance permitido, Alcance prohibido, Componentes, Criterio de salida, Fase 3 — Cerebro API y recepción pública, Objetivo
 
 ### Community 154 - "MCP Tools: code-review-graph"
 Cohesion: 0.40
 Nodes (4): Key Tools, MCP Tools: code-review-graph, When to use graph tools FIRST, Workflow
+
+### Community 155 - "P2P Campaign Design"
+Cohesion: 0.40
+Nodes (4): Context, Decisions, Goals / Non-Goals, Risks / Trade-offs
 
 ### Community 156 - "Fase 4 — Catálogo científico y educación regional"
 Cohesion: 0.50
@@ -778,10 +803,6 @@ Nodes (4): Alcance, Criterio de salida, Fase 11 — Escala regional e interopera
 Cohesion: 0.50
 Nodes (4): Criterio de salida, Entregables, Fase 0 — Gobierno, baseline y seguridad de trabajo, Objetivo
 
-### Community 162 - "Fase 2 — Runtime Sentinel y defensa independiente del modelo"
-Cohesion: 0.50
-Nodes (4): Criterio de salida, Fase 2 — Runtime Sentinel y defensa independiente del modelo, Objetivo, Reutilización Sentinel
-
 ### Community 163 - "React + TypeScript + Vite"
 Cohesion: 0.50
 Nodes (3): Expanding the ESLint configuration, React Compiler, React + TypeScript + Vite
@@ -804,23 +825,23 @@ Nodes (5): scripts, build, dev, lint, preview
 
 ## Knowledge Gaps
 - **11 isolated node(s):** `./tsconfig.json`, `uvx`, `uvx`, `Canario de migraciones en PostgreSQL scratch`, `Grafo actualizado: 2423 nodos, 3702 aristas y 188 comunidades` (+6 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1200 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **44 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1205 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **33 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `@nestjs/common` connect `NestJS Modules and Infrastructure` to `Application Health Endpoint`, `Authentication and User Accounts`, `Demo Request Management`, `ai-gateway.module.ts`, `Organization Validation`, `Backend Dependencies`, `Backend Bootstrap and Logging`, `omniroute.provider.ts`, `Knowledge Search`, `backend/package.json`, `Member Management and RUT Validation`, `Database Service and Tests`, `User Management API`, `Authentication Module and Guards`, `Mission Management API`, `community.controller.ts`?**
-  _High betweenness centrality (0.163) - this node is a cross-community bridge._
+- **Why does `@nestjs/common` connect `Role-Based Access Control` to `Demo Request Management`, `Authentication Request Validation`, `Species Management`, `Organization Validation`, `Mission Task Management`, `Donation Management`, `Backend Dependencies`, `CampaignsService`, `Application Bootstrap and Seeding`, `Member Management and RUT Validation`, `Tenant Request Middleware`, `Authentication Module`, `Campaign Request Validation`, `Application Health Endpoint`, `OAuth Provider Integration`, `Backend Bootstrap and Logging`, `Knowledge Search`, `Backend Package Configuration`, `Community Profiles and Credentials`, `omniroute.provider.ts`, `ai-gateway.module.ts`, `JWT Authentication Strategy`, `Database Service and Prisma`?**
+  _High betweenness centrality (0.191) - this node is a cross-community bridge._
 - **What connects `./tsconfig.json`, `uvx`, `uvx` to the rest of the system?**
   _11 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Authentication and User Accounts` be split into smaller, more focused modules?**
-  _Cohesion score 0.05220883534136546 - nodes in this community are weakly interconnected._
-- **Why does `Campaign` connect `Campaign` to `RecurrenceToggle`, `Volunteer Membership Feature Design`, `Prettier Dependency`?**
-  _High betweenness centrality (0.069) - this node is a cross-community bridge._
+- **Should `Demo Request Management` be split into smaller, more focused modules?**
+  _Cohesion score 0.09846153846153846 - nodes in this community are weakly interconnected._
+- **Why does `Impacta+ — guía raíz para agentes` connect `Impacta+ — guía raíz para agentes` to `Dashboard Navigation`, `Project Documentation`?**
+  _High betweenness centrality (0.075) - this node is a cross-community bridge._
+- **Should `Authentication Request Validation` be split into smaller, more focused modules?**
+  _Cohesion score 0.13768115942028986 - nodes in this community are weakly interconnected._
+- **Why does `Member` connect `Volunteer Membership Feature Design` to `Organization and Campaign Pages`, `P2P Campaign Requirements`, `RecurrenceToggle`, `ADDED Requirements`, `P2P Fundraising Proposal`?**
+  _High betweenness centrality (0.067) - this node is a cross-community bridge._
 - **Should `Docker Development Environment` be split into smaller, more focused modules?**
   _Cohesion score 0.048484848484848485 - nodes in this community are weakly interconnected._
-- **Why does `Impacta+ — guía raíz para agentes` connect `Impacta+ — guía raíz para agentes` to `PLAN_MAESTRO_CEREBRO_OPERATIVO_REGIONAL.md`?**
-  _High betweenness centrality (0.069) - this node is a cross-community bridge._
-- **Should `Species Management` be split into smaller, more focused modules?**
-  _Cohesion score 0.08377896613190731 - nodes in this community are weakly interconnected._
