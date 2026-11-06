@@ -10,13 +10,12 @@ Orden por dependencias, riesgo de datos y posibilidad de habilitar trabajo poste
 
 ## P0 — Base segura para cambios y migraciones
 
-- [ ] Aplicar el aislamiento de puertos versionado: API solo por WireGuard y PostgreSQL/Redis por loopback. **Producción observada en `0.0.0.0` para 3102/5435/6381**; cambiar los binds de datos requiere recreación planificada y autorización.
-- [ ] Mover las credenciales hard-coded de Compose a `.env` privado en Fenix: agregar `POSTGRES_PASSWORD` y `DATABASE_URL_DOCKER`, hacerlas coincidir con el rol persistido y verificar sin mostrar valores. El `.env` actual no contiene esas claves; no rotar el rol ni recrear la base sin una ventana autorizada.
+- [x] Aplicar el aislamiento de puertos: API solo por WireGuard; PostgreSQL/Redis solo por loopback. Verificado en Docker tras recrear cada contenedor.
+- [x] Configurar `POSTGRES_PASSWORD` y `DATABASE_URL_DOCKER` en el `.env` privado de Fenix, validar que Compose resuelve los mismos valores y confirmar autenticación PostgreSQL sin mostrar secretos. Archivo con permisos `0600`.
 - [ ] Verificar `main`/`origin/main`, cambios locales y estado de producción antes de cada acción operativa.
-- [ ] Crear una instancia PostgreSQL scratch aislada, sin volumen ni credenciales de producción, y ejecutar allí toda la cadena `prisma migrate deploy` desde cero.
-- [ ] Auditar especialmente `20260824171000_add_p2p_and_subscriptions` (limpieza de tablas ausentes con `IF EXISTS`) y `20260825170000_add_impacta_knowledge_rag` (tablas, índices y FKs contra `Organization`).
-- [ ] Registrar resultado del canario y distinguir preparación local de cualquier migración aplicada en producción.
-- **Bloqueo actual:** `5432` pertenece a `sentinel-postgres` y `5435` a `impacta-db`, ambos persistentes. No usar esos puertos ni iniciar otro servicio sin autorización explícita.
+- [x] Canario de migraciones desde cero completado en la base efímera de CI (`42152556855`); en Fenix `prisma migrate status` confirmó que el esquema ya estaba actualizado. No se aplicaron migraciones durante este despliegue.
+- [x] Registrar y separar la preparación local del despliegue: el refactor se publicó y verificó en producción el 2026-11-06; volúmenes de PostgreSQL/Redis conservados.
+- [ ] Mantener el puerto de datos `5435` reservado para PostgreSQL persistente; para un nuevo canario usar una instancia efímera aislada y sin publicar puertos.
 
 ## P1 — Pagos correctos antes de cobrar en producción
 
@@ -24,12 +23,16 @@ Fuente: `openspec/changes/campanas-p2p-recaudacion/`.
 
 - [x] Incremento atómico página/campaña y protección contra callback exitoso repetido: está implementado en `donations.service.ts::confirmDonation` con `$transaction`/`Serializable`; hay casos unitarios escritos, no ejecutados en esta sesión.
 - [x] Completar/cancelar páginas preservando donaciones y montos: está implementado en `campaigns.service.ts`.
-- [x] Ruta `GET /receipts/:captureId` y filtro de ownership por tenant/miembro implementados localmente; PDF incluye origen y referencia. Pendiente compilación y pruebas de acceso.
+- [x] Ruta `GET /receipts/:captureId`, filtro de ownership por tenant/miembro y PDF con origen/referencia compilados; CI backend aprobado en `42152556855`.
 - [ ] Completar frontend para crear/editar páginas P2P y mostrar `/p2p/:slug`, QR y métricas sociales.
 - [ ] Completar autoservicio de suscripciones en `/portal` y manejo UX de errores/recibos.
 - [ ] Añadir y ejecutar pruebas de ownership del recibo, aislamiento de rutas P2P y reentrancia de callbacks.
 - [ ] Implementar Webpay/Flow, alta de suscripción y cobro programado solo después de definir credenciales/entorno de pruebas y el contrato operativo.
 - [ ] Completar páginas `/p2p/:slug`, QR y lista/autoservicio de suscripciones en `/portal`.
+
+## P1 — Sincronización del grafo
+
+- [ ] Reanudar la actualización incremental Graphify de los documentos operativos. El intento del 2026-11-06 omitió 47/112 fuentes y el guard de reducción conservó el grafo raíz previo (2436 nodos). No usar `--allow-partial`; revisar la copia preservada `graphify-out/2026-11-06-before-update/` y reintentar con chunks menores.
 
 ## P2 — Gobierno, privacidad y runtime Sentinel
 
@@ -81,12 +84,17 @@ Fuentes: `openspec/changes/membresias-voluntariado-eventos/` y `comunicacion-gra
 
 ## Sesión actual — 2026-11-06
 
-- Refactor de despliegue fusionado vía [PR #2](https://github.com/jenovoas/ONG_Impacta/pull/2) en `main` (`70b55a5`); cabeza `96189bf`; ramas local/remota eliminadas. Sin deploy a producción.
+- Refactor de despliegue fusionado vía [PR #2](https://github.com/jenovoas/ONG_Impacta/pull/2) en `main` (`70b55a5`); cabeza `96189bf`; ramas local/remota eliminadas.
 - CI `42152556855`: backend, frontend y landing aprobaron; backend completó migraciones efímeras, unitarias y e2e. Lint/build local pasaron en los tres proyectos.
 - Graphify actualizado y etiquetado: 2436 nodos, 3723 aristas, 183 comunidades; diagnóstico en cero para nodos sin verificar, endpoints faltantes/huérfanos y bucles.
 - Revisión estática inicial de la migración RAG: crea las dos tablas, índices y FKs esperados. No se ejecutó contra una base.
 - Revisión de código P2P detectó atomicidad/idempotencia, cierre/cancelación y casos unitarios ya implementados; se corrigieron sus checkboxes OpenSpec.
 - Recibo seguro: `ReceiptsController` en `/receipts/:captureId`, ownership por organización/miembro autenticado y PDF con procedencia P2P/suscripción; build y pruebas de backend aprobados en CI.
 - Puertos observados: 5432 `sentinel-postgres`, 5435 `impacta-db`; ambos persistentes. No usar como scratch.
-- Evidencia de solo lectura: despliegue separado Kingu/Fenix; API 3102, PostgreSQL 5435 y Redis 6381 aún publicados en todas las interfaces. Refactor Compose/script preparado localmente, sin aplicar.
-- Sin despliegue de producción ni cambios de servicio. Las migraciones y pruebas del PR corrieron en la base efímera del runner.
+- Despliegue realizado desde `main` (`c32ecdb`): API `10.88.0.1:3102`; PostgreSQL `127.0.0.1:5435`; Redis `127.0.0.1:6381`. Datos y caché conservaron sus volúmenes existentes.
+- Frontend publicado en Kingu como release `release-c32ecdbccdaf-20261106T034033Z`; se puede revertir con `./deploy.sh frontend-rollback <release-anterior>`.
+- `./deploy.sh verify`: API privada, web pública y proxy API respondieron `200`; PostgreSQL/Redis saludables. `prisma migrate status` dio esquema actualizado; no se aplicó DDL en producción.
+- Variables privadas faltantes incorporadas a `.env` en Fenix con permisos `0600`; valores no registrados en Git, salida ni handoff.
+- Jaime confirmó la desactivación de Kilo en su panel. No existe integración local en workflows del repositorio.
+- Aviso de build: chunk `LandingPage` de 913.38 kB sin comprimir; build correcto. CI del PR `42152556855` aprobó backend, frontend y landing.
+- Graphify: intento incremental fallido con 47/112 fuentes omitidas; el guard conservó `graphify-out/graph.json` raíz. La copia previa de la carpeta fechada quedó preservada en `graphify-out/2026-11-06-before-update/`. Caché parcial queda local y sin seguimiento; no aceptar salida parcial.

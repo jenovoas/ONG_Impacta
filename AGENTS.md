@@ -53,7 +53,7 @@ Por principios estrictos de seguridad y aislamiento, **el Frontend y el Backend 
 
 2. **Host de Cómputo y Datos (`fenix` — `10.88.0.1`):**
    - **Backend:** NestJS en contenedor Docker (`impacta-backend`), escuchando solo en `10.88.0.1:3102` (`3101` interno); Nginx en Kingu es el único cliente público.
-   - **Datos:** PostgreSQL 16 (`impacta-db:5435`) y Redis 7 (`impacta-redis:6381`) en contenedores. La configuración de Compose ahora los limita a `127.0.0.1` y el API a WireGuard; el runtime observado el 2026-11-06 aún publica esos tres puertos en todas las interfaces. La refactorización está local, no desplegada.
+   - **Datos:** PostgreSQL 16 (`impacta-db:5435`) y Redis 7 (`impacta-redis:6381`) en contenedores. Desde el despliegue del 2026-11-06 ambos puertos de host están limitados a `127.0.0.1`; el API escucha solo en `10.88.0.1:3102` por WireGuard.
    - **Secretos:** `.env` privado en Fenix (con `JWT_SECRET` y credenciales de BD); nunca se sincroniza hacia Kingu.
 
 ## Comandos base
@@ -102,10 +102,13 @@ En Fenix, `deploy.sh backend|migrate` requiere `POSTGRES_PASSWORD` y `DATABASE_U
 
 ## Estado operativo verificado (2026-11-06)
 
-- `fenix` ejecuta el API NestJS en `impacta-backend` (Docker Compose); Nginx de Kingu proxifica `/api/` a `10.88.0.1:3102` por WireGuard.
-- `kingu` sirve el build Vite estático desde `/var/www/impacta.pinguinoseguro.cl/` bajo Nginx/TLS. Todo sigue bajo el único dominio `impacta.pinguinoseguro.cl`.
-- En la inspección de solo lectura, Docker aún publicaba API 3102, PostgreSQL 5435 y Redis 6381 en `0.0.0.0`. La restricción a WireGuard/loopback está preparada en Compose localmente y no desplegada.
-- Aplicar el cambio de publicación de PostgreSQL/Redis requiere recrear esos contenedores; no hacerlo como parte de un deploy normal del API.
+- Refactor desplegado desde `main` (`c32ecdb`). Fenix ejecuta `impacta-backend`; su puerto de host `3102` está publicado solo en `10.88.0.1` (WireGuard), con puerto interno `3101`.
+- PostgreSQL y Redis se recrearon individualmente con sus volúmenes persistentes originales: `ong_impacta_postgres_data` y `ong_impacta_redis_data`. Los puertos `5435` y `6381` quedaron limitados a `127.0.0.1`; ambos contenedores están saludables.
+- Kingu sirve el release estático `release-c32ecdbccdaf-20261106T034033Z` con Nginx/TLS. El proxy `/api/` sigue en el único dominio `impacta.pinguinoseguro.cl`.
+- `./deploy.sh verify`: API privada, frontend público y API a través del proxy respondieron `200`. `prisma migrate status` informó el esquema actualizado; el despliegue no aplicó migraciones.
+- `.env` privado de Fenix completado con las claves requeridas, usando el valor ya configurado en `impacta-db`; se verificó autenticación y no se imprimió el secreto. Permisos del archivo: `0600`. Nunca sincronizarlo a Kingu.
+- El build frontend avisó que el chunk de `LandingPage` supera 500 kB (913.38 kB sin comprimir). El build terminó correctamente.
+- Jaime confirmó que desactivó Kilo en su panel. No hay configuración local de Kilo en este repositorio.
 
 ## Convenciones de commits
 

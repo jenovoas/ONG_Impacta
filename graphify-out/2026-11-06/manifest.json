@@ -526,8 +526,8 @@
     "semantic_hash": "fe08ac6c02a1addeff1ec18289721007"
   },
   "backend/src/modules/donations/donations.service.ts": {
-    "mtime": 1793932307.145356,
-    "seen": 1793932996.5584,
+    "mtime": 1793933585.0316164,
+    "seen": 1793933818.8429086,
     "ast_hash": "94dbfff4490778ccb8d53ba73ecc0be1",
     "semantic_hash": ""
   },
@@ -791,14 +791,14 @@
     "semantic_hash": "397a4e7fd9eb228257a07387005fa770"
   },
   "deploy.sh": {
-    "mtime": 1793926279.398677,
-    "seen": 1793926418.5278952,
+    "mtime": 1793933585.0316164,
+    "seen": 1793933818.8440185,
     "ast_hash": "a2d37ca5af2571cad76433b16077d915",
     "semantic_hash": ""
   },
   "docker-compose.yml": {
-    "mtime": 1793925915.146569,
-    "seen": 1793926004.985249,
+    "mtime": 1793933585.0316164,
+    "seen": 1793933818.8440208,
     "ast_hash": "077f6227667e75f6c6962ee817cc2923",
     "semantic_hash": ""
   },
@@ -869,8 +869,8 @@
     "semantic_hash": "787e5a07efeb2bf6209d5937195f2f68"
   },
   "frontend/src/pages/Campaigns.tsx": {
-    "mtime": 1793932440.011926,
-    "seen": 1793932996.5597858,
+    "mtime": 1793933585.0316164,
+    "seen": 1793933818.8442795,
     "ast_hash": "835d8cc881732bf4e871d3b36a4b9b4f",
     "semantic_hash": ""
   },
@@ -887,14 +887,14 @@
     "semantic_hash": "7d82e61f588b0f9509073755eb2c4578"
   },
   "frontend/src/pages/Login.tsx": {
-    "mtime": 1793932353.22486,
-    "seen": 1793932996.5598361,
+    "mtime": 1793933585.0316164,
+    "seen": 1793933818.8443282,
     "ast_hash": "597137d68650ebbbc023afdaf6c3588a",
     "semantic_hash": ""
   },
   "frontend/src/pages/Members.tsx": {
-    "mtime": 1793932441.0479147,
-    "seen": 1793932996.5598388,
+    "mtime": 1793933585.0316164,
+    "seen": 1793933818.8443305,
     "ast_hash": "06ec0d955823aa4ca6770e0685997934",
     "semantic_hash": ""
   },
@@ -929,8 +929,8 @@
     "semantic_hash": "c853f94af0409207ffcbd5027e860668"
   },
   "frontend/src/pages/Species.tsx": {
-    "mtime": 1793932785.0322068,
-    "seen": 1793932996.5600498,
+    "mtime": 1793933585.0316164,
+    "seen": 1793933818.8444467,
     "ast_hash": "bf36d1075c1c2ac59f9f4f741790b887",
     "semantic_hash": ""
   },
@@ -971,8 +971,8 @@
     "semantic_hash": "6b74d568929690b9bc8da8dea6abe1d6"
   },
   "landing/package.json": {
-    "mtime": 1793932871.011278,
-    "seen": 1793932996.560207,
+    "mtime": 1793933585.059616,
+    "seen": 1793933818.8445764,
     "ast_hash": "e3948ec0a6016c16f9658fce97acafab",
     "semantic_hash": ""
   },
@@ -995,14 +995,14 @@
     "semantic_hash": "3e4341f3cb31ba3260197dc870cccba2"
   },
   "landing/src/components/DemoButton.tsx": {
-    "mtime": 1793932558.5186496,
-    "seen": 1793932996.5602782,
+    "mtime": 1793933585.059616,
+    "seen": 1793933818.8446503,
     "ast_hash": "2ddd4508306fab581e9c8f4fc638abfb",
     "semantic_hash": ""
   },
   "landing/src/components/DemoModal.tsx": {
-    "mtime": 1793932559.6146376,
-    "seen": 1793932996.5602815,
+    "mtime": 1793933585.059616,
+    "seen": 1793933818.8446522,
     "ast_hash": "ea115208257b25b24514aa05b01a8c23",
     "semantic_hash": ""
   },
@@ -1146,14 +1146,14 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1793926279.398677,
-    "seen": 1793926418.5292368,
+    "mtime": 1793933585.0276165,
+    "seen": 1793933818.845183,
     "ast_hash": "3bd2460504178f1c5777d3b67dcff48a",
     "semantic_hash": ""
   },
   "ARQUITECTURA_TECNICA.md": {
-    "mtime": 1793925781.5559812,
-    "seen": 1793926004.9865382,
+    "mtime": 1793933585.0316164,
+    "seen": 1793933818.8451853,
     "ast_hash": "edd0091202b93c22d5c76fc1cf766051",
     "semantic_hash": ""
   },
@@ -1176,9 +1176,9 @@
     "semantic_hash": ""
   },
   "HANDOFF.md": {
-    "mtime": 1793926476.1805449,
-    "seen": 1793932996.5610092,
-    "ast_hash": "8fb87c1dd53c95d3514711c84822cd67",
+    "mtime": 1793933733.1980088,
+    "seen": 1793933818.8452616,
+    "ast_hash": "bc21f63c1c4f3f31392ebad4a5010528",
     "semantic_hash": ""
   },
   "Impacta+PRD.md": {
@@ -1188,14 +1188,14 @@
     "semantic_hash": ""
   },
   "PENDIENTES.md": {
-    "mtime": 1793926476.1805449,
-    "seen": 1793932996.5610428,
-    "ast_hash": "f1b211dc151dc11465489efece984424",
+    "mtime": 1793933734.181998,
+    "seen": 1793933818.8452816,
+    "ast_hash": "8dfce2bc92540ab4d4c6489e43c9a374",
     "semantic_hash": ""
   },
   "PLAN.md": {
-    "mtime": 1793925781.5519812,
-    "seen": 1793926004.9866195,
+    "mtime": 1793933585.0316164,
+    "seen": 1793933818.8452833,
     "ast_hash": "1e6fe7637ffd6fd2081247ee8f0158d6",
     "semantic_hash": ""
   },
@@ -1206,14 +1206,14 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1793925762.9361749,
-    "seen": 1793926004.9866383,
+    "mtime": 1793933585.0316164,
+    "seen": 1793933818.8453033,
     "ast_hash": "6e6dec6453ee2340c0fb49f62c216f0b",
     "semantic_hash": ""
   },
   "backend/AGENTS.md": {
-    "mtime": 1793925975.877927,
-    "seen": 1793926004.98664,
+    "mtime": 1793933585.0316164,
+    "seen": 1793933818.845306,
     "ast_hash": "fb72e33a66f819c38ae542b1324b86d0",
     "semantic_hash": ""
   },
@@ -1806,8 +1806,8 @@
     "semantic_hash": ""
   },
   "landing/eslint.config.mjs": {
-    "mtime": 1793932389.8893077,
-    "seen": 1793932996.5601819,
+    "mtime": 1793933585.059616,
+    "seen": 1793933818.8445535,
     "ast_hash": "2b7e704771ff2dce50b55e0da0243acb",
     "semantic_hash": ""
   },
@@ -1824,8 +1824,8 @@
     "semantic_hash": ""
   },
   "landing/package-lock.json": {
-    "mtime": 1793932871.103277,
-    "seen": 1793932996.5633554,
+    "mtime": 1793933585.059616,
+    "seen": 1793933818.8473659,
     "ast_hash": "f4854e19a6483dbfd27213e58607ddcc",
     "semantic_hash": ""
   }

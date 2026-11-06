@@ -11,36 +11,37 @@ tags: [impacta, handoff]
 - Commit `c88e83b` (recibos/handoff/grafo) publicado; integrado con el commit remoto `6faaede` en `ccdef74` y empujado a `origin/main`.
 - Refactorización de despliegue fusionada mediante PR [#2](https://github.com/jenovoas/ONG_Impacta/pull/2), commit de `main` `70b55a5` (commit de cabeza `96189bf`); rama local y remota eliminadas.
 - Artefactos principales Graphify ya versionados; el estado/caché local previo está preservado en un stash.
-- Se verificó producción en solo lectura; no se desplegó ni se modificaron servicios.
-- Graphify actualizado: `graphify-out/GRAPH_REPORT.md` tiene 2436 nodos, 3723 aristas y 183 comunidades. Diagnóstico: 0 nodos no verificados, extremos huérfanos, endpoints faltantes ni bucles.
-- CI del PR, ejecución `42152556855`: backend, frontend y landing aprobados; backend completó migraciones, pruebas unitarias y e2e. Lint y build de backend/frontend/landing también pasaron localmente. La revisión Kilo seguía en curso al fusionar y no era un requisito de protección; `main` no tiene protección de rama configurada.
+- Refactor desplegado el 2026-11-06 desde `main` (`c32ecdb`); evidencia y puertos finales en la sección de despliegue.
+- Graphify conserva el grafo completo previo (2436 nodos, 3723 aristas, 183 comunidades). El intento incremental de hoy omitió 47/112 fuentes y el guard de reducción impidió sobrescribir el grafo raíz; no usar `--allow-partial`. Detalle para reanudar abajo.
+- CI del PR, ejecución `42152556855`: backend, frontend y landing aprobados; backend completó migraciones, pruebas unitarias y e2e. Lint y build de backend/frontend/landing también pasaron localmente. Jaime confirmó que desactivó Kilo en su panel; no configurar ni reactivar. `main` no tiene protección de rama configurada.
 - `PLAN.md` y `ARQUITECTURA_TECNICA.md` contienen contexto desfasado. Contrastar siempre con `AGENTS.md`, los commits actuales y las specs.
 
 ## Trabajo abierto y prioridad
 
-1. Aplicar el aislamiento de red versionado: API solo por WireGuard y PostgreSQL/Redis solo por loopback. El 2026-11-06 se observó Docker publicando `3102`, `5435` y `6381` en `0.0.0.0`; modificar DB/Redis requiere recreación planificada y autorización explícita.
-2. Preparar una base PostgreSQL scratch aislada y ejecutar el canario de migraciones. **Bloqueado:** `5432` y `5435` pertenecen a bases persistentes; no reutilizarlas ni iniciar otro servicio sin autorización.
-3. Completar pagos P2P: recibo seguro ya compilado y probado por CI; faltan frontend público/QR, autoservicio de suscripciones y luego Webpay/Flow.
-4. Cerrar las decisiones de gobierno, privacidad, responsables y revisión legal que son prerrequisito de mensajería, denuncias, periodismo y asistentes.
-5. Completar la capacidad RAG: embeddings semánticos propios, historial editorial y corpus con fuentes verificadas.
-6. Avanzar catálogo científico y educación tras confirmar especies, fuentes y responsables.
-7. Dejar membresías, voluntariado, eventos, jornadas, subvenciones y board detrás de las dependencias de producto y gobierno.
+1. Continuar pagos P2P: frontend público/QR, autoservicio de suscripciones y después Webpay/Flow con contrato y credenciales de prueba.
+2. Cerrar gobierno, privacidad, responsables y revisión legal antes de mensajería, denuncias, periodismo y asistentes.
+3. Completar RAG: embeddings propios, historial editorial y corpus con fuentes verificadas.
+4. Avanzar catálogo científico y educación tras confirmar especies, fuentes y responsables.
+5. Dejar membresías, voluntariado, eventos, jornadas, subvenciones y board detrás de las dependencias de producto y gobierno.
 
 Detalle vivo: [PENDIENTES.md](PENDIENTES.md). Estado persistente: `Impacta/PENDIENTES` en la bóveda y fila Impacta+ de `HANDOFF.md`.
 
 ## Punto de reanudación
 
-- Para continuar el canario: provisionar una instancia scratch temporal/aislada, verificar su identidad y URL, y aplicar migraciones únicamente a esa base. No reutilizar el puerto 5432 ni el 5435 actuales.
-- Para el análisis previo: revisar en conjunto el SQL de la migración RAG y toda la cadena de migraciones. En esta sesión la revisión estática inicial encontró creación de `KnowledgeDocument`/`KnowledgeChunk`, índices y claves foráneas; no se ejecutó DDL.
+- Mañana: auditar el commit documental y el despliegue del 2026-11-06 con las evidencias de abajo; `main` debe seguir sincronizado con `origin/main`. Se conservan como archivos locales sin seguimiento `.graphify_python` y `graphify-out/cache/semantic/` de la extracción incompleta; no añadir la caché parcial al commit.
+- Producción quedó con puertos restringidos y checks HTTP 200; no repetir despliegue ni aplicar migraciones sin cambios nuevos.
+- Sincronización Graphify pendiente: `graphify . --update --no-viz` omitió 47 de 112 fuentes semánticas y rechazó el grafo menor. `graphify-out/graph.json` raíz permanece intacto. La copia anterior de `graphify-out/2026-11-06/` se preservó en `graphify-out/2026-11-06-before-update/`; no sobrescribir ni borrar. No pasar `--allow-partial`; reintentar mañana con chunks menores y solo después de auditar el diff.
+- El siguiente trabajo de producto está en `PENDIENTES.md`, P1 (UI pública/QR y autoservicio de suscripciones P2P).
 - Revisión P2P: el callback ya incrementa página y campaña en una transacción `Serializable`, es idempotente para una donación ya exitosa, y cierre/cancelación conserva historial. Casos unitarios existen; no se ejecutaron.
 - Recibo seguro: añadido `ReceiptsController` y búsqueda por `captureId`, `organizationId` y miembro autenticado; PDF con origen P2P/suscripción y referencia. Compilado y validado por CI, incluidas las pruebas backend.
 - Mantener los cambios locales de `graphify-out/`; nunca limpiar o restaurar ese directorio para resolver el estado sin seguimiento.
-- No hubo despliegue de producción ni cambios de servicios. Los builds y pruebas se ejecutaron localmente/por CI según lo indicado arriba.
 
 ## Refactorización de despliegue — 2026-11-06
 
-- Evidencia de solo lectura: host local `fenix`; contenedores `impacta-backend` en `0.0.0.0:3102`, `impacta-db` en `0.0.0.0:5435` y `impacta-redis` en `0.0.0.0:6381`. Kingu sirve el frontend y su Nginx enruta el mismo dominio a `10.88.0.1:3102` por WireGuard.
-- Cambios locales: releases atómicos del frontend en Kingu con reversión; actualización de solo API en Fenix; migración Prisma separada y única para el esquema compartido; verificación pública/privada sin escrituras de tenants; bindings de API a WireGuard y de DB/Redis a loopback.
-- `docker-compose.yml` ya no contiene la contraseña de ejemplo; el deploy requiere `POSTGRES_PASSWORD` y `DATABASE_URL_DOCKER`. La inspección de nombres de variables del `.env` confirmó que esas claves aún faltan. Configurarlas exige que coincidan con el rol de la base persistida; no se leyó ni registró ningún secreto.
-- La configuración no se aplicó en producción. Para cambiar los binds de DB/Redis hay que recrear esos contenedores en una ventana autorizada.
-- CI del PR #2 ejecutó migraciones de la base efímera del runner, pruebas unitarias/e2e y builds; todos los pasos del backend aprobaron. Frontend y landing también aprobaron lint/build. No se ejecutó deploy ni se modificaron servicios de producción.
+- Despliegue desde `main` (`c32ecdb`) en `fenix` y `kingu`. API `impacta-backend`: solo `10.88.0.1:3102` (WireGuard). PostgreSQL: `127.0.0.1:5435`; Redis: `127.0.0.1:6381`.
+- PostgreSQL y Redis se recrearon por separado, manteniendo `ong_impacta_postgres_data` y `ong_impacta_redis_data`; ambos quedaron `healthy`. No se borraron volúmenes ni datos.
+- Frontend Vite publicado bajo el dominio único con release reversible `release-c32ecdbccdaf-20261106T034033Z`. El build completó; aviso no bloqueante: `LandingPage` 913.38 kB sin comprimir.
+- Verificación final: `./deploy.sh verify` pasó para API privada, frontend HTTPS y proxy API; endpoints devolvieron `200`. `prisma migrate status` confirmó esquema al día; no se aplicó ninguna migración en producción.
+- `.env` privado de Fenix completado con credenciales extraídas de la configuración del contenedor vigente y validadas mediante conexión local a Postgres; se dejó en modo `0600`. No se copiaron secretos al frontend, Git ni esta nota.
+- CI `42152556855` ejecutó la cadena de migraciones en PostgreSQL efímero y aprobó pruebas/builds. No se ejecutaron pruebas locales durante este cierre.
+- El build Graphify incompleto dejó caché semántica local sin seguimiento bajo `graphify-out/cache/semantic/`; se conserva para auditoría y no se incluyó en el commit. `.graphify_python` es un auxiliar local no versionado.
