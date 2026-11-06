@@ -13,7 +13,7 @@ tags: [impacta, handoff]
 - Artefactos principales Graphify ya versionados; el estado/caché local previo está preservado en un stash.
 - Refactor desplegado el 2026-11-06 desde `main` (`c32ecdb`); evidencia y puertos finales en la sección de despliegue.
 - Graphify conserva el grafo completo previo (2436 nodos, 3723 aristas, 183 comunidades). El intento incremental de hoy omitió 47/112 fuentes y el guard de reducción impidió sobrescribir el grafo raíz; no usar `--allow-partial`. Detalle para reanudar abajo.
-- CI del PR `42152556855` y CI de cierre `42159609305`: backend, frontend y landing aprobados; backend completó migraciones, lint, build, unitarias y e2e. El cierre mostró solo avisos no bloqueantes de Node.js 20 en acciones, transición de `ubuntu-latest` y fuentes Next. Jaime confirmó que desactivó Kilo en su panel; no configurar ni reactivar. `main` no tiene protección de rama configurada.
+- CI del PR `42152556855` y cierres `42159609305`/`42159877954`: backend, frontend y landing aprobados; backend completó migraciones, lint, build, unitarias y e2e. Los cierres mostraron solo avisos no bloqueantes de Node.js 20 en acciones, transición de `ubuntu-latest` y fuentes Next. Jaime confirmó que desactivó Kilo en su panel; no configurar ni reactivar. `main` no tiene protección de rama configurada.
 - `PLAN.md` y `ARQUITECTURA_TECNICA.md` contienen contexto desfasado. Contrastar siempre con `AGENTS.md`, los commits actuales y las specs.
 
 ## Trabajo abierto y prioridad
@@ -29,6 +29,7 @@ Detalle vivo: [PENDIENTES.md](PENDIENTES.md). Estado persistente: `Impacta/PENDI
 ## Punto de reanudación
 
 - Mañana: auditar el commit documental y el despliegue del 2026-11-06 con las evidencias de abajo; `main` debe seguir sincronizado con `origin/main`. `.graphify_python` y `graphify-out/cache/semantic/` siguen en disco e ignorados por `.gitignore`; no versionar la extracción parcial.
+- Hay un cambio local no incluido en estos commits en `docker-compose.yml`: ancla de logging `json-file` con `max-size: 50m` y `max-file: 2` para PostgreSQL, Redis y backend. No lo hice ni lo desplegué; preservar y auditar su autoría/impacto antes de incluirlo. Aplicarlo requeriría recrear contenedores.
 - Producción quedó con puertos restringidos y checks HTTP 200; no repetir despliegue ni aplicar migraciones sin cambios nuevos.
 - Sincronización Graphify pendiente: `graphify . --update --no-viz` omitió 47 de 112 fuentes semánticas y rechazó el grafo menor. `graphify-out/graph.json` raíz permanece intacto. La copia anterior de `graphify-out/2026-11-06/` se preservó en `graphify-out/2026-11-06-before-update/`; no sobrescribir ni borrar. No pasar `--allow-partial`; reintentar mañana con chunks menores y solo después de auditar el diff.
 - El siguiente trabajo de producto está en `PENDIENTES.md`, P1 (UI pública/QR y autoservicio de suscripciones P2P).
