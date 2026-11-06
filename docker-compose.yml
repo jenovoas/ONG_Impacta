@@ -1,3 +1,9 @@
+x-log-rotation: &log-rotation
+  driver: json-file
+  options:
+    max-size: "50m"
+    max-file: "2"
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -16,6 +22,7 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    logging: *log-rotation
 
   redis:
     image: redis:7-alpine
@@ -31,6 +38,7 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    logging: *log-rotation
 
   backend:
     build:
@@ -53,6 +61,7 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    logging: *log-rotation
 
 networks:
   default:
