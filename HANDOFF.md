@@ -8,21 +8,22 @@ tags: [impacta, handoff]
 
 ## Estado de entrada
 
-- Repo en `main`, `HEAD` y `origin/main` coinciden en `c1a816e` (2026-10-29).
-- Cambios locales de esta sesión en `AGENTS.md`, `PENDIENTES.md`, `HANDOFF.md`, `backend/src/modules/donations/` y `openspec/changes/campanas-p2p-recaudacion/tasks.md`.
-- `graphify-out/` se actualizó localmente y sigue sin seguimiento; conservarlo.
-- No se verificó el estado de producción ni se hizo despliegue en esta sesión.
-- Graphify actualizado el 2026-11-06; `graphify-out/GRAPH_REPORT.md` corresponde a `c1a816e` y contiene 2402 nodos, 3663 aristas y 190 comunidades. Diagnóstico: 0 nodos sin verificar, 0 aristas con extremos ausentes/huérfanos, 0 bucles; una pareja de extremos tiene dos relaciones distintas y se conserva como una arista en el grafo simple. 11 archivos SQL no aportan nodos por falta de `tree_sitter_sql`.
+- Commit `c88e83b` (recibos/handoff/grafo) publicado; integrado con el commit remoto `6faaede` en `ccdef74` y empujado a `origin/main`.
+- Refactorización de despliegue en la rama `feat/deploy-separado-multitenant`; preparación local, todavía no desplegada.
+- Artefactos principales Graphify ya versionados; el estado/caché local previo está preservado en un stash.
+- Se verificó producción en solo lectura; no se desplegó ni se modificaron servicios.
+- Graphify actualizado durante la refactorización; `graphify-out/GRAPH_REPORT.md` tiene 2422 nodos, 3700 aristas y 191 comunidades. Diagnóstico: 0 nodos sin verificar, 0 aristas con extremos ausentes/huérfanos ni bucles. 11 archivos SQL no aportan nodos por falta de `tree_sitter_sql`.
 - `PLAN.md` y `ARQUITECTURA_TECNICA.md` contienen contexto desfasado. Contrastar siempre con `AGENTS.md`, los commits actuales y las specs.
 
 ## Trabajo abierto y prioridad
 
-1. Preparar una base PostgreSQL scratch aislada y ejecutar el canario de migraciones, empezando por `backend/prisma/migrations/20260825170000_add_impacta_knowledge_rag/migration.sql`. **Bloqueado:** los puertos 5432 y 5435 están ocupados por `sentinel-postgres` e `impacta-db`; son bases persistentes y no deben usarse para la prueba. No iniciar ni cambiar servicios sin autorización.
-2. Completar pagos P2P: API `GET /receipts/:captureId` quedó en preparación local con ownership por tenant/miembro y procedencia en PDF; faltan compilación/pruebas, frontend público/QR, autoservicio de suscripciones y luego Webpay/Flow.
-3. Cerrar las decisiones de gobierno, privacidad, responsables y revisión legal que son prerrequisito de mensajería, denuncias, periodismo y asistentes.
-4. Completar la capacidad RAG: embeddings semánticos propios, historial editorial y corpus con fuentes verificadas.
-5. Avanzar catálogo científico y educación tras confirmar especies, fuentes y responsables.
-6. Dejar membresías, voluntariado, eventos, jornadas, subvenciones y board detrás de las dependencias de producto y gobierno.
+1. Aplicar el aislamiento de red versionado: API solo por WireGuard y PostgreSQL/Redis solo por loopback. El 2026-11-06 se observó Docker publicando `3102`, `5435` y `6381` en `0.0.0.0`; modificar DB/Redis requiere recreación planificada y autorización explícita.
+2. Preparar una base PostgreSQL scratch aislada y ejecutar el canario de migraciones. **Bloqueado:** `5432` y `5435` pertenecen a bases persistentes; no reutilizarlas ni iniciar otro servicio sin autorización.
+3. Completar pagos P2P: recibo seguro en preparación local, sin compilar ni probar; faltan frontend público/QR, autoservicio de suscripciones y luego Webpay/Flow.
+4. Cerrar las decisiones de gobierno, privacidad, responsables y revisión legal que son prerrequisito de mensajería, denuncias, periodismo y asistentes.
+5. Completar la capacidad RAG: embeddings semánticos propios, historial editorial y corpus con fuentes verificadas.
+6. Avanzar catálogo científico y educación tras confirmar especies, fuentes y responsables.
+7. Dejar membresías, voluntariado, eventos, jornadas, subvenciones y board detrás de las dependencias de producto y gobierno.
 
 Detalle vivo: [PENDIENTES.md](PENDIENTES.md). Estado persistente: `Impacta/PENDIENTES` en la bóveda y fila Impacta+ de `HANDOFF.md`.
 
@@ -34,3 +35,11 @@ Detalle vivo: [PENDIENTES.md](PENDIENTES.md). Estado persistente: `Impacta/PENDI
 - Inicio del recibo seguro: añadido `ReceiptsController` y búsqueda por `captureId`, `organizationId` y miembro autenticado; el PDF incluye origen P2P/suscripción y referencia. No compilado ni probado.
 - Mantener los cambios locales de `graphify-out/`; nunca limpiar o restaurar ese directorio para resolver el estado sin seguimiento.
 - No se ejecutaron pruebas, compilaciones ni comandos de despliegue.
+
+## Refactorización de despliegue — 2026-11-06
+
+- Evidencia de solo lectura: host local `fenix`; contenedores `impacta-backend` en `0.0.0.0:3102`, `impacta-db` en `0.0.0.0:5435` y `impacta-redis` en `0.0.0.0:6381`. Kingu sirve el frontend y su Nginx enruta el mismo dominio a `10.88.0.1:3102` por WireGuard.
+- Cambios locales: releases atómicos del frontend en Kingu con reversión; actualización de solo API en Fenix; migración Prisma separada y única para el esquema compartido; verificación pública/privada sin escrituras de tenants; bindings de API a WireGuard y de DB/Redis a loopback.
+- `docker-compose.yml` ya no contiene la contraseña de ejemplo; el deploy requiere `POSTGRES_PASSWORD` y `DATABASE_URL_DOCKER`. La inspección de nombres de variables del `.env` confirmó que esas claves aún faltan. Configurarlas exige que coincidan con el rol de la base persistida; no se leyó ni registró ningún secreto.
+- La configuración no se aplicó en producción. Para cambiar los binds de DB/Redis hay que recrear esos contenedores en una ventana autorizada.
+- No se ejecutaron pruebas, compilaciones ni despliegues.

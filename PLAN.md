@@ -34,12 +34,12 @@ Las rutas ahora cargan sus pantallas por separado; el módulo de entrada bajó d
 - **Deploy 21-oct:** frontend ✅ arriba; backend ⏳ bloqueado por `DATABASE_URL` + `JWT_SECRET` (+ definir supervisor). 3 migraciones nuevas listas (`migrate deploy`).
 - Specs P2P: avance real marcado en `openspec/changes/campanas-p2p-recaudacion/tasks.md`. Pendiente: pasarela real (mock vigente), páginas `/p2p/:slug`, suscripciones en portal, e2e en CI, navegación manual.
 
-**Infra:** servidor **`fenix`**, VM **Azure** con Ubuntu 24.04 LTS. Serving edge: nginx directo. **Stack 100% nativo — NADA corre en contenedores en producción.** Wildcard `*.pinguinoseguro.cl` (`/etc/letsencrypt/live/pinguinoseguro.cl/`). **NO TOCAR infra existente** de los otros proyectos del server (pinguinoseguro, laespiguita, lotaindomito, micelia, portfolio, transcript). Solo agregar servicios. Ver [AGENTS.md](AGENTS.md) sección Infraestructura para el patrón de serving.
+**Infra vigente verificada (2026-11-06):** Kingu aloja el frontend estático y Nginx/TLS; Fenix ejecuta API, PostgreSQL y Redis en Docker Compose. Nginx proxifica el dominio único hacia `10.88.0.1:3102` por WireGuard. La inspección en vivo aún encontró los puertos de host 3102/5435/6381 publicados en `0.0.0.0`; Compose se está refactorizando para limitarlos a WireGuard/loopback, sin despliegue realizado. Las descripciones históricas de runtime nativo/systemd de abajo ya no representan la producción actual. Ver [AGENTS.md](AGENTS.md) y [HANDOFF.md](HANDOFF.md).
 
-> Historia: el stack vivió antes en un VM llamada `fan` (Rocky + podman rootless), **apagada el 23-ago-2026**. La migración a fenix cambió el runtime: postgres/redis nativos vía systemd, backend como proceso node bajo systemd. Todo lo que mencione podman/compose en producción está obsoleto.
+> Historia: el stack vivió antes en una VM llamada `fan` (Rocky + podman rootless), **apagada el 23-ago-2026**. Una etapa intermedia en Fenix usó servicios nativos/systemd; desde la verificación del 2026-11-06 la producción corre el backend y los datos en contenedores Docker.
 
 **Stack:**
-- `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto en `https://impacta.pinguinoseguro.cl/api` (nginx `proxy_pass` al servicio systemd `impacta-backend.service` escuchando en `127.0.0.1:3001`).
+- `backend/` — NestJS 11 + Prisma 5 + class-validator. Global `ValidationPipe`. Expuesto en `https://impacta.pinguinoseguro.cl/api` (Nginx de Kingu → `10.88.0.1:3102` por WireGuard → API en Fenix, puerto interno 3101).
 - `landing/` — Next.js 16.2.4 (standalone) + Tailwind v4 + Manrope/Inter. **NO desplegado en producción desde `1380fb9`.** El código se conserva en el repo como referencia (incluye el wiring real: `DemoRequest` POST, `public-stats` fetch, `DemoModal` con focus trap + scroll lock). Path A (deploy Next.js en `impacta.pinguinoseguro.cl`) fue revocado por el usuario: degradaba visualmente el sitio (sin Three.js EarthBackground, sin `logo.png`, sin navbar completa).
 - `frontend/` — Vite + React 19. **UN SOLO dominio usuario-facing: `https://impacta.pinguinoseguro.cl`:**
   - `/` — landing pública (`LandingPage.tsx`) con `EarthBackground` (Three.js), `logo.png`, navbar, module cards con "Ver módulo en acción", demo modal (POST a `/api/demo-requests`, dedup 5min/email), stats bar con datos REALES desde `/api/organizations/public-stats`. Sin sesión solo se ve esto.
@@ -48,7 +48,7 @@ Las rutas ahora cargan sus pantallas por separado; el módulo de entrada bajó d
   - `impacta.pinguinoseguro.cl` quedó como legado: el SPA (`LegacyDomainRedirect` en `App.tsx`) redirige todo su tráfico a `impacta.*`.
   - Mismo build estático (`npm run build` → `dist/`), copiado a `/var/www/impacta.pinguinoseguro.cl/` y servido por nginx.
 - **PostgreSQL 16 NATIVO** (systemd `postgresql`, `127.0.0.1:5432`), DB `impacta`. Migraciones aplicadas (incluida `20260816190000_add_demo_requests`). **Redis NATIVO** (systemd `redis-server`, `127.0.0.1:6379`).
-- [docker-compose.yml](docker-compose.yml) queda **solo para desarrollo local** fuera del server.
+- [docker-compose.yml](docker-compose.yml) y [docker-compose.prod.yml](docker-compose.prod.yml) definen dependencias locales y runtime de backend/datos en Fenix, respectivamente.
 - **Prisma schema:** 8 modelos — `Organization`, `User`, `Member`, `Donation`, `Campaign`, `Species`, `Mission`, `MissionTask`.
 - **MinIO storage service** integrado para upload de imágenes (species).
 

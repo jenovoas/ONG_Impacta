@@ -791,16 +791,16 @@
     "semantic_hash": "397a4e7fd9eb228257a07387005fa770"
   },
   "deploy.sh": {
-    "mtime": 1793255178.1621041,
-    "seen": 1793425366.9908018,
-    "ast_hash": "8724da3f2ab496dfbfe5dc29439cabd8",
-    "semantic_hash": "8724da3f2ab496dfbfe5dc29439cabd8"
+    "mtime": 1793925956.1501355,
+    "seen": 1793926004.9852462,
+    "ast_hash": "ae27bceb4d8324c1af6ed9b16fbcac9f",
+    "semantic_hash": ""
   },
   "docker-compose.yml": {
-    "mtime": 1793219350.117317,
-    "seen": 1793425366.9908192,
-    "ast_hash": "f145a01e3cbd00fc0e5f9b335f2f1dd0",
-    "semantic_hash": "f145a01e3cbd00fc0e5f9b335f2f1dd0"
+    "mtime": 1793925915.146569,
+    "seen": 1793926004.985249,
+    "ast_hash": "077f6227667e75f6c6962ee817cc2923",
+    "semantic_hash": ""
   },
   "frontend/eslint.config.js": {
     "mtime": 1793219350.117317,
@@ -1146,15 +1146,15 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1793923332.4947236,
-    "seen": 1793923344.575972,
-    "ast_hash": "4c7e791ae5b9be52539f5b4795e74a40",
+    "mtime": 1793925975.877927,
+    "seen": 1793926004.9865365,
+    "ast_hash": "54163b950a19654a6bc671cbfd997988",
     "semantic_hash": ""
   },
   "ARQUITECTURA_TECNICA.md": {
-    "mtime": 1793219350.109317,
-    "seen": 1793923344.575974,
-    "ast_hash": "a48d438c61837bc523291968b4529222",
+    "mtime": 1793925781.5559812,
+    "seen": 1793926004.9865382,
+    "ast_hash": "edd0091202b93c22d5c76fc1cf766051",
     "semantic_hash": ""
   },
   "CODEBUDDY.md": {
@@ -1176,9 +1176,9 @@
     "semantic_hash": ""
   },
   "HANDOFF.md": {
-    "mtime": 1793923934.335967,
-    "seen": 1793923963.2888396,
-    "ast_hash": "43fb69f11f10bd21f97df4834a1caf7a",
+    "mtime": 1793925975.877927,
+    "seen": 1793926004.9865983,
+    "ast_hash": "67c6a7feafa239847d781f3c66c57e34",
     "semantic_hash": ""
   },
   "Impacta+PRD.md": {
@@ -1188,15 +1188,15 @@
     "semantic_hash": ""
   },
   "PENDIENTES.md": {
-    "mtime": 1793923934.335967,
-    "seen": 1793923963.288861,
-    "ast_hash": "49157ccb6b72ebc556c38f745b3a92be",
+    "mtime": 1793925975.877927,
+    "seen": 1793926004.9866178,
+    "ast_hash": "2c5b00fdab11faa9c03e49054c1302c6",
     "semantic_hash": ""
   },
   "PLAN.md": {
-    "mtime": 1793219350.109317,
-    "seen": 1793923344.5759866,
-    "ast_hash": "aa271c0d1bf5f797e7e6efe5fc403f7b",
+    "mtime": 1793925781.5519812,
+    "seen": 1793926004.9866195,
+    "ast_hash": "1e6fe7637ffd6fd2081247ee8f0158d6",
     "semantic_hash": ""
   },
   "QODER.md": {
@@ -1206,21 +1206,21 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1793224637.008038,
-    "seen": 1793923344.5759904,
-    "ast_hash": "0a6f6187a11a5e9d0d242ce34ac28c4e",
+    "mtime": 1793925762.9361749,
+    "seen": 1793926004.9866383,
+    "ast_hash": "6e6dec6453ee2340c0fb49f62c216f0b",
     "semantic_hash": ""
   },
   "backend/AGENTS.md": {
-    "mtime": 1793224637.008038,
-    "seen": 1793923344.5759923,
-    "ast_hash": "c8ec979233dc5531a6f533ea4ea7a762",
+    "mtime": 1793925975.877927,
+    "seen": 1793926004.98664,
+    "ast_hash": "fb72e33a66f819c38ae542b1324b86d0",
     "semantic_hash": ""
   },
   "backend/CLAUDE.md": {
-    "mtime": 1793219350.109317,
-    "seen": 1793923344.5759938,
-    "ast_hash": "5c27369b226fcf2be8a6cfe52224e767",
+    "mtime": 1793924939.9427958,
+    "seen": 1793926004.9866412,
+    "ast_hash": "6cf003cdec830c2a9dc2dcf92cf40688",
     "semantic_hash": ""
   },
   "backend/README.md": {
@@ -1332,15 +1332,15 @@
     "semantic_hash": ""
   },
   "landing/AGENTS.md": {
-    "mtime": 1793219350.129317,
-    "seen": 1793923344.576026,
-    "ast_hash": "9e09241799026ac05be315a2f0b50055",
+    "mtime": 1793924939.9646544,
+    "seen": 1793926004.9869983,
+    "ast_hash": "783f8bafe8480c240e095747e3387977",
     "semantic_hash": ""
   },
   "landing/CLAUDE.md": {
-    "mtime": 1793219350.129317,
-    "seen": 1793923344.5760276,
-    "ast_hash": "5c27369b226fcf2be8a6cfe52224e767",
+    "mtime": 1793924939.9647613,
+    "seen": 1793926004.987,
+    "ast_hash": "5126a2bdb15ac4e73b7784a5c0a5eee5",
     "semantic_hash": ""
   },
   "landing/README.md": {
@@ -1797,6 +1797,12 @@
     "mtime": 1793923830.329132,
     "seen": 1793923963.2861068,
     "ast_hash": "687bc256a8951655214380526f882fcf",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1793924939.9422762,
+    "seen": 1793926004.9865406,
+    "ast_hash": "e735cfd70b4fa8d54a7854085d0db6d6",
     "semantic_hash": ""
   },
   "backend/package-lock.json": {

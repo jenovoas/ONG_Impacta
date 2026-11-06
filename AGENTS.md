@@ -32,7 +32,7 @@ Flujo: visitante llega a `/` → se registra o logea en `/login`·`/register` �
 - [frontend/](frontend/) — Vite + React 19 + TanStack Query. **Sirve UN SOLO SISTEMA** (ver regla #1): Landing (`LandingPage.tsx` en `/`) + Front auth (`/login`, `/register`) + Panel de Control de Usuarios (`/dashboard/*`). Un build → `/var/www/impacta.pinguinoseguro.cl/`.
 - [infra/nginx/](infra/nginx/) — copia versionada de la config nginx activa en el server.
 - [Impacta+PRD.md](Impacta+PRD.md), [DISENO_IDENTIDAD_VISUAL.md](DISENO_IDENTIDAD_VISUAL.md) — producto y marca.
-- [docker-compose.yml](docker-compose.yml) — **solo desarrollo local** (postgres 5435 + redis 6381 + backend). En producción NADA corre en contenedores.
+- [docker-compose.yml](docker-compose.yml) + [docker-compose.prod.yml](docker-compose.prod.yml) — desarrollo y runtime de producción del backend/datos en Fenix. La producción no contiene el frontend: Kingu sirve los estáticos y proxy inverso por WireGuard.
 
 ## Design system
 
@@ -52,27 +52,37 @@ Por principios estrictos de seguridad y aislamiento, **el Frontend y el Backend 
    - **Reverse Proxy:** Nginx enruta `/api/` hacia el backend en Fenix (`http://10.88.0.1:3102/`) a través del enlace privado WireGuard (`10.88.0.0/24`). Configuración en `/etc/nginx/conf.d/impacta.pinguinoseguro.cl.conf` (copia versionada en `infra/nginx/`).
 
 2. **Host de Cómputo y Datos (`fenix` — `10.88.0.1`):**
-   - **Backend:** Proceso NestJS en contenedor Docker (`impacta-backend`), escuchando en el puerto privado de host `10.88.0.1:3102` (`3101` interno).
-   - **Datos:** PostgreSQL 16 (`impacta-db:5435`) y Redis 7 (`impacta-redis:6381`) en contenedores propios aislados.
+   - **Backend:** NestJS en contenedor Docker (`impacta-backend`), escuchando solo en `10.88.0.1:3102` (`3101` interno); Nginx en Kingu es el único cliente público.
+   - **Datos:** PostgreSQL 16 (`impacta-db:5435`) y Redis 7 (`impacta-redis:6381`) en contenedores. La configuración de Compose ahora los limita a `127.0.0.1` y el API a WireGuard; el runtime observado el 2026-11-06 aún publica esos tres puertos en todas las interfaces. La refactorización está local, no desplegada.
    - **Secretos:** `.env` privado en Fenix (con `JWT_SECRET` y credenciales de BD); nunca se sincroniza hacia Kingu.
 
 ## Comandos base
 
 ```bash
-# Deploy de frontend (compila SPA y sincroniza con rsync a Kingu /var/www/...)
+# Deploy de frontend (build local y release estático en Kingu con cambio atómico)
 ./deploy.sh frontend
 
-# Migraciones (contenedor backend en Fenix; requiere .env local con JWT_SECRET)
+# Volver a un release anterior del frontend
+./deploy.sh frontend-rollback release-a1b2c3d4-20261106T120000Z
+
+# Listar el release activo y los disponibles para volver atrás
+./deploy.sh frontend-list
+
+# Migraciones (una vez sobre el esquema PostgreSQL compartido; requiere .env en Fenix)
 ./deploy.sh migrate
 
-# Deploy de backend (build + up del stack docker en Fenix puerto 3102)
+# Deploy de API (solo reemplaza backend en Fenix; no recrea PostgreSQL ni Redis)
 ./deploy.sh backend
 
-# Verificación post-deploy (comprueba backend local y endpoints HTTPS públicos)
+# Verificación de las dos capas y del proxy público; no escribe datos de tenants
 ./deploy.sh verify
 ```
 
-## Estado actual (2026-08-25 — post-forense sabotaje)
+El contexto de organización viaja con las solicitudes autenticadas y se aplica en la API/Prisma. El esquema y sus migraciones son compartidos: no ejecutar `prisma migrate deploy` por organización. Las pruebas de aislamiento multi-tenant se ejecutan en CI/DB desechable, nunca contra tenants reales durante el despliegue.
+
+En Fenix, `deploy.sh backend|migrate` requiere `POSTGRES_PASSWORD` y `DATABASE_URL_DOCKER` en el `.env` privado. Deben coincidir con el rol/base existentes; cambiar el valor de entorno de Postgres no rota por sí solo la contraseña guardada en el volumen.
+
+## Estado actual (2026-08-25 — post-forense sabotaje; registro histórico)
 
 - `https://impacta.pinguinoseguro.cl` — **UN SOLO SISTEMA**: landing pública (`LandingPage.tsx` con EarthBackground Three.js, stats reales vía `/api/organizations/public-stats`) + Front auth (`/login`, `/register`) + Panel de Control de Usuarios (`/dashboard/*`). Un build → `/var/www/impacta.pinguinoseguro.cl/`.
 - `https://impacta.pinguinoseguro.cl/api` — backend NestJS 11 corriendo como `impacta-backend.service`.
@@ -83,12 +93,19 @@ Por principios estrictos de seguridad y aislamiento, **el Frontend y el Backend 
 - **e2e suite restaurada (25-ago, commit `cbbabaa`):** `backend/test/` fue borrado en `9daacaa` (rama P2P). Los e2e son la única prueba automatizada del aislamiento multi-tenant — no borrarlos de nuevo.
 - **Rama `recover/events-volunteer-shifts`** (25-ago): ancla los commits huérfanos `ccfa1ad`+`05510c8`+`2911371` descartados por un reset del 24-ago (~4000 líneas de Events/VolunteerShifts). Listos para fusionar cuando se quiera esa feature.
 
-## Estado actual (2026-10-21 — merges + deploy parcial)
+## Estado actual (2026-10-21 — merges + deploy parcial; registro histórico)
 
 - `main` = `1a73832`: fusionadas `feat/frontend-login-polish` (`8e338d8`, pulido pantallas + Logger/Loki), `chore-direnv-envrc` (`aa872bd`, solo `.envrc`) y `origin/feat/campanas-p2p` (`1a73832`, P2P + suscripciones + community + ai-security + ai-gateway + knowledge RAG). Ramas `frontend-login-polish` y `feat/auth-polish-oauth` (vacía, 0 ahead) eliminadas. Conflictos resueltos: páginas/App con polish de main, `app.module.ts` combinado, e2e lado p2p (`db.base` ya no existe en `DatabaseService`), `.env.example` Loki+OmniRoute.
 - **Frontend desplegado 21-oct:** build fresco en `frontend/dist` servido por nginx (`/` y `/login` 200 con SNI correcto).
 - **Nginx 21-oct:** agregado `location /api/ → 127.0.0.1:3101` en `/etc/nginx/http.d/impacta.conf` (verificado: sin backend responde 502, proxy OK). Copia versionada actualizada en `infra/nginx/`.
 - **Backend pendiente 21-oct:** compilado y testeado (46 unit ✅), pero sin `.env` (`DATABASE_URL`, `JWT_SECRET`) no arranca ni migra. 3 migraciones nuevas (`...24171000` P2P/subs, `...5150000` community, `...5170000` knowledge) lineales y aditivas, listas para `migrate deploy`. Pasarela real (Webpay/Flow) sigue en mock (`mock_ref_`); páginas P2P públicas (`/p2p/:slug`) y lista de suscripciones en portal, pendientes (ver `openspec/changes/campanas-p2p-recaudacion/tasks.md`).
+
+## Estado operativo verificado (2026-11-06)
+
+- `fenix` ejecuta el API NestJS en `impacta-backend` (Docker Compose); Nginx de Kingu proxifica `/api/` a `10.88.0.1:3102` por WireGuard.
+- `kingu` sirve el build Vite estático desde `/var/www/impacta.pinguinoseguro.cl/` bajo Nginx/TLS. Todo sigue bajo el único dominio `impacta.pinguinoseguro.cl`.
+- En la inspección de solo lectura, Docker aún publicaba API 3102, PostgreSQL 5435 y Redis 6381 en `0.0.0.0`. La restricción a WireGuard/loopback está preparada en Compose localmente y no desplegada.
+- Aplicar el cambio de publicación de PostgreSQL/Redis requiere recrear esos contenedores; no hacerlo como parte de un deploy normal del API.
 
 ## Convenciones de commits
 
