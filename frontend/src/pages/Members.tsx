@@ -16,25 +16,49 @@ import {
 import client from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 
+interface Member {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  rut: string | null;
+  type: string;
+  status: string;
+}
+
+interface MemberPage {
+  items: Member[];
+  meta: { page: number; totalPages: number; total: number };
+}
+
+interface NewMember {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  type: 'VOLUNTEER' | 'PARTNER';
+}
+
 export const Members: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
-  const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
 
   const { data: memberPage, isLoading, isError } = useQuery({
     queryKey: ['members', page],
     queryFn: async () => {
-      const { data } = await client.get('/members', { params: { page, pageSize: 20 } });
+      const { data } = await client.get<MemberPage>('/members', { params: { page, pageSize: 20 } });
       return data;
     },
   });
   const members = memberPage?.items ?? [];
 
   const createMutation = useMutation({
-    mutationFn: async (newMember: any) => {
+    mutationFn: async (newMember: NewMember) => {
       const { data } = await client.post('/members', newMember);
       return data;
     },
@@ -44,7 +68,7 @@ export const Members: React.FC = () => {
     },
   });
 
-  const filteredMembers = members.filter((m: any) => {
+  const filteredMembers = members.filter((m: Member) => {
     const matchesSearch = 
       `${m.firstName} ${m.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
       m.email.toLowerCase().includes(search.toLowerCase());
@@ -108,7 +132,7 @@ export const Members: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 2xl:grid-cols-3">
           <AnimatePresence>
-            {filteredMembers.map((m: any) => (
+            {filteredMembers.map((m: Member) => (
               <motion.div
                 key={m.id}
                 layout
@@ -165,7 +189,7 @@ export const Members: React.FC = () => {
         </div>
       )}
 
-      {!isLoading && !isError && (memberPage?.meta?.totalPages ?? 0) > 1 && (
+      {!isLoading && !isError && memberPage && memberPage.meta.totalPages > 1 && (
         <nav aria-label="Páginas de miembros" className="flex items-center justify-between rounded-2xl bg-surface-container px-4 py-3 text-sm">
           <span className="text-on-surface-variant">Página {memberPage.meta.page} de {memberPage.meta.totalPages} · {memberPage.meta.total} miembros</span>
           <div className="flex gap-2">
@@ -201,15 +225,15 @@ export const Members: React.FC = () => {
                 </div>
 
                 <form 
-                  onSubmit={(e: any) => {
+                  onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                     e.preventDefault();
-                    const formData = new FormData(e.target);
+                    const formData = new FormData(e.currentTarget);
                     createMutation.mutate({
-                      firstName: formData.get('firstName'),
-                      lastName: formData.get('lastName'),
-                      email: formData.get('email'),
-                      phone: formData.get('phone'),
-                      type: formData.get('type'),
+                      firstName: String(formData.get('firstName') ?? ''),
+                      lastName: String(formData.get('lastName') ?? ''),
+                      email: String(formData.get('email') ?? ''),
+                      phone: String(formData.get('phone') ?? '') || undefined,
+                      type: formData.get('type') === 'PARTNER' ? 'PARTNER' : 'VOLUNTEER',
                     });
                   }} 
                   className="space-y-6"

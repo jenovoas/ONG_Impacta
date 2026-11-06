@@ -1,5 +1,7 @@
 # Arquitectura Técnica - Impacta+
 
+> **Nota de vigencia:** este documento conserva el diseño de producto original (2026-04) y sus diagramas no describen necesariamente la operación actual. Para topología, puertos, separación Kingu/Fenix, Nginx y despliegue multi-tenant, usar [AGENTS.md](AGENTS.md), [README.md](README.md), [docker-compose.prod.yml](docker-compose.prod.yml) y [deploy.sh](deploy.sh).
+
 | **Versión** | 1.0 |
 |-------------|-----|
 | **Fecha** | 4 de abril de 2026 |

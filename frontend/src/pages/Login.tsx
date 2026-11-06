@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Loader2, HandHeart, Leaf, Users } from 'lucide-react';
 import client from '../api/client';
+import axios from 'axios';
 import { useAuthStore } from '../store/auth.store';
 import type { AuthUser } from '../store/auth.store';
 
@@ -35,8 +36,11 @@ export const LoginPage: React.FC = () => {
       };
       setAuth(user, data.access_token, data.refresh_token);
       navigate('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al iniciar sesión');
+    } catch (err: unknown) {
+      const message = axios.isAxiosError<{ message?: string | string[] }>(err)
+        ? err.response?.data?.message
+        : undefined;
+      setError(Array.isArray(message) ? message.join(', ') : message || 'Error al iniciar sesión');
     } finally {
       setLoading(false);
     }

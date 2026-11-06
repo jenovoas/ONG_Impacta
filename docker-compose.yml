@@ -7,7 +7,7 @@ services:
     environment:
       - POSTGRES_DB=impacta
       - POSTGRES_USER=impacta
-      - POSTGRES_PASSWORD=impacta_pass
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data:z
     healthcheck:
@@ -41,7 +41,7 @@ services:
       NODE_ENV: production
       PORT: 3001
       # JWT secret y OAuth config se cargan desde .env (Docker Compose env_file)
-      DATABASE_URL: postgresql://impacta:impacta_pass@postgres:5432/impacta?schema=public
+      DATABASE_URL: ${DATABASE_URL_DOCKER:?Define DATABASE_URL_DOCKER en .env}
       REDIS_URL: redis://redis:6379/0
     env_file:
       - .env

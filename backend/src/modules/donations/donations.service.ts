@@ -16,13 +16,7 @@ const receiptDonationInclude = {
 
 type ReceiptDonation = Prisma.DonationGetPayload<{
   include: typeof receiptDonationInclude;
-}> & {
-  member: NonNullable<
-    Prisma.DonationGetPayload<{
-      include: typeof receiptDonationInclude;
-    }>['member']
-  >;
-};
+}>;
 
 function sanitizePdfText(str: string): string {
   if (!str) return '';
@@ -309,6 +303,9 @@ export class DonationsService {
     orgId: string,
     donation: ReceiptDonation,
   ): Promise<Buffer> {
+    if (!donation.member) {
+      throw new NotFoundException('Receipt not found');
+    }
     const member = donation.member;
     const org = donation.organization;
     const pdfDoc = await PDFDocument.create();

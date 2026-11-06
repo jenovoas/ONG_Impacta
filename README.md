@@ -27,11 +27,10 @@
 - **ORM**: Prisma 5 con extensiones para Multi-tenancy transparente.
 - **Database**: PostgreSQL 16 + Redis 7 (Caching & BullMQ).
 
-### Infraestructura (servidor fenix — Azure)
-- **VM**: Azure, Ubuntu 24.04 LTS.
-- **Runtime**: 100% nativo — Postgres 16 y Redis como servicios systemd; backend como servicio systemd (`impacta-backend.service`).
-- **Edge**: Nginx directo, certificados wildcard SSL (`/etc/letsencrypt/live/pinguinoseguro.cl/`).
-- **Storage**: MinIO (S3 Compatible) para la gestión de assets multimedia.
+### Infraestructura
+- **Kingu (borde)**: Nginx entrega el frontend Vite estático y termina TLS para `impacta.pinguinoseguro.cl`.
+- **Fenix (cómputo y datos)**: backend NestJS, PostgreSQL 16 y Redis 7 en Docker Compose. La configuración versionada publica el API solo por `10.88.0.1:3102` y PostgreSQL/Redis por loopback. El runtime observado el 2026-11-06 todavía publica los tres puertos en todas las interfaces; la restricción está preparada localmente y requiere un despliegue explícito.
+- **Aislamiento multi-tenant**: el API aplica el contexto de organización autenticado sobre el esquema compartido. Las migraciones se aplican una vez a esa base; no se despliega una instancia por ONG.
 
 ---
 
@@ -42,7 +41,7 @@
 ├── frontend/       # React 19 — UN SOLO SISTEMA: landing + front auth + panel de control (un build)
 ├── landing/        # Next.js de referencia, NO desplegado (Path A revocado — solo tokens @theme)
 ├── infra/nginx/    # Copia versionada de la config nginx activa (un solo dominio + redirect legado)
-└── deploy.sh       # Deploy de frontend/backend en fenix
+└── deploy.sh       # Deploy independiente de frontend en Kingu y API en Fenix
 ```
 
 ---
@@ -68,16 +67,16 @@
 - Backend: `cd backend && npm run build`.
 - Frontend (landing y panel): `cd frontend && npm run build`.
 - CI: el workflow de GitHub Actions ejecuta lint, build, pruebas unitarias y E2E para backend, además de lint y build de frontend y del proyecto Next.js de referencia.
-- En producción, el despliegue se ejecuta desde el servidor `fenix`: `./deploy.sh frontend`, `./deploy.sh backend` o `./deploy.sh verify`.
+- En producción, `./deploy.sh frontend` publica un release estático en Kingu; `./deploy.sh backend` actualiza solo la API en Fenix; `./deploy.sh migrate` aplica una vez las migraciones al esquema multi-tenant compartido; `./deploy.sh verify` comprueba ambas capas y el proxy sin escribir datos de organizaciones.
 - `/health` no está implementado actualmente; no usar esa ruta como verificación. La verificación de producción se describe en [AGENTS.md](AGENTS.md).
 
 ### Logs del backend
 
-- El backend emite logs estructurados JSON a stdout en producción; systemd los recoge en `impacta-backend.service`.
+- El backend emite logs estructurados JSON a stdout; en producción se consultan con `sudo docker logs impacta-backend` en Fenix.
 - Para enviar una copia a Loki, configura `LOKI_HOST` en el entorno del backend. `LOKI_USERNAME` y `LOKI_PASSWORD` son opcionales y deben configurarse juntos. La salida a stdout se mantiene.
 - En desarrollo se usa `pino-pretty`; Loki solo se activa en producción cuando se define `LOKI_HOST`.
 
-> Deploy en producción (server fenix): ver [`deploy.sh`](deploy.sh) y [AGENTS.md](AGENTS.md).
+> Despliegue separado por host: ver [`deploy.sh`](deploy.sh), [`docker-compose.prod.yml`](docker-compose.prod.yml) y [AGENTS.md](AGENTS.md).
 
 ---
 *Desarrollado con ❤️ para el ecosistema de conservación por el equipo de **PinguinoSeguro**.*

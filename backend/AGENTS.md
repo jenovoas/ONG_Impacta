@@ -67,7 +67,7 @@ npx prisma studio                  # UI local
 npm run prisma:seed                # si existe prisma/seed.ts
 ```
 
-`DATABASE_URL` en `.env` apunta al postgres **nativo** del server: `postgresql://impacta:...@127.0.0.1:5432/impacta?schema=public` (ver [.env.example](../.env.example)).
+En desarrollo local, `DATABASE_URL` puede apuntar al puerto publicado del Compose local. En producción, Compose inyecta la URL privada del servicio `postgres` al contenedor API; las herramientas Prisma ejecutadas en el host deben usar el `.env` de Fenix y no imprimir sus valores.
 
 ## Gotchas
 
@@ -77,12 +77,15 @@ npm run prisma:seed                # si existe prisma/seed.ts
 - **`ValidationPipe` global** rechaza propiedades desconocidas con 400. Para campos opcionales, marcar con `@IsOptional()` antes del validador específico.
 - **Drift entre DB de prod y migraciones del repo (25-ago-2026):** la migración `20260824130000_add_events_tickets` se aplicó a producción pero fue descartada del repo por un reset. La siguiente (`20260824171000`) generó DDL destructivo contra esas tablas fantasma que revienta cualquier DB fresca. Si una migración referencia tablas que no existen en migraciones previas del repo, **para y verifica** — puede ser drift contra objetos aplicados a prod pero no commiteados. Test canario: `DATABASE_URL=...impacta_e2e npx prisma migrate deploy` en una DB de scratch antes de pushear.
 
-## Deploy
+## Despliegue y multi-tenancy
 
-- El backend corre como servicio systemd **`impacta-backend.service`** (unit file en `/etc/systemd/system/`, user `jnovoas`, WorkingDirectory `~/proyectos/ONG_Impacta/backend`, ejecuta `/usr/bin/node dist/src/main`, puerto 3001, `EnvironmentFile=~/proyectos/ONG_Impacta/.env`).
-- Deploy: `./deploy.sh backend` (build + restart) · Migraciones: `./deploy.sh migrate` · Verificación: `./deploy.sh verify`.
-- Expuesto como `impacta.pinguinoseguro.cl/api/` vía nginx (`proxy_pass http://127.0.0.1:3001`; config versionada en [../infra/nginx/](../infra/nginx/)).
-- `backend/Dockerfile` y el compose quedan **solo para desarrollo local** — en producción no hay contenedores.
+- Producción separa hosts: frontend estático y Nginx en Kingu; API, PostgreSQL y Redis en Fenix. No copiar `.env`, código backend ni credenciales al host de borde.
+- La configuración Compose publica el API, que escucha internamente en 3101, por `10.88.0.1:3102` (WireGuard), y PostgreSQL `5435`/Redis `6381` en `127.0.0.1`; la API usa la red interna de Compose. El runtime observado el 2026-11-06 aún publica esos puertos en todas las interfaces; la configuración corregida no está desplegada.
+- `./deploy.sh frontend` compila con lockfile, copia solo `frontend/dist/` a un release en Kingu y cambia el enlace activo. `./deploy.sh frontend-rollback <release>` permite volver a uno anterior.
+- `./deploy.sh backend` actualiza solo el servicio API en Fenix y verifica primero el estado de migraciones. `./deploy.sh migrate` es una operación separada y explícita.
+- La base de datos usa un esquema compartido multi-tenant; las migraciones se aplican una vez, no por organización. No ejecutar pruebas de aislamiento ni escrituras de verificación contra datos reales; usar CI/DB desechable.
+- Fenix debe tener `POSTGRES_PASSWORD` y `DATABASE_URL_DOCKER` en su `.env` privado, apuntando al servicio Compose `postgres`. Esos valores deben coincidir con el rol persistido; editar `.env` no cambia el secreto de un volumen ya inicializado.
+- `./deploy.sh verify` comprueba backend privado, frontend público y API a través del proxy sin crear ni modificar datos de tenants.
 
 ## Testing
 

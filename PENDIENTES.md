@@ -10,6 +10,8 @@ Orden por dependencias, riesgo de datos y posibilidad de habilitar trabajo poste
 
 ## P0 — Base segura para cambios y migraciones
 
+- [ ] Aplicar el aislamiento de puertos versionado: API solo por WireGuard y PostgreSQL/Redis por loopback. **Producción observada en `0.0.0.0` para 3102/5435/6381**; cambiar los binds de datos requiere recreación planificada y autorización.
+- [ ] Mover las credenciales hard-coded de Compose a `.env` privado en Fenix: agregar `POSTGRES_PASSWORD` y `DATABASE_URL_DOCKER`, hacerlas coincidir con el rol persistido y verificar sin mostrar valores. El `.env` actual no contiene esas claves; no rotar el rol ni recrear la base sin una ventana autorizada.
 - [ ] Verificar `main`/`origin/main`, cambios locales y estado de producción antes de cada acción operativa.
 - [ ] Crear una instancia PostgreSQL scratch aislada, sin volumen ni credenciales de producción, y ejecutar allí toda la cadena `prisma migrate deploy` desde cero.
 - [ ] Auditar especialmente `20260824171000_add_p2p_and_subscriptions` (limpieza de tablas ausentes con `IF EXISTS`) y `20260825170000_add_impacta_knowledge_rag` (tablas, índices y FKs contra `Organization`).
@@ -79,9 +81,10 @@ Fuentes: `openspec/changes/membresias-voluntariado-eventos/` y `comunicacion-gra
 
 ## Sesión actual — 2026-11-06
 
-- Rama `main`, `HEAD == origin/main == c1a816e`; `graphify-out/` actualizado localmente, sin seguimiento, conservado (2402 nodos, 3663 aristas, 190 comunidades). Diagnóstico sin extremos ausentes/huérfanos ni bucles; 11 archivos SQL sin nodos por falta de `tree_sitter_sql`.
+- `feat/deploy-separado-multitenant` publicada en `origin` (`cb9a455`); Graphify actualizado sobre ese commit (2423 nodos, 3702 aristas, 188 comunidades), sin extremos huérfanos ni bucles.
 - Revisión estática inicial de la migración RAG: crea las dos tablas, índices y FKs esperados. No se ejecutó contra una base.
 - Revisión de código P2P detectó atomicidad/idempotencia, cierre/cancelación y casos unitarios ya implementados; se corrigieron sus checkboxes OpenSpec.
 - Inicio del recibo seguro: se agregó `ReceiptsController` en `/receipts/:captureId`, consulta por `organizationId` + miembro autenticado y PDF con procedencia P2P/suscripción. Preparación local; no compilado ni probado.
 - Puertos observados: 5432 `sentinel-postgres`, 5435 `impacta-db`; ambos persistentes. No usar como scratch.
+- Evidencia de solo lectura: despliegue separado Kingu/Fenix; API 3102, PostgreSQL 5435 y Redis 6381 aún publicados en todas las interfaces. Refactor Compose/script preparado localmente, sin aplicar.
 - Sin pruebas, compilaciones, migraciones, despliegues ni cambios de servicio.
