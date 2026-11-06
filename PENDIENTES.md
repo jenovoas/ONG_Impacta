@@ -81,7 +81,7 @@ Fuentes: `openspec/changes/membresias-voluntariado-eventos/` y `comunicacion-gra
 
 ## Sesión actual — 2026-11-06
 
-- `feat/deploy-separado-multitenant`, basada en `ccdef74`; Graphify actualizado localmente (2422 nodos, 3700 aristas, 191 comunidades), sin extremos ausentes/huérfanos ni bucles. 11 archivos SQL sin nodos por falta de `tree_sitter_sql`.
+- `feat/deploy-separado-multitenant` publicada en `origin` (`cb9a455`); Graphify actualizado sobre ese commit (2423 nodos, 3702 aristas, 188 comunidades), sin extremos huérfanos ni bucles.
 - Revisión estática inicial de la migración RAG: crea las dos tablas, índices y FKs esperados. No se ejecutó contra una base.
 - Revisión de código P2P detectó atomicidad/idempotencia, cierre/cancelación y casos unitarios ya implementados; se corrigieron sus checkboxes OpenSpec.
 - Inicio del recibo seguro: se agregó `ReceiptsController` en `/receipts/:captureId`, consulta por `organizationId` + miembro autenticado y PDF con procedencia P2P/suscripción. Preparación local; no compilado ni probado.

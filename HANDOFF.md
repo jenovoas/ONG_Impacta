@@ -9,10 +9,10 @@ tags: [impacta, handoff]
 ## Estado de entrada
 
 - Commit `c88e83b` (recibos/handoff/grafo) publicado; integrado con el commit remoto `6faaede` en `ccdef74` y empujado a `origin/main`.
-- Refactorización de despliegue en la rama `feat/deploy-separado-multitenant`; preparación local, todavía no desplegada.
+- Refactorización de despliegue publicada en `feat/deploy-separado-multitenant`, commit `cb9a455`; todavía no desplegada.
 - Artefactos principales Graphify ya versionados; el estado/caché local previo está preservado en un stash.
 - Se verificó producción en solo lectura; no se desplegó ni se modificaron servicios.
-- Graphify actualizado durante la refactorización; `graphify-out/GRAPH_REPORT.md` tiene 2422 nodos, 3700 aristas y 191 comunidades. Diagnóstico: 0 nodos sin verificar, 0 aristas con extremos ausentes/huérfanos ni bucles. 11 archivos SQL no aportan nodos por falta de `tree_sitter_sql`.
+- Graphify actualizado sobre `cb9a455`: `graphify-out/GRAPH_REPORT.md` tiene 2423 nodos, 3702 aristas y 188 comunidades. Diagnóstico: sin nodos no verificados, extremos huérfanos ni bucles. 11 SQL no aportan nodos por falta de `tree_sitter_sql`.
 - `PLAN.md` y `ARQUITECTURA_TECNICA.md` contienen contexto desfasado. Contrastar siempre con `AGENTS.md`, los commits actuales y las specs.
 
 ## Trabajo abierto y prioridad

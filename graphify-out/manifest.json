@@ -791,9 +791,9 @@
     "semantic_hash": "397a4e7fd9eb228257a07387005fa770"
   },
   "deploy.sh": {
-    "mtime": 1793925956.1501355,
-    "seen": 1793926004.9852462,
-    "ast_hash": "ae27bceb4d8324c1af6ed9b16fbcac9f",
+    "mtime": 1793926279.398677,
+    "seen": 1793926418.5278952,
+    "ast_hash": "a2d37ca5af2571cad76433b16077d915",
     "semantic_hash": ""
   },
   "docker-compose.yml": {
@@ -1146,9 +1146,9 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1793925975.877927,
-    "seen": 1793926004.9865365,
-    "ast_hash": "54163b950a19654a6bc671cbfd997988",
+    "mtime": 1793926279.398677,
+    "seen": 1793926418.5292368,
+    "ast_hash": "3bd2460504178f1c5777d3b67dcff48a",
     "semantic_hash": ""
   },
   "ARQUITECTURA_TECNICA.md": {
@@ -1176,9 +1176,9 @@
     "semantic_hash": ""
   },
   "HANDOFF.md": {
-    "mtime": 1793925975.877927,
-    "seen": 1793926004.9865983,
-    "ast_hash": "67c6a7feafa239847d781f3c66c57e34",
+    "mtime": 1793926334.64208,
+    "seen": 1793926418.5293317,
+    "ast_hash": "7bedf70ed45cc39b3057cec8b66d8f5c",
     "semantic_hash": ""
   },
   "Impacta+PRD.md": {
@@ -1188,9 +1188,9 @@
     "semantic_hash": ""
   },
   "PENDIENTES.md": {
-    "mtime": 1793925975.877927,
-    "seen": 1793926004.9866178,
-    "ast_hash": "2c5b00fdab11faa9c03e49054c1302c6",
+    "mtime": 1793926334.64208,
+    "seen": 1793926418.5293517,
+    "ast_hash": "945993e95c8e9d715ba06f055dfdf742",
     "semantic_hash": ""
   },
   "PLAN.md": {
