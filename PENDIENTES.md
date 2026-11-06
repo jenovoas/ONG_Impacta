@@ -98,5 +98,5 @@ Fuentes: `openspec/changes/membresias-voluntariado-eventos/` y `comunicacion-gra
 - Jaime confirmó la desactivación de Kilo en su panel. No existe integración local en workflows del repositorio.
 - Aviso de build: chunk `LandingPage` de 913.38 kB sin comprimir; build correcto. CI del PR `42152556855` aprobó backend, frontend y landing.
 - Cierres documentales `8defc8a`, `042de6b` y regla Graphify `487f29f` publicados en `origin/main`; CI de push `42159609305` y `42159877954` aprobaron backend, frontend y landing. Avisos no bloqueantes: Node.js 20 de las acciones, transición de `ubuntu-latest` y fuentes Next.
-- `docker-compose.yml` conserva un cambio local no incluido (rotación de logs `50m × 2` para los tres servicios); no se desplegó. Auditar autoría y efecto antes de versionarlo o aplicarlo.
+- La rotación de logs de `docker-compose.yml` (`json-file`, `50m × 2` para los tres servicios) quedó publicada en `4662935`. Es configuración local de desarrollo y no se aplicó a producción.
 - Graphify: intento incremental fallido con 47/112 fuentes omitidas; el guard conservó `graphify-out/graph.json` raíz. La copia previa de la carpeta fechada quedó preservada en `graphify-out/2026-11-06-before-update/`. Caché parcial e intérprete quedan en disco, ignorados por `.gitignore`; no aceptar ni versionar salida parcial.
